@@ -1,14 +1,14 @@
 name:                ml-tableau
 version:             0.1.0.0
--- synopsis:
--- description:
-homepage:            https://github.com/githubuser/ml-tableau#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2021 Author name here
-category:            Web
+synopsis:            Decision procedure for guarded matching logic
+description:         Write me!
+homepage:            https://github.com/nishantjr/ml-tableau
+license:             AllRightsReserved
+-- license-file:        LICENSE
+author:              Nishant Rodrigues <nishantjr@gmail.com>
+maintainer:          Nishant Rodrigues <nishantjr@gmail.com>
+copyright:           2021 Nishant Rodrigues
+category:            Formal Methods
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  README.md
