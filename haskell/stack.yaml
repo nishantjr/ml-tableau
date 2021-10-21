@@ -6,4 +6,4 @@ resolver:
 packages:
 - .
 
-# compiler-check: newer-minor
+compiler-check: newer-minor
