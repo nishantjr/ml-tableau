@@ -14,6 +14,12 @@ with:
     curl -sSL https://get.haskellstack.org/ | sh
     stack upgrade
 
+The usual Stack commands for development are:
+
+    stack build --test
+    stack run
+
+
 
 <!-------------------------------------------------------------------->
 [stack]: https://docs.haskellstack.org/en/stable/README/
