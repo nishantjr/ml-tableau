@@ -2,7 +2,7 @@
 module Main where
 
 import Test.Framework
-import {-@ HTF_TESTS @-} SampleTest
+import {-@ HTF_TESTS @-} PatternTest
 
 main :: IO ()
 main = htfMain htf_importedTests
