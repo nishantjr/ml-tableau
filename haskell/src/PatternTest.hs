@@ -47,4 +47,10 @@ test_run_parsers = uncurry assertEqual $ unzip
     , ("cd",    char 'c',                   Left "unconsumed input")
     , ("d",     char 'c',                   Left "bad parse")
     , ("",      char 'c',                   Left "bad parse")
+    , ("",      nothing,                    Right ())
+    , ("cd",    char_cd,                    Right ())
     ]
+    where
+        nothing, char_cd ∷ Parser ()
+        nothing = return ()
+        char_cd = do c1 ← char 'c'; c2 ← char 'd'; return c1

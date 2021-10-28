@@ -31,6 +31,15 @@ data PState = PS
 
 newtype Parser x = Parser (PState → Either PState (PState, x))
 
+instance Functor Parser where
+    fmap    = undefined
+instance Applicative Parser where
+    pure    = undefined
+    (<*>)   = undefined
+instance Monad Parser where
+    return  = undefined
+    (>>=)   = undefined
+
 runParser ∷ Parser a → String → Either String a
 runParser (Parser p) input =
     case p (PS input) of
