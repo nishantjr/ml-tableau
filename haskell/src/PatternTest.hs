@@ -34,8 +34,13 @@ xxx_test_Pat_parse = uncurry assertEqual $ unzip
         , ("x ",        EVar "x")
         ]
 
-test_anychar_success = assertEqual (anychar (PS "foo")) (Right (PS "oo", 'f'))
-test_anychar_failure = assertEqual (anychar (PS "")) (Left (PS ""))
-
-test_char_success   = assertEqual (char 'c' (PS "cd")) (Right (PS "d", ()))
-test_char_failure   = assertEqual (char 'd' (PS "cd")) (Left  (PS "cd"))
+test_anychar_success = assertEqual
+    (Right (PS "oo", 'f'))          (runParser "foo" anychar)
+test_anychar_failure = assertEqual
+    (Left (PS ""))                  (runParser "" anychar)
+test_char_success = assertEqual
+    (Right (PS "d", ()))            (runParser "cd" (char 'c'))
+test_char_failure = assertEqual
+    (Left  (PS "cd"))               (runParser "cd" (char 'd'))
+test_char_failure_empty = assertEqual
+    (Left  (PS ""))                 (runParser "" (char 'c'))

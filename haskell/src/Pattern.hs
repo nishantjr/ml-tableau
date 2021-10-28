@@ -29,14 +29,19 @@ data PState = PS
     }
     deriving (Show, Eq)
 
-type Parser x = PState → Either PState (PState, x)
+newtype Parser x = Parser (PState → Either PState (PState, x))
+
+runParser ∷ String → Parser x → Either PState (PState, x)
+runParser input (Parser p) = p (PS input)
 
 anychar ∷ Parser Char
-anychar ps@(PS "") = Left ps
-anychar (PS (firstchar:rest) ) = Right (PS rest, firstchar)
+anychar = Parser (\st@(PS inp) → case inp of
+    (c:cs)  → Right (PS cs, c)
+    _       → Left st
+    )
 
 char ∷ Char → Parser ()
-char _ ps@(PS "") = Left ps
-char c ps@(PS (c':rest))
-    | c == c'   = Right (PS rest, ())
-    | otherwise = Left  ps
+char c' = Parser (\st@(PS inp) → case inp of
+    (c:cs) | c == c'    → Right (PS cs, ())
+    _                   → Left st
+    )
