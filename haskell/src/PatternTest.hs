@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -F -pgmF htfpp #-}
+{-# LANGUAGE UnicodeSyntax #-}
 module PatternTest where
 
 import Pattern
@@ -34,13 +35,16 @@ xxx_test_Pat_parse = uncurry assertEqual $ unzip
         , ("x ",        EVar "x")
         ]
 
-test_anychar_success = assertEqual
-    (Right (PS "oo", 'f'))          (runParser "foo" anychar)
-test_anychar_failure = assertEqual
-    (Left (PS ""))                  (runParser "" anychar)
-test_char_success = assertEqual
-    (Right (PS "d", ()))            (runParser "cd" (char 'c'))
-test_char_failure = assertEqual
-    (Left  (PS "cd"))               (runParser "cd" (char 'd'))
-test_char_failure_empty = assertEqual
-    (Left  (PS ""))                 (runParser "" (char 'c'))
+test_raw_parsers = uncurry assertEqual $ unzip
+    $ map (\(input, Parser p, expected) → (expected, p (PS input)))
+    [ ("foo",    anychar,    (Right (PS "oo", 'f')))
+    , ("",       anychar,    (Left (PS "")))
+    ]
+
+test_run_parsers = uncurry assertEqual $ unzip
+    $ map (\(input, parser, expected) → (expected, runParser parser input))
+    [ ("c",     char 'c',                   Right ())
+    , ("cd",    char 'c',                   Left "unconsumed input")
+    , ("d",     char 'c',                   Left "bad parse")
+    , ("",      char 'c',                   Left "bad parse")
+    ]

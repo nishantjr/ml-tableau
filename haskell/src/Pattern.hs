@@ -31,8 +31,12 @@ data PState = PS
 
 newtype Parser x = Parser (PState → Either PState (PState, x))
 
-runParser ∷ String → Parser x → Either PState (PState, x)
-runParser input (Parser p) = p (PS input)
+runParser ∷ Parser a → String → Either String a
+runParser (Parser p) input =
+    case p (PS input) of
+        Left state                          → Left "bad parse"
+        Right (PS input, x) | input == ""   → Right x
+                            | otherwise     → Left "unconsumed input"
 
 anychar ∷ Parser Char
 anychar = Parser (\st@(PS inp) → case inp of
