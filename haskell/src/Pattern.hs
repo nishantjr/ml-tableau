@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax #-}
+{-# LANGUAGE UnicodeSyntax, InstanceSigs #-}
 
 module Pattern where
 
@@ -32,13 +32,31 @@ data PState = PS
 newtype Parser x = Parser (PState → Either PState (PState, x))
 
 instance Functor Parser where
-    fmap    = undefined
+    --   (a → b) → f a        → f b
+    fmap f         (Parser p) = Parser (\st →
+        case (p st) of
+             Left st'        → Left st'
+             Right (st', x)  → Right (st', f x)
+             )
 instance Applicative Parser where
-    pure    = undefined
-    (<*>)   = undefined
+    --   a → f a
+    pure x = Parser (\st → Right (st, x))
+    (<*>) ∷ Parser (a → b) → Parser a → Parser b
+    (Parser p₀)  <*> (Parser p₁) = Parser (\st →
+        case p₀ st of
+             Left st'        → Left st'
+             Right (st', f)  → case p₁ st' of
+                                    Left st''       → Left st''
+                                    Right (st'', x) → Right (st'', f x)
+        )
 instance Monad Parser where
-    return  = undefined
-    (>>=)   = undefined
+    -- (return :: a → m a) = pure
+    --    m a   →  (a → m b) → m b
+    (Parser p) >>= f         = Parser (\st →
+        case p st of
+             Left st'       → Left st'
+             Right (st', x) → let Parser p = (f x) in p st'
+        )
 
 runParser ∷ Parser a → String → Either String a
 runParser (Parser p) input =

@@ -41,6 +41,11 @@ test_raw_parsers = uncurry assertEqual $ unzip
     , ("",       anychar,    (Left (PS "")))
     ]
 
+test_pure_return = assertEqual (Right 42) (runParser p "")
+    where
+        p ∷ Parser Int
+        p = pure 42
+
 test_run_parsers = uncurry assertEqual $ unzip
     $ map (\(input, parser, expected) → (expected, runParser parser input))
     [ ("c",     char 'c',                   Right ())
