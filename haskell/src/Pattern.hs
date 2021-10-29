@@ -42,12 +42,10 @@ instance Applicative Parser where
     --   a → f a
     pure x = Parser (\st → Right (st, x))
     (<*>) ∷ Parser (a → b) → Parser a → Parser b
-    (Parser p₀)  <*> (Parser p₁) = Parser (\st →
+    (Parser p₀)  <*> π = Parser (\st →
         case p₀ st of
              Left st'        → Left st'
-             Right (st', f)  → case p₁ st' of
-                                    Left st''       → Left st''
-                                    Right (st'', x) → Right (st'', f x)
+             Right (st', f)  → let Parser p = (fmap f π) in p st'
         )
 instance Monad Parser where
     -- (return :: a → m a) = pure
