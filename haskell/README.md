@@ -16,7 +16,7 @@ with:
 
 The usual Stack commands for development are:
 
-    stack build --test
+    stack test              # or: build --test
     stack run
 
 
