@@ -47,13 +47,10 @@ newtype Parser α = Parser (PState → Either PState (PState, α))
 -- to do this.
 --
 instance Functor Parser where
-    --   (α → β) → f α        → f β
-    fmap f         (Parser p) = Parser (\st →
-        case (p st) of
-             Left st'        → Left st'
-             Right (st', x)  → Right (st', f x)
-             )
-    -- f <$> x = fmap f x       fmap has an infix alias
+    --   (α → β) → f α → f β
+    fmap f         π   = do x ← π; return (f x)
+    -- `fmap` also has an infix alias:
+    -- f <$> x = fmap f x
 
 -- Applicative gives us sequencing of Parsers: `liftA2` runs Parser β after
 -- Parser α, threading the the state between them and using the `(α → β → γ)`
@@ -64,23 +61,21 @@ instance Functor Parser where
 --
 instance Applicative Parser where
     pure ∷ α → Parser α
-    pure   x = Parser (\st → Right (st, x))
+    pure     = return
 
     liftA2 ∷  (α → β → γ) → Parser α  → Parser β → Parser γ
-    liftA2    combine      (Parser p₀)  π₁       = Parser (\st →
-            case p₀ st of
-                Left st'      → Left st'        -- failure passes through
-                Right (st',x) → p₁ st' where Parser p₁ = fmap (combine x) π₁
-        )
+    liftA2 f π ρ = do x ← π; y ← ρ; return (f x y)
 
     -- (<*>) ∷ Parser (β → γ) → Parser β → Parser γ
     -- (<*>) = liftA2 id            -- here (β → γ) = α in liftA2 above
                                     -- and we use id ∷ (β → γ) → (β → γ)
+    -- π <*> ρ = do f ← π; y ← ρ; return (f y)
 
 -- Monad gives us choice based on intermediate productions in sequenced Parsers.
 --
 instance Monad Parser where
-    -- (return ∷ α → m α) = pure    -- Default definition
+    return ∷ α → Parser α
+    return   x = Parser (\st → Right (st, x))
 
     (>>=) ∷ Parser τ   →  (τ → Parser γ) → Parser γ
     (>>=)  (Parser p₀)       f           = Parser (\st →
