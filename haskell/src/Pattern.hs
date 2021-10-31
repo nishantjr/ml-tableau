@@ -69,7 +69,7 @@ instance Applicative Parser where
     liftA2 ∷  (α → β → γ) → Parser α  → Parser β → Parser γ
     liftA2    combine      (Parser p₀)  π₁       = Parser (\st →
             case p₀ st of
-                Left st'      → Left st'        -- error passes through
+                Left st'      → Left st'        -- failure passes through
                 Right (st',x) → p₁ st' where Parser p₁ = fmap (combine x) π₁
         )
 
@@ -77,13 +77,16 @@ instance Applicative Parser where
     -- (<*>) = liftA2 id            -- here (β → γ) = α in liftA2 above
                                     -- and we use id ∷ (β → γ) → (β → γ)
 
+-- Monad gives us choice based on intermediate productions in sequenced Parsers.
+--
 instance Monad Parser where
-    -- (return :: a → m a) = pure
-    --    m a   →  (a → m b) → m b
-    (Parser p) >>= f         = Parser (\st →
-        case p st of
-             Left st'       → Left st'
-             Right (st', x) → let Parser p = (f x) in p st'
+    -- (return ∷ α → m α) = pure    -- Default definition
+
+    (>>=) ∷ Parser τ   →  (τ → Parser γ) → Parser γ
+    (>>=)  (Parser p₀)       f           = Parser (\st →
+        case p₀ st of
+             Left st'       → Left st'          -- failure passes through
+             Right (st', x) → p₁ st' where (Parser p₁) = f x
         )
 
 runParser ∷ Parser a → String → Either String a
