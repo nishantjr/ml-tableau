@@ -3,6 +3,7 @@
 module PatternTest where
 
 import Pattern
+import GHC.Base (liftA2)
 import Test.Framework
 
 test_Pat_syntax_example = assertEqual xs xs
@@ -35,11 +36,20 @@ xxx_test_Pat_parse = uncurry assertEqual $ unzip
         , ("x ",        EVar "x")
         ]
 
+----------------------------------------------------------------------
+
 test_raw_parsers = uncurry assertEqual $ unzip
     $ map (\(input, Parser p, expected) → (expected, p (PS input)))
     [ ("foo",    anychar,    (Right (PS "oo", 'f')))
     , ("",       anychar,    (Left (PS "")))
     ]
+
+test_Applicative_TEMP = assertEqual "ab" x
+    where
+        π            = liftA2 (++) (pure "a") (pure "b")
+        (Parser p)   = π
+        state        = undefined
+        Right (_, x) = p state
 
 test_pure_return = assertEqual (Right 42) (runParser p "")
     where
