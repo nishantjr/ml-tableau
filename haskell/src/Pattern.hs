@@ -35,29 +35,50 @@ data PState = PS
 
 -- A _parser of α_ is a function that, when applied to a parser _state_
 -- evaluates to a parse failure, represented by a `Left` of the failure
--- state  or a parse success, represented by a `Right` of a pair of the new
+-- state or a parse success, represented by a `Right` of a pair of the new
 -- state and a value of type α called a _production_.
 --
 newtype Parser α = Parser (PState → Either PState (PState, α))
 
--- A parser has two parts: the "pure" part consisting of the production
--- itself and the rest consisting of the (somewhat hidden) parser state.
--- `fmap` takes a function operating on this pure portion and applies it to
--- a production to make a new production, handling the state as necessary
--- to do this.
+-- Parsers may be combined, letting us build complex parsers from a library
+-- of smaller parsers called combinators. To do this, we make Parser α an
+-- instance of Monad, which gives us:
+-- * Encapsulation of state so that higher-level combinators can handle
+--   it implicitly. (Functor)
+-- * Sequencing of parsers, with the state threaded through them.
+--   (Applicative)
+-- * Error handling, via failure also being threaded through sequences
+--   by not trying to execute subsequent parsers after a failure. (Applicative)
+-- * Choice (of what to do next) based on intermediate productions in
+--   a sequence of parsers. (Monad)
+-- Further explanation of this is given in the instance definitions for
+-- Applicative and Functor below.
 --
-instance Functor Parser where
-    --   (α → β) → f α → f β
-    fmap f         π   = do x ← π; return (f x)
-    -- `fmap` also has an infix alias:
-    -- f <$> x = fmap f x
+-- The Monad typeclass supplies choice with the (τ → Parser γ) argument
+-- to bind (>>=), allowing us to choose the next parser based on the
+-- production produced by the previous parser.
+--
+instance Monad Parser where
+    return ∷ α → Parser α
+    return   x = Parser (\st → Right (st, x))
+
+    (>>=) ∷ Parser τ   →  (τ → Parser γ) → Parser γ
+    (>>=)  (Parser p₀)       f           = Parser (\st →
+        case p₀ st of
+             Left st'       → Left st'          -- failure passes through
+             Right (st', x) → p₁ st' where (Parser p₁) = f x
+        )
 
 -- Applicative gives us sequencing of Parsers: `liftA2` runs Parser β after
--- Parser α, threading the the state between them and using the `(α → β → γ)`
--- to combine the productions of the two parsers.
+-- Parser α, threading the the state between them and using the `(α → β →
+-- γ)` to combine the productions of the two parsers, and also `pure x`,
+-- allowing us to create a parser that produces the pure value _x_. (See
+-- Functor below for more on pure values.)
 --
--- Applicative also gives us `pure x`, allowing us to create a parser that
--- produces the pure value _x_.
+-- This can be entirely defined using Monad operations since all Monads are
+-- Applicative functors. However, the language design doesn't give a way to
+-- have these automatically defined in this way only if this particular
+-- Applicative is also an instance of Monad, so we need to do this by hand.
 --
 instance Applicative Parser where
     pure ∷ α → Parser α
@@ -71,18 +92,18 @@ instance Applicative Parser where
                                     -- and we use id ∷ (β → γ) → (β → γ)
     -- π <*> ρ = do f ← π; y ← ρ; return (f y)
 
--- Monad gives us choice based on intermediate productions in sequenced Parsers.
---
-instance Monad Parser where
-    return ∷ α → Parser α
-    return   x = Parser (\st → Right (st, x))
 
-    (>>=) ∷ Parser τ   →  (τ → Parser γ) → Parser γ
-    (>>=)  (Parser p₀)       f           = Parser (\st →
-        case p₀ st of
-             Left st'       → Left st'          -- failure passes through
-             Right (st', x) → p₁ st' where (Parser p₁) = f x
-        )
+-- A parser has two parts: the "pure" part consisting of the production
+-- itself and the rest consisting of the (somewhat hidden) parser state.
+-- `fmap` takes a function operating on this pure portion and applies it to
+-- a production to make a new production, handling the state as necessary
+-- to do this.
+--
+instance Functor Parser where
+    --   (α → β) → f α → f β
+    fmap f         π   = do x ← π; return (f x)
+    -- `fmap` also has an infix alias:
+    -- f <$> x = fmap f x
 
 runParser ∷ Parser a → String → Either String a
 runParser (Parser p) input =
