@@ -334,7 +334,9 @@ def serialize_parity_game(root: PGNodeGeneralized, edges: ParityGame, def_list: 
                 )]
     return ret
 
+run = 0
 def run_pgsolver(game: SerializedParityGame) -> bool:
+
     def entry_to_string(entry : SerializedParityGameEntry) -> str:
         source, priority, player, dests, label = entry
         assert len(dests) > 0
@@ -353,9 +355,11 @@ def run_pgsolver(game: SerializedParityGame) -> bool:
     if match is None:
         raise RuntimeError("PGGame not well formed?\n" + output)
 
-    with open('/tmp/in.pg', 'w') as pg_file:
+    global run
+    run += 1
+    with open('/tmp/in.'  + str(run) + '.pg', 'w') as pg_file:
         pg_file.write(input)
-    with open('/tmp/out.pg', 'w') as pg_file:
+    with open('/tmp/out.' + str(run) + '.pg', 'w') as pg_file:
         pg_file.write(check_output(['pgsolver', '-global',  'recursive', '-pg'], input=input, text=True))
 
     return match.group(1) == '0'
