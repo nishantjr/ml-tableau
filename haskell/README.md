@@ -2,6 +2,18 @@ ml-tableau: Decision procedure for guarded matching logic
 =========================================================
 
 
+Building and Testing
+--------------------
+
+Run the top-level `Test` script. Any arguments given will be passed on to
+HTF (the Haskell Test Framework) to be processed as its [command line
+options][htf cmd], e.g., `./Test -q` for quieter output or `./Test ':[pr]`
+(a case-insensitive POSIX regular expression) to run tests from any test
+module but only where the test name itself starts with `p` or `r`.
+
+HTF stores a history of its test runs under `.HTF/`.
+
+
 Development Setup
 -----------------
 
@@ -14,13 +26,15 @@ with:
     curl -sSL https://get.haskellstack.org/ | sh
     stack upgrade
 
-The usual Stack commands for development are:
+Normally one will run the `Test` script (see above), but in case you need
+them, the usual Stack commands for development are:
 
-    stack test              # or: build --test
+    stack build             # or: build --test
     stack run
 
 
 
 <!-------------------------------------------------------------------->
-[stack]: https://docs.haskellstack.org/en/stable/README/
+[htf cmd]: https://hackage.haskell.org/package/HTF-0.14.0.3/docs/Test-Framework-CmdlineOptions.html
 [st manual]: https://docs.haskellstack.org/en/stable/install_and_upgrade/#linux
+[stack]: https://docs.haskellstack.org/en/stable/README/

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eu -o pipefail
+trap 'echo 1>&2 "INTERNAL FAILURE!"; exit 3;' 0
+
+die() {
+    local exitcode=$1; shift
+    echo 1>&2 "FAIL: $@"
+    trap '' 0; exit $exitcode
+}
+
+BASEDIR=$(cd $(dirname "$0") && pwd -P)
+cd "$BASEDIR"
+stack test --ta "$*" || die 1 "Unit tests"
+
+trap '' 0   # No internal failure.
