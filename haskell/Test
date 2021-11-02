@@ -10,6 +10,13 @@ die() {
 
 BASEDIR=$(cd $(dirname "$0") && pwd -P)
 cd "$BASEDIR"
-stack test --ta "$*" || die 1 "Unit tests"
 
+echo '───── Unit Tests'
+stack test --ta "$*" || die 1 "Unit tests"
+echo
+
+echo '───── Functional Tests'
+stack run ml-tableau -- < ftest/1.input | diff -u ftest/1.expected -
+
+echo 'PASSED'
 trap '' 0   # No internal failure.
