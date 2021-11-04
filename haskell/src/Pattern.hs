@@ -4,6 +4,18 @@ module Pattern where
 
 import GHC.Base (liftA2)
 import Data.Char (isUpper, isLower)
+import Data.Map.Strict (Map, fromList)
+
+----------------------------------------------------------------------
+-- A Signature is a mapping from symbol name to arity
+
+newtype Signature = Signature (Map String Int)
+    deriving (Show, Eq)
+
+sample_symbols ∷ Signature
+sample_symbols = Signature (fromList [("C",0),("S",1)])
+
+----------------------------------------------------------------------
 
 data Pat
     = EVar   String
