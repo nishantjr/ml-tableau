@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+
+type pgsolver &>/dev/null \
+    || { echo '"pgsolver" not found in path. Giving up.' ; exit 1 ; }
+
 mypy --show-column-numbers --strict .
 
 # For security reasons, Python randomizes the hash of objects by combining it with
