@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+mypy --show-column-numbers --strict .
+
+# For security reasons, Python randomizes the hash of objects by combining it with
+# a random seed. This makes runs of the same program differ from one execution
+# to the next making failures difficult to debug. To get around this we manually
+# specify a seed.
+#
+# Note that there are still other sources of non-determinism such as the python
+# implementation and build configuration, since object hashes are sometimes
+# generated from machine pointers etc that depend on platform, memory layout
+# etc.
+PYTHONHASHSEED=1 pytest "$@"
