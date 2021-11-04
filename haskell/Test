@@ -16,7 +16,8 @@ stack test --ta "$*" || die 1 "Unit tests"
 echo
 
 echo '───── Functional Tests'
-stack run ml-tableau -- < ftest/1.input | diff -u ftest/1.expected -
+stack run ml-tableau -- < ftest/1.input | diff -u ftest/1.expected - \
+    || die 1 "ml-tableau produced unexpected output"
 
 echo 'PASSED'
 trap '' 0   # No internal failure.
