@@ -39,9 +39,9 @@ xxx_test_Pat_parse = uncurry assertEqual $ unzip
 ----------------------------------------------------------------------
 
 test_raw_parsers = uncurry assertEqual $ unzip
-    $ map (\(input, Parser p, expected) → (expected, p (PS input)))
-    [ ("foo",    anychar,    (Right (PS "oo", 'f')))
-    , ("",       anychar,    (Left (PS "")))
+    $ map (\(input, Parser p, expected) → (expected, p (mkPS input)))
+    [ ("foo",    anychar,    (Right (mkPS "oo", 'f')))
+    , ("",       anychar,    (Left (mkPS "")))
     ]
 
 test_Applicative_TEMP = assertEqual "ab" x

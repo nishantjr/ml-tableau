@@ -4,16 +4,19 @@ module Pattern where
 
 import GHC.Base (liftA2)
 import Data.Char (isUpper, isLower)
-import Data.Map.Strict (Map, fromList)
+import qualified Data.Map.Strict as M (Map, fromList, empty)
 
 ----------------------------------------------------------------------
 -- A Signature is a mapping from symbol name to arity
 
-newtype Signature = Signature (Map String Int)
+newtype Signature = Signature (M.Map String Int)
     deriving (Show, Eq)
 
+emptySig :: Signature
+emptySig = Signature M.empty
+
 sample_symbols ∷ Signature
-sample_symbols = Signature (fromList [("C",0),("S",1)])
+sample_symbols = Signature (M.fromList [("C",0),("S",1)])
 
 ----------------------------------------------------------------------
 
@@ -41,9 +44,13 @@ parsePat _ = error "Bad input"
 -- information, and anything else necessary to making the parser work
 -- nicely.
 data PState = PS
-    { input ∷ String
+    { signature ∷ Signature
+    , input     ∷ String
     }
     deriving (Show, Eq)
+
+mkPS :: String → PState
+mkPS s = PS emptySig s
 
 -- A _parser of α_ is a function that, when applied to a parser _state_
 -- evaluates to a parse failure, represented by a `Left` of the failure
@@ -118,20 +125,30 @@ instance Functor Parser where
     -- f <$> x = fmap f x
 
 runParser ∷ Parser a → String → Either String a
-runParser (Parser p) input =
-    case p (PS input) of
-        Left state                          → Left "bad parse"
-        Right (PS input, x) | input == ""   → Right x
-                            | otherwise     → Left "unconsumed input"
+runParser (Parser p) s =
+    case p (mkPS s) of
+        Left st                         → Left "bad parse"
+        Right (st, x) | input st == ""  → Right x
+                      | otherwise       → Left "unconsumed input"
+
+----------------------------------------------------------------------
+-- Low-level combinators
+
+sig ∷ Parser Signature
+sig = Parser $ \st → Right (st, signature st)
+
+-- Consume all remaining input
+gobble :: Parser ()
+gobble = Parser $ \st → Right (st { input="" }, ())
 
 anychar ∷ Parser Char
-anychar = Parser (\st@(PS inp) → case inp of
-    (c:cs)  → Right (PS cs, c)
+anychar = Parser (\st → case (input st) of
+    (c:cs)  → Right (st { input=cs }, c)
     _       → Left st
     )
 
 char ∷ Char → Parser ()
-char c' = Parser (\st@(PS inp) → case inp of
-    (c:cs) | c == c'    → Right (PS cs, ())
+char c' = Parser (\st → case (input st) of
+    (c:cs) | c == c'    → Right (st { input=cs }, ())
     _                   → Left st
     )
