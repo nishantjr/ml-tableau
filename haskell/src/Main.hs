@@ -11,6 +11,8 @@ main = do
         Right x → print x
     where
         parser = do
-            x ← sig
+            symbols
+            string "\n\n  sat "     -- symbols should parse up to this
             gobble
+            x ← sig
             return x

@@ -152,3 +152,12 @@ char c' = Parser (\st → case (input st) of
     (c:cs) | c == c'    → Right (st { input=cs }, ())
     _                   → Left st
     )
+
+----------------------------------------------------------------------
+-- High-level combinators
+
+string ∷ String → Parser ()
+string = mapM_ char
+
+symbols :: Parser ()
+symbols = string "symbols C:0 S:1;"     -- placeholder
