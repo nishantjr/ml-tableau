@@ -16,7 +16,10 @@ stack test --ta "$*" || die 1 "Unit tests"
 echo
 
 echo '───── Functional Tests'
-stack run ml-tableau -- < ftest/1.input | diff -u ftest/1.expected - \
+mkdir -p .build/test/
+stack run ml-tableau -- < ftest/1.input > .build/test/1.output \
+    || die 2 "ml-tableau error: exit code = $?"
+diff -u ftest/1.expected .build/test/1.output \
     || die 1 "ml-tableau produced unexpected output"
 
 echo 'PASSED'
