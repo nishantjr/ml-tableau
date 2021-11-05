@@ -2,6 +2,7 @@
 
 module Pattern where
 
+import Debug.Trace (trace)
 import GHC.Base (liftA2)
 import Data.Char (isUpper, isLower)
 import qualified Data.Map.Strict as M (Map, fromList, empty)
@@ -153,6 +154,15 @@ char c' = Parser (\st → case (input st) of
     _                   → Left st
     )
 
+many :: Parser α → Parser [α]
+many π = many' π [] where
+    many' ∷ Parser α → [α] → Parser [α]
+    many' (Parser p) acc = Parser $ \st →
+        case p st of
+             Left _          → Right (st, reverse acc)
+             Right (st', x)  → p' st'
+                               where (Parser p') = many' (Parser p) (x:acc)
+
 ----------------------------------------------------------------------
 -- Generic Combinators
 
@@ -176,15 +186,14 @@ int = anychar >> return 7
 symbols :: Parser ()
 symbols = do
     string "symbols"
-    toksep
-    decl1 ← symbolDeclaration
-    toksep
-    decl2 ← symbolDeclaration
+    many $ toksep >> symbolDeclaration
     char ';'
 
-symbolDeclaration :: Parser (String, Int)
+symbolDeclaration :: Parser ()
 symbolDeclaration = do
-    name ← anychar
+    namechar ← anychar
+    let name = [namechar]
     char ':'
     arity ← int
-    return ([name], arity)
+    return ()
+    -- XXX add name, arity to Signature
