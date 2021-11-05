@@ -1,6 +1,6 @@
 ---
 geometry: margin=2cm
-header-include: |
+header-includes: |
     \usepackage{xcolor}
 
     \renewcommand{\phi}{\varphi}
