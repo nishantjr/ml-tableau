@@ -132,7 +132,7 @@ runParser (Parser p) s =
                       | otherwise       → Left "unconsumed input"
 
 ----------------------------------------------------------------------
--- Low-level combinators
+-- Low-level Combinators
 
 sig ∷ Parser Signature
 sig = Parser $ \st → Right (st, signature st)
@@ -154,10 +154,37 @@ char c' = Parser (\st → case (input st) of
     )
 
 ----------------------------------------------------------------------
--- High-level combinators
+-- Generic Combinators
 
 string ∷ String → Parser ()
 string = mapM_ char
 
+-- Optional whitespace
+optspace :: Parser ()
+optspace = return ()
+
+-- Mandatory whitespace
+toksep :: Parser ()
+toksep = char ' ' >> optspace
+
+int :: Parser Int
+int = anychar >> return 7
+
+----------------------------------------------------------------------
+-- Pattern Combinators
+
 symbols :: Parser ()
-symbols = string "symbols C:0 S:1;"     -- placeholder
+symbols = do
+    string "symbols"
+    toksep
+    decl1 ← symbolDeclaration
+    toksep
+    decl2 ← symbolDeclaration
+    char ';'
+
+symbolDeclaration :: Parser (String, Int)
+symbolDeclaration = do
+    name ← anychar
+    char ':'
+    arity ← int
+    return ([name], arity)
