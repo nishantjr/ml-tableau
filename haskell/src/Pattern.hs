@@ -4,19 +4,15 @@ module Pattern where
 
 import Control.Applicative
 import Data.Char (isUpper, isLower)
-import qualified Data.Map.Strict as M (Map, fromList, empty)
+import qualified Data.Map.Strict as M (Map, fromList, empty, insert)
 
 ----------------------------------------------------------------------
 -- A Signature is a mapping from symbol name to arity
 
-newtype Signature = Signature (M.Map String Int)
-    deriving (Show, Eq)
-
-emptySig :: Signature
-emptySig = Signature M.empty
+type Signature = M.Map String Int
 
 sample_symbols ∷ Signature
-sample_symbols = Signature (M.fromList [("C",0),("S",1)])
+sample_symbols = M.fromList [("C",0),("S",1)]
 
 ----------------------------------------------------------------------
 
@@ -50,7 +46,7 @@ data PState = PS
     deriving (Show, Eq)
 
 mkPS :: String → PState
-mkPS s = PS emptySig s
+mkPS s = PS M.empty s
 
 -- A _parser of α_ is a function that, when applied to a parser _state_
 -- evaluates to a parse failure, represented by a `Left` of the failure
@@ -160,8 +156,11 @@ runParser (Parser p) s =
 ----------------------------------------------------------------------
 -- Low-level Combinators
 
-sig ∷ Parser Signature
-sig = Parser $ \st → Right (st, signature st)
+getState :: Parser PState
+getState = Parser $ \st → Right (st,st)
+
+setState ∷ (PState → PState) → Parser ()
+setState f = Parser $ \st → Right (f st, ())
 
 -- Consume all remaining input
 gobble :: Parser ()
@@ -199,6 +198,9 @@ int = anychar >> return 7
 ----------------------------------------------------------------------
 -- Pattern Combinators
 
+getSig ∷ Parser Signature
+getSig = getState >>= return . signature
+
 symbols :: Parser ()
 symbols = do
     string "symbols"
@@ -211,5 +213,8 @@ symbolDeclaration = do
     let name = [namechar]
     char ':'
     arity ← int
-    return ()
-    -- XXX add name, arity to Signature
+    addSymbol name arity
+
+addSymbol :: String → Int → Parser ()
+addSymbol name arity = setState $ \st →
+    st { signature = M.insert name arity (signature st) }

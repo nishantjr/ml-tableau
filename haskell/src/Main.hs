@@ -14,5 +14,5 @@ main = do
             symbols
             string "\n\n  sat "     -- symbols should parse up to this
             gobble
-            x ← sig
+            x ← getSig
             return x
