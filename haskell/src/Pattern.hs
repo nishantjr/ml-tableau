@@ -2,8 +2,7 @@
 
 module Pattern where
 
-import Debug.Trace (trace)
-import GHC.Base (liftA2)
+import Control.Applicative
 import Data.Char (isUpper, isLower)
 import qualified Data.Map.Strict as M (Map, fromList, empty)
 
@@ -89,6 +88,32 @@ instance Monad Parser where
              Right (st', x) → p₁ st' where (Parser p₁) = f x
         )
 
+-- PEG parsers work by working through a list of alternatives and picking the
+-- first one that succeeds. The `Alternative` class gives us this with the `<|>`
+-- operator (creating a parser for the union of the languages of the two
+-- parsers), and also gives us two operations that are built on this:
+-- * `many`: try the given parser repeatedly until it fails, collecting the
+--   results in a list.
+-- * `some`: as with `many`, but fail unless the parser is successful at least
+--   once.
+--
+-- `empty` is the identity element for the choice function; if given as one
+-- argument the choice always selects the other. It is the parser for the empty
+-- language. In our current implementation simple failure works because failure
+-- does not change the state. However, if failure does start changing the state
+-- at some point we will need to change this to ensure that the other choice's
+-- failure is always chosen over empty's.
+--
+instance Alternative Parser where
+    empty ∷ Parser a
+    empty = Parser $ \st → Left st
+
+    (<|>) ∷ Parser α → Parser α → Parser α
+    (Parser p) <|> (Parser q)  = Parser $ \st →
+        case p st of
+            Left _      → q st
+            right       → right
+
 -- Applicative gives us sequencing of Parsers: `liftA2` runs Parser β after
 -- Parser α, threading the the state between them and using the `(α → β →
 -- γ)` to combine the productions of the two parsers, and also `pure x`,
@@ -153,15 +178,6 @@ char c' = Parser (\st → case (input st) of
     (c:cs) | c == c'    → Right (st { input=cs }, ())
     _                   → Left st
     )
-
-many :: Parser α → Parser [α]
-many π = many' π [] where
-    many' ∷ Parser α → [α] → Parser [α]
-    many' (Parser p) acc = Parser $ \st →
-        case p st of
-             Left _          → Right (st, reverse acc)
-             Right (st', x)  → p' st'
-                               where (Parser p') = many' (Parser p) (x:acc)
 
 ----------------------------------------------------------------------
 -- Generic Combinators
