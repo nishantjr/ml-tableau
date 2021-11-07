@@ -1,4 +1,4 @@
-symbols C:0 S:1;
+symbols C:0 S:123;
 
   sat  S C;
 unsat  S C  ∧ ¬(S C);

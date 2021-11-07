@@ -192,8 +192,18 @@ optspace = return ()
 toksep :: Parser ()
 toksep = char ' ' >> optspace
 
-int :: Parser Int
-int = anychar >> return 7
+nat :: Parser Int
+nat = do digits ← many digit
+         return $ read digits
+
+digit ∷ Parser Char
+digit = anychar `matches` isDigit
+    where isDigit c = (c >= '0') && (c <= '9')
+
+matches :: Parser α → (α → Bool) → Parser α
+matches π f = do x ← π
+                 if f x then return x
+                        else empty
 
 ----------------------------------------------------------------------
 -- Pattern Combinators
@@ -212,7 +222,7 @@ symbolDeclaration = do
     namechar ← anychar
     let name = [namechar]
     char ':'
-    arity ← int
+    arity ← nat
     addSymbol name arity
 
 addSymbol :: String → Int → Parser ()
