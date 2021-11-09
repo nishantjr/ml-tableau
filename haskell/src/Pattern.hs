@@ -3,7 +3,7 @@
 module Pattern where
 
 import Control.Applicative
-import Data.Char (isUpper, isLower)
+import Data.Char (isUpper, isLower, isSpace)
 import qualified Data.Map.Strict as M (Map, fromList, empty, insert)
 
 ----------------------------------------------------------------------
@@ -171,8 +171,8 @@ setState f = Parser $ \st → Right (f st, ())
 gobble :: Parser ()
 gobble = Parser $ \st → Right (st { input="" }, ())
 
-anychar ∷ Parser Char
-anychar = Parser (\st → case (input st) of
+anyChar ∷ Parser Char
+anyChar = Parser (\st → case (input st) of
     (c:cs)  → Right (st { input=cs }, c)
     _       → Left st
     )
@@ -191,7 +191,7 @@ string = mapM_ char
 
 -- Optional whitespace
 optspace :: Parser ()
-optspace = return ()
+optspace = (many $ matches anyChar isSpace) >> return ()
 
 -- Mandatory whitespace
 toksep :: Parser ()
@@ -202,7 +202,7 @@ nat = do digits ← many digit
          return $ read digits
 
 digit ∷ Parser Char
-digit = anychar `matches` isDigit
+digit = anyChar `matches` isDigit
     where isDigit c = (c >= '0') && (c <= '9')
 
 matches :: Parser α → (α → Bool) → Parser α
@@ -215,7 +215,8 @@ matches π f = do x ← π
 
 statements :: Parser [Statement]
 statements = do
-    symbols
+    many $ optspace >> (symbols <|> statement)
+    optspace
     return []
 
 getSig ∷ Parser Signature
@@ -229,7 +230,7 @@ symbols = do
 
 symbolDeclaration :: Parser ()
 symbolDeclaration = do
-    namechar ← anychar
+    namechar ← anyChar
     let name = [namechar]
     char ':'
     arity ← nat
@@ -238,3 +239,28 @@ symbolDeclaration = do
 addSymbol :: String → Int → Parser ()
 addSymbol name arity = setState $ \st →
     st { signature = M.insert name arity (signature st) }
+
+statement :: Parser ()
+statement = do
+    stmt <- sat <|> unsat <|> valid
+    --return stmt
+    return ()
+
+sat, unsat, valid :: Parser Statement
+sat   = parameterizedStatement "sat"   Sat
+unsat = parameterizedStatement "unsat" Unsat
+valid = parameterizedStatement "valid" Valid
+
+parameterizedStatement :: String → (Pat → Statement) → Parser Statement
+parameterizedStatement s cons = do
+    string s
+    toksep
+    pat ← pattern
+    optspace
+    char ';'
+    return $ cons pat
+
+pattern :: Parser Pat
+pattern = do
+    some $ matches anyChar (';' /=)
+    return $ EVar "XXX"

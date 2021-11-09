@@ -11,8 +11,10 @@ main = do
         Right x → print x
     where
         parser = do
-            symbols
-            string "\n\n  sat "     -- symbols should parse up to this
-            gobble
-            x ← getSig
-            return x
+            stmts ← statements
+            sig ← getSig
+            return (sig, stmts)
+            -- symbols
+            -- string "\n\n  sat "     -- symbols should parse up to this
+            -- gobble
+            -- return x
