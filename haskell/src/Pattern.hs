@@ -190,12 +190,14 @@ string ∷ String → Parser ()
 string = mapM_ char
 
 -- Optional whitespace
-optspace :: Parser ()
-optspace = (many $ matches anyChar isSpace) >> return ()
+optspaces :: Parser ()
+optspaces = many space >> return ()
 
 -- Mandatory whitespace
 toksep :: Parser ()
-toksep = char ' ' >> optspace
+toksep = some space >> return ()
+
+space = matches anyChar isSpace >> return ()
 
 nat :: Parser Int
 nat = do digits ← many digit
@@ -215,8 +217,8 @@ matches π f = do x ← π
 
 statements :: Parser [Statement]
 statements = do
-    many $ optspace >> (symbols <|> statement)
-    optspace
+    many $ optspaces >> (symbols <|> statement)
+    optspaces
     return []
 
 getSig ∷ Parser Signature
@@ -256,7 +258,7 @@ parameterizedStatement s cons = do
     string s
     toksep
     pat ← pattern
-    optspace
+    optspaces
     char ';'
     return $ cons pat
 
