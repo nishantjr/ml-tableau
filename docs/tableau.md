@@ -7,149 +7,232 @@ header-includes: |
 
     \newcommand{\N}{\mathbb N}
 
+    \newcommand{\limplies}{\rightarrow}
     \newcommand{\lOr}{\bigvee}
     \newcommand{\lAnd}{\bigwedge}
 
     \renewcommand{\subset}{\subseteq}
-    \newcommand{\union}{\cup}
-    \newcommand{\intersection}{\cap}
+    \newcommand{\union}{\mathrel{\cup}}
+    \newcommand{\intersection}{\mathrel{\cap}}
 
+    \newcommand{\denotation}[1]{\left\lVert #1 \right\rVert}
     \newcommand{\free} {\mathrm{free}}
 
+    \newcommand{\matches}[2]{\mathsf{matches}(#1, #2)}
     \newcommand{\sequent}[1]{\left\langle #1 \right\rangle}
+    \newcommand{\unsat}{\mathsf{unsat}}
+    \newcommand{\Atoms}{\mathrm{Atoms}}
+    \newcommand{\Universals}{\mathrm{Universals}}
+    \newcommand{\Elements}{\mathrm{Elements}}
+    \newcommand{\signature}[1]{\mathsf{Sig}(#1)}
+
     \newcommand{\deflist}{\mathcal D}
+
     \newcommand{\name}[1]{(\text{#1})\quad}
 
     \newcommand{\pruleun}[2]{\frac{#1}{#2}}
-    \newcommand{\prulebin}[3]{\frac{#1}{#2\qquad#3}}
+    \newcommand{\prulebin}[3]{\frac{#1}{#2\quad#3}}
 
     \newcommand{\satruleun}[2]
-        {\color{green}\pruleun{\color{black}#1}{\color{black}#2}}
+        {{\color{green}\pruleun{\color{black}#1}{\color{black}#2}}}
     \newcommand{\satrulebin}[3]
-        {\color{green}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}
+        {{\color{green}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
 
     \newcommand{\unsatruleun}[2]
-        {\color{blue}\pruleun{\color{black}#1}{\color{black}#2}}
+        {{\color{blue}\pruleun{\color{black}#1}{\color{black}#2}}}
     \newcommand{\unsatrulebin}[3]
-        {\color{blue}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}
+        {{\color{blue}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
 
     \newcommand{\Pos}{\mathrm{Pos}}
+
+    \newcommand{\inst}{\mathsf{inst}}
+
+    \newcommand {\mkDeflist}[1]{\mathsf{deflist}(#1)}
+    \newcommand {\combineDefList}{\circ}
 ---
+
+## Positive-form patterns
+
+Definition (Positive Form Pattern)
+: Positive form patterns are defined using the syntax:
+
+\begin{alignat*}{3}
+\phi := \quad&       \sigma(\phi_1, \ldots, \phi_n)
+   &\quad\mid\quad&   \bar \sigma(\phi_1, \ldots, \phi_n) \\
+    \quad\mid\quad&  \phi_1 \land \phi_2
+   &\quad\mid\quad&  \phi_1 \lor  \phi_2 \\
+    \quad\mid\quad&  \exists x \ldotp \phi
+   &\quad\mid\quad&  \forall x \ldotp \phi \\
+    \quad\mid\quad&  \mu X \ldotp \phi
+   &\quad\mid\quad&  \nu X \ldotp \phi
+\end{alignat*}
+
+where $$\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$$
 
 ## Definition List
 
-...
+Definition (Definition List)
+
+:   A definition list, $\deflist$, of a pattern $\phi$ is an ordered list assigning set variables,
+    called definition constants, to fixed point patterns.
+
+    NOTE: We assume no free element variables in fixed point patterns.
+
+    Given a pattern $\phi$, a definition list is constructed as follows:
+
+    \begin{align*}
+    \mkDeflist{D} &= \emptyset \qquad \text{where $D$ is a definition constant.} \\
+    \mkDeflist{\sigma(\phi_1,\ldots,\phi_n)} = \mkDeflist{\bar\sigma(\phi_1,\ldots,\phi_n)} &= \mkDeflist{\phi_1}\combineDefList\cdots\combineDefList\mkDeflist{\phi_n} \\
+    \mkDeflist{\phi_1\lor\phi_2}  = \mkDeflist{\phi_1\land\phi_2)} &= \mkDeflist{\phi_1}\combineDefList\mkDeflist{\phi_2} \\
+    \mkDeflist{\exists \bar x \ldotp\phi}  = \mkDeflist{\forall \bar x \ldotp \phi)} &= \mkDeflist{\phi} \\
+    \mkDeflist{\mu X \ldotp\phi}  &= (D \mapsto \mu X . \phi[U/X]) \combineDefList \mkDeflist{\phi} \text{ where $\phi$ has no free element variables.}\\
+    \mkDeflist{\nu X \ldotp\phi}  &= (D \mapsto \nu X . \phi[U/X]) \combineDefList \mkDeflist{\phi} \text{ where $\phi$ has no free element variables.}\\
+    \end{align*}
+    \begin{align*}
+                         \deflist_1 \combineDefList \cdot                           &= \deflist_1 \\
+    (D_1 \mapsto \phi)   \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= (D_1 \mapsto \phi) \deflist_1 \combineDefList \deflist_2[D_1/D_2] \\
+                         \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= \deflist_1 (D_2 \mapsto \phi) \combineDefList \deflist_2 \qquad\text{otherwise.}\\
+    \end{align*}
 
 ## Tableau
 
-An *assertion* is:
+Definition (Assertion)
+:   An *assertion* is either:
 
-1.  a pair of a set variable and a pattern, denoted $e \in \phi$.
-2.  a disjunction of assertions: $a_1 \lor a_2$
+    1.  a pair of an element variable and a pattern, denoted $\matches{e}{\phi}$,
+    2.  a conjunction of assertions: $\alpha_1 \land a_2$
+    2.  a disjunction of assertions: $\alpha_1 \lor \alpha_2$
 
-*Atomic assertions* are assertions of the form:
+Assertions allow us to capture that a particular element in the model
+represented by the first argument $e$ is in the denotation of $\phi$.
 
-1.  $e \in \sigma(\bar a)$,
-2.  $e \not\in \sigma(\bar a)$,
-3.  $e \in e'$ (This is not used. It is here just for symmetry),
-4.  $e \not\in e'$.
+Definition (Atomic assertions)
+:   *Atomic assertions* are assertions of the form:
 
-A *sequent* is:
+    1.  $\matches{e}{\sigma(a_1, \ldots, a_n)}$,
+    2.  $\matches{e}{\lnot\sigma(a_1, \ldots, a_n)} \equiv \matches{e}{\bar\sigma(\lnot a_1, \ldots, \lnot a_n)}$.
 
-1. a tuple, $\sequent{\Gamma; A; C}$,
-   where $\Gamma$ is a set of assertions,
-          $A$ is a set of atomic assertions
-             where $e$, $e'$, are $\bar a$ element variables.
-       and $C$ is a set of element variables.
-2. $\bot$
-3. $\top$
+    where $e$ and each $a_i$ is an element variable.
 
-Given signature $\Sigma$, definition list $\deflist$ and guarded pattern $\phi$,
-a tableau is a (possibly infinte) tree
-with nodes labeled by sequents
-and built using the application of the rules below.
-The label of the root node is $\sequent{e \in \phi, \{e\}}$ for some fresh variable $e$.
+Definition (Sequent)
+:   A *sequent* is:
 
+    1. a tuple, $\sequent{\Gamma; \Atoms; \Universals; \Elements}$,
+       where $\Gamma$       is a set of assertions,
+             $\Atoms$       is a set of atomic assertions,
+             $\Universals$  is a set of assertions whose pattern is of the form $\bar\sigma(...)$ or $\forall \bar x\ldotp ...$,
+         and $\Elements$    is a set of element variables.
+    2. $\alpha \leadsto \mathrm{sequent}$ where $\alpha$ is an assertion.
+    3. $\unsat$
+
+Informally,
+$\Gamma$ represents the set of assertions we'd like to hold in the current tableau node,
+$\Atoms$ represents the paritally built interpretations for symbols in the model,
+and $\Elements$ are a subset of elements in the model.
+We implicitly assume that all element in $\Elements$ have distinct interpretations
+in the model.
+
+Definition (Tableau)
+
+:   For a signature $\Sigma$, and a guarded  pattern $\phi$,
+    let $\deflist$ be its definition list,
+    and $K$ be a set of distinct element variables.
+
+    a tableau is a (possibly infinte) tree
+    with nodes labeled by sequents
+    and built using the application of the rules below.
+
+    The label of the root node is $\sequent{e \in \phi, \{\}, \{e\}}$ for some fresh variable $e$ drawn from $K$.
+    Leaf nodes must be labeled either 
+       with $\unsat$
+    or with a sequent where $\Gamma$ contains only universal assertions
+    i.e. assertions of the form $\matches{e}{\forall \bar x\ldotp \phi}$
+    or $\matches{e}{\bar\sigma(\bar\phi)}$.
+
+\allowdisplaybreaks
 \begin{align*}
 \cline{1-3}
-\intertext{The (unsat) rule has highest priority.}
-\name{unsat} &
-    \pruleun{\sequent{\alpha, \Gamma; A; ...}}
-            { \bot } &
-    \text{when $\alpha$ is an atomic assertion \emph{not} in $A$.}
+\name{conflict}                 & \pruleun{\sequent{\alpha, \Gamma; \Atoms; ...}}
+                                          { \unsat } \\
+                                & \text{when $\alpha$ is an atomic assertion, with its negation  in $\Atoms$.}
+\\
+\name{ok}                       & \pruleun{\sequent{\alpha, \Gamma; \Atoms; ...}}
+                                    {\sequent{        \Gamma; \Atoms; ...}} \\
+                                & \text{when $\alpha$ is an atomic assertion in $\Atoms$.}
+\\
+\name{conflict-el}              & \pruleun{\sequent{\matches{e}{e'}, \Gamma; \Atoms; ...}}
+                                          { \unsat } \\
+                                & \text{when $e' \neq e$ is an element in $\Elements$.}
+\\
+\name{ok-el}                    & \pruleun{\sequent{\matches{e}{e}, \Gamma; \Atoms; ...}}
+                                          {\sequent{        \Gamma; \Atoms; ...}} \\
+                                & \text{when $\alpha$ is an atomic assertion in $\Atoms$.}
 \\
 \cline{1-3}
-\intertext{Next, any of the following rules may apply}
-%
-\name{and} &
-    \pruleun{\sequent{ e \in \alpha \land \beta,   \Gamma; ...}}
-            {\sequent{ e \in \alpha, e \in \beta,  \Gamma; ...}}
+\name{and}                      & \unsatruleun{\sequent{ \matches{e}{\phi \land \psi},   \Gamma; ...}}
+                                              {\sequent{ \matches{e}{\phi}, \matches{e}{\psi},  \Gamma; ...}}
 \\
-\name{or}  &
- \satrulebin{\sequent{ e \in \alpha \lor \beta, \Gamma; ... }}
-             {\sequent{ e \in \alpha, \Gamma; ... }}
-             {\sequent{ e \in \beta,  \Gamma; ... }}
+\name{or}                       & \satrulebin{\sequent{  \matches{e}{\phi \lor \psi}, \Gamma; ... }}
+                                              {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
+                                              {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
 \\
-\name{def} &
-    \pruleun{\sequent{ e \in \kappa X . \alpha(X), \Gamma; ...}}
-            {\sequent{ D, \Gamma; ...}} &
-    \text{when $D := \kappa X. \alpha(X) \in \deflist$ }
+\name{def}                      & \pruleun{\sequent{ \matches{e}{\kappa X . \phi(X)}, \Gamma; ...}}
+                                  {\sequent{ \matches{e}{D}, \Gamma; ...}} \\
+                                & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
 \\
-\name{unfold} &
-    \pruleun{\sequent{ e \in D, \Gamma; ... }}
-            {\sequent{ e \in \alpha(D), \Gamma;... }} & \text{when $D := \kappa X. \alpha(X) \in \deflist$ }
+\name{unfold}                   & \pruleun{\sequent{ \matches{e}{D}, \Gamma; ... }}
+                                          {\sequent{ \matches{e}{\phi[D/X]}, \Gamma;... }} \\
+                                & \text{when $D := \kappa X. \phi \in \deflist$ }
 \\
 \name{dapp} &
-\unsatruleun{\sequent{e \in \bar\sigma(\bar \alpha), \Gamma; ...}}
-            { \sequent{ \mathrm{instantiations}
-               \union e \in \bar\sigma(\bar \alpha), \Gamma; ... } }
-  & \text{where $\mathrm{instantiations} = \{ \lOr_i c_i \in \alpha_i \mid$ if $(e \in \sigma(\bar c) \in \Gamma \}$} \\
- && \text{and $e \in \bar \sigma(\bar \alpha)$ is not an atomic assertion.}
+\unsatruleun{\sequent{ \matches{e}{\bar\sigma(\bar \phi)}, \Gamma; \Universals; \Elements; ...}}
+            { \sequent{ \mathrm{inst} \union \Gamma; 
+               \matches{e}{\bar\sigma(\bar \phi)}, \Universals; \Elements; ... } } \\
+  & \text{where $\mathrm{inst} = \left\{ \matches{e}{\sigma(\bar c)} \limplies \lOr_i \matches{c_i}{\alpha_i}
+                                    \mid \text{ if } \bar c \subset \Elements \right\}$} \\
+  & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not an atomic assertion.}
 \\
-\name{forall} &
-\unsatruleun { \sequent{ e \in \forall \bar x \ldotp \phi(\bar x), \Gamma; ... } }
-             { \sequent{ \mathrm{instantiations}
-               \union e \in \forall \bar x \ldotp \phi, \Gamma; ... } }
-  & \text{where $\mathrm{instantiations} = \{ e \in \phi[\bar c / \bar x] \mid c \subset C \}$}
+\name{forall}                   & \unsatruleun { \sequent{ \matches{e}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Universals; \Elements; ... } }
+                                               { \sequent{ \mathrm{inst} \union \Gamma
+                                                         ; \matches{e}{\forall \bar x \ldotp \phi}, \Universals
+                                                         ; \Elements
+                                                         ; ... } } \\
+                                & \text{where $\mathrm{inst} = \{ e \in \phi[\bar c / \bar x] \mid c \subset \Elements \}$}
 \\
 \cline{1-3}
-\intertext{The following rules may only apply when none of the above rules apply.}
+\intertext{The following rules may only apply when none of the above rules apply -- i.e. when all assertions in $\alpha$
+are either existentials or applications}
+\name{choose-existential} &
+\unsatruleun {\sequent{ \Gamma; ... }}
+             {\alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; C }}
+    \qquad  \text{where $\alpha \in \Gamma$}
+   \\ 
 \name{app} &
-  \satruleun { \sequent{ e \in \sigma(\bar \phi), \Gamma; C } }
-             { \{ \sequent{ e \in \sigma(\bar k), k_i \in \phi_i \text{ foreach } i, \Gamma'; C' } \} }
-  & \text{where $\bar k$ is a set of distinct fresh variables}\\
- && \text{ and $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset \{e\} \union \free(\exists \bar x \ldotp \phi(\bar x)) \}$} \\
- && \text{ and $e \in \sigma(\bar \alpha)$ is not an atomic assertion.}
+  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; C } }
+             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i} \text{ for each } i, \Gamma'; C' } \} } \\
+  & \text{where} \\
+  & \text{\qquad $\bar k \subset \free(\bar \phi) \union \{e\} \union K \setminus C$} \\
+  & \text{\qquad $C'     = \bar k \union \free(\bar \phi)$} \\
+  & \text{\qquad $A' = \{ a \mid a \in A \text{ and } \free(a) \subset C' \}$ \quad($A$ restricted to $C'$)} \\
+  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset C' \}$ \quad($\Gamma$ restricted to $C'$)} \\
 \\
 \name{exists} &
-  \satruleun { \sequent{ e \in \exists \bar x \ldotp \phi(\bar x), \Gamma; C } }
-             { \{ \sequent{  \phi[\bar k / \bar x], \Gamma'; C' } \} }
-  & \text{where $\bar k$ is a set of distinct fresh variables}\\
- && \text{ and $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset \{e\} \union \free(\exists \bar x \ldotp \phi(\bar x)) \}$}
+  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; A; C } }
+             { \{ \sequent{ \alpha, \Gamma'; A' ; C' } \}
+             } \\
+  & \text{where} \\
+  & \text{\qquad $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset \free(\exists \bar x \ldotp \phi(\bar x)) \union \{e\} \union K \setminus C\}$} \\
+  & \text{\qquad $C'     = \free(\alpha)$} \\
+  & \text{\qquad $A' = \{ a \mid a \in A \text{ and } \free(a) \subset C' \}$ \quad($A$ restricted to $C'$)} \\
+  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset C' \}$ \quad($\Gamma$ restricted to $C'$)} \\
 \\
 \cline{1-3}
-\intertext{This following rules must apply only immediately after the (exists)/(app) rules.
-$\mathrm{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
-\name{resolve} &
- \satrulebin{\sequent{\Gamma; A; C}}
-          {\sequent{ \Gamma; e \in \sigma(\bar a), A; C}}
-          {\sequent{ \Gamma; e \not\in \sigma(\bar a), A; C}} &
-   \text{when $\{e\}\union \bar a \subset C$ and $(\{e\}\union \bar a)\intersection \mathrm{fresh} \neq \emptyset$.}
-\\
-\name{unify} &
- \satrulebin{\sequent{\Gamma; A ; C}}
-          {\sequent{ \Gamma[d/c]; A; C \setminus \{ c \}}}
-          {\sequent{ \Gamma; c \not\in d , A ; C }} &
-   \text{when $\{c, d\} \subset C$ and $d \in \mathrm{fresh}$.}
-\\
-\cline{1-3}
-\intertext{The (sat) rule has lowest priority and may only apply when none of
-the rules from the first three sections apply -- i.e. when only atomic patterns
-remain, and (unsat) does not apply.
-}
-\name{sat} &
-    \pruleun{\sequent{\Gamma; C}}
-            {\top} &
+\intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
+$\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
+\name{resolve} & \satrulebin{\sequent{\Gamma; A; C}}
+                            {\sequent{ \Gamma; \matches{e}{\sigma(\bar a)}, A; C}}
+                            {\sequent{ \Gamma; \matches{e}{\lnot\sigma(\bar a)}, A; C}} \\
+               & \text{when $\{e\}\union \bar a \subset C$ and $(\{e\}\union \bar a)\intersection \mathsf{fresh} \neq \emptyset$.}
 \\
 \cline{1-3}
 \end{align*}
@@ -217,12 +300,65 @@ and a winning strategy for player $1$ a refutation.
 
 ## Soundness
 
-**Lemma 1**: For every tableau, $\mathcal G(\mathcal T)$, must have either a pre-model or a refutation but not both.
+Lemma
 
-**Lemma 2a**: The existance of a pre-model  implies the existance of a satisfying model for that pattern.
-**Lemma 2b**: For any satisfiable guarded pattern there exists tableau a pre-model.
+:   Given a tableau there is a pre-model or a refutation, but not both.
 
-**Lemma 3**: The existance of a refutation implies $\lnot \phi$ is valid.
+Lemma (Satisfiable patterns have pre-models)
+
+:   Given a pattern $\phi$ and an element $e$ in $M$ such that $e \in \denotation{\phi}$,
+    there is a tableau $\mathcal T$ and game $\mathcal G(\mathcal T)$
+    with a pre-model.
+
+Proof
+
+:   First, we will construct a tableau,
+    and then show that the game for that tableau has a winning strategy.
+
+    While constructing the tableau, we will
+    associate each constant $c$
+    in nodes $n$ needed for the winning strategy
+    with an element in model through a function $\rho_n$.
+    We will build a set $W$ that are needed by the winning strategy.
+
+    The root node of the tableau is $\mathrm{root} = \sequent{\matches{c}{\phi}; \{\}; \{c\}}$.
+    Define $\rho_\mathrm{root} := c \mapsto e$. Let $\mathrm{root} \in W$.
+
+    Consider an incomplete node $n$ in $W$;
+
+    * Suppose there is some tuple of constants $\bar c \subset C$ such that
+      neither $\matches(c_0,       \sigma(c_1,\ldots,c_n))$
+      nor     $\matches(c_0, \lnot \sigma(c_1,\ldots,c_n))$
+      are in  $\Atoms$, then we use the (resolve) rule to construct its children.
+
+      Suppose $\rho_n(c_0) \in \denotation{\sigma(c_1,\ldots,c_n)}_{M,\rho_n}$
+      then we place the left child of (resolve) in $W$,
+      otherwise we place the right child of (resolve) in $W$.
+
+    * Otherwise, if $\matches{e}{\phi\lor\psi} \in \alpha$,
+      then we construct child nodes $l$ and $r$ using the (or) rule.
+      If $\signature{\matches{e}{\phi}, n}\le\signature{\matches{e}{\psi}, n}$
+      we place $l$ in $W$. If not, we place $r$ in $W$.
+
+    * 
+
+    * In all other cases, it is player $1$'s turn.
+      We choose any arbitary rule and place all children in $W$.
+
+   For incomplete nodes *not* in $W$,
+   we first apply (resolve) repeatedly until all possible atomic assertions
+   or their negations are in $\Atoms$ and then build the tableau arbitarily.
+   Since there is a rule matching any pattern we will be able to complete
+   the tableau (possibly after infinite applications).
+
+Lemma
+
+:   For a pattern $\phi$, given a pre-model we may build a satisfying model.
+
+
+Lemma
+
+:  The existance of a refutation implies $\lnot \phi$ is valid.
 
 ## Termination
 
