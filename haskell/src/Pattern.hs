@@ -16,6 +16,9 @@ sample_symbols = M.fromList [("C",0),("S",1)]
 
 ----------------------------------------------------------------------
 
+data Statement = Sat Pat | Unsat Pat | Valid Pat
+    deriving (Show, Eq)
+
 data Pat
     = EVar   String
     | SVar   String
@@ -149,9 +152,11 @@ instance Functor Parser where
 runParser ∷ Parser a → String → Either String a
 runParser (Parser p) s =
     case p (mkPS s) of
-        Left st                         → Left "bad parse"
+        Left st                         → err st "bad parse at"
         Right (st, x) | input st == ""  → Right x
-                      | otherwise       → Left "unconsumed input"
+                      | otherwise       → err st "unconsumed input:"
+    where
+        err st msg = Left $ msg ++ " " ++ (show $ take 12 (input st) ++ "...")
 
 ----------------------------------------------------------------------
 -- Low-level Combinators
@@ -207,6 +212,11 @@ matches π f = do x ← π
 
 ----------------------------------------------------------------------
 -- Pattern Combinators
+
+statements :: Parser [Statement]
+statements = do
+    symbols
+    return []
 
 getSig ∷ Parser Signature
 getSig = getState >>= return . signature

@@ -59,9 +59,9 @@ test_pure_return = assertEqual (Right 42) (runParser p "")
 test_run_parsers = uncurry assertEqual $ unzip
     $ map (\(input, parser, expected) → (expected, runParser parser input))
     [ ("c",     char 'c',                   Right ())
-    , ("cd",    char 'c',                   Left "unconsumed input")
-    , ("d",     char 'c',                   Left "bad parse")
-    , ("",      char 'c',                   Left "bad parse")
+    , ("cd",    char 'c',                   Left "unconsumed input: \"d...\"")
+    , ("d",     char 'c',                   Left "bad parse at \"d...\"")
+    , ("",      char 'c',                   Left "bad parse at \"...\"")
     , ("",      nothing,                    Right ())
     , ("cd",    char_cd,                    Right ())
     ]
