@@ -14,7 +14,3 @@ main = do
             stmts ← statements
             sig ← getSig
             return (sig, stmts)
-            -- symbols
-            -- string "\n\n  sat "     -- symbols should parse up to this
-            -- gobble
-            -- return x
