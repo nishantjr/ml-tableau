@@ -1,5 +1,5 @@
 ---
-geometry: margin=2cm
+xgeometry: margin=2cm
 header-includes: |
     \usepackage{xcolor}
 
@@ -13,7 +13,9 @@ header-includes: |
 
     \renewcommand{\subset}{\subseteq}
     \newcommand{\union}{\mathrel{\cup}}
+    \newcommand{\Union}{\bigcup}
     \newcommand{\intersection}{\mathrel{\cap}}
+    \newcommand{\Intersection}{\bigcap}
 
     \newcommand{\denotation}[1]{\left\lVert #1 \right\rVert}
     \newcommand{\free} {\mathrm{free}}
@@ -25,8 +27,6 @@ header-includes: |
     \newcommand{\Universals}{\mathrm{Universals}}
     \newcommand{\Elements}{\mathrm{Elements}}
     \newcommand{\signature}[1]{\mathsf{Sig}(#1)}
-
-    \newcommand{\deflist}{\mathcal D}
 
     \newcommand{\name}[1]{(\text{#1})\quad}
 
@@ -47,8 +47,11 @@ header-includes: |
 
     \newcommand{\inst}{\mathsf{inst}}
 
-    \newcommand {\mkDeflist}[1]{\mathsf{deflist}(#1)}
-    \newcommand {\combineDefList}{\circ}
+    \newcommand{\deflist}{\mathcal D}
+    \newcommand{\mkDeflist}[1]{\mathsf{deflist}(#1)}
+    \newcommand{\combineDefList}{\circ}
+    \newcommand{\expand}[1]{\langle\mid #1 \mid \rangle}
+    \newcommand{\Sig}{\mathsf{Sig}}
 ---
 
 ## Positive-form patterns
@@ -73,10 +76,12 @@ where $$\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ld
 
 Definition (Definition List)
 
-:   A definition list, $\deflist$, of a pattern $\phi$ is an ordered list assigning set variables,
-    called definition constants, to fixed point patterns.
+:   A definition list, $\deflist$, of a pattern $\phi$ is an ordered list assigning
+    special constants, called definition constants, to fixed point patterns.
 
-    NOTE: We assume no free element variables in fixed point patterns.
+    We allow the use of definitional constants whereever set variables are allowed.
+
+    TODO: We assume no free element variables in fixed point patterns.
 
     Given a pattern $\phi$, a definition list is constructed as follows:
 
@@ -93,6 +98,11 @@ Definition (Definition List)
     (D_1 \mapsto \phi)   \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= (D_1 \mapsto \phi) \deflist_1 \combineDefList \deflist_2[D_1/D_2] \\
                          \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= \deflist_1 (D_2 \mapsto \phi) \combineDefList \deflist_2 \qquad\text{otherwise.}\\
     \end{align*}
+
+    We define the semantics of patterns with definition constants in terms
+    of an expansion operator:
+    $$\expand{\phi}_\deflist = \phi[\alpha_n/D_n]\ldots[\alpha_1/D_q]$$
+    where $\deflist = (D_1 \mapsto \alpha_1)\cdots (D_n \mapsto \alpha_n)$.
 
 ## Tableau
 
@@ -142,7 +152,7 @@ Definition (Tableau)
     with nodes labeled by sequents
     and built using the application of the rules below.
 
-    The label of the root node is $\sequent{e \in \phi, \{\}, \{e\}}$ for some fresh variable $e$ drawn from $K$.
+    The label of the root node is $\sequent{\matches{e}{\phi}, \{\}, \{\}, \{e\}}$ for some fresh variable $e$ drawn from $K$.
     Leaf nodes must be labeled either 
        with $\unsat$
     or with a sequent where $\Gamma$ contains only universal assertions
@@ -298,6 +308,45 @@ and a winning strategy for player $1$ a refutation.
 
 ## Approximations & Signatures
 
+In this section, we define concepts that will be used later for proving the
+soundness and completeness of the procedure.
+
+Definition (Approximations)
+
+:   For any ordinal $\tau$ and pattern $\alpha$, we define two new patterns:
+    $\mu^\tau X\ldotp \alpha(X)$ and
+    $\nu^\tau X\ldotp \alpha(X)$, with the following semantics:
+
+    * $\denotation{\mu^0 X\ldotp \alpha(X)}_{M,\rho} = \emptyset$
+    * $\denotation{\nu^0 X\ldotp \alpha(X)}_{M,\rho} = M$
+    * $\denotation{\kappa^{\tau + 1} X\ldotp \alpha(X)}_{M,\rho}
+      = \denotation{\alpha(X)}_{M,\rho[{\kappa^{\tau + 1} X\ldotp \alpha(X)}/X]}$
+      where $\kappa$ is either $\mu$ or $\nu$.
+
+    Then we have
+    $\denotation{\mu X\ldotp \alpha(X)}_{M,\rho} = \Union_{\tau'} \denotation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$
+    and $\denotation{\nu X\ldotp \alpha(X)}_{M,\rho} = \Intersection_{\tau'} \denotation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$.
+    TODO: We need to prove this.
+
+    We extend the notion of definition lists by allowing mappings of the form
+    $D \mapsto \mu^\tau X \ldotp \alpha$
+    and 
+    $D \mapsto \nu^\tau X \ldotp \alpha$.
+
+Definition (Signatures)
+
+:   TODO: We need to rename this to avoid confusion with $\Sigma$.
+
+    Fix an assertion $\alpha = \matches{e}{\phi}$, a definition list $\deflist$,
+    a model $M$ and valuation $\rho$ such that $\rho{e} \in \denotation{\expand{alpha}_\deflist}_{M,\rho}$.
+
+    Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-constants occuring in $\deflist$.
+    We define the signature of $\alpha$ in $M$ for $\rho$, $\Sig(\alpha)_{M,\rho}$
+    to be the least tuple $(\tau_1,\ldots,\tau_n)$
+    such that $\rho(e) \in \denotation{\expand{alpha}_{\deflist'}}_{M,\rho}$
+    where $\deflist'$ is obtained by replacing each $\mu$-constant $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
+    with $(U_{k_i} \mapsto \mu^{\tau_i} X\ldotp \alpha_{k_i}(X))$.
+
 ## Soundness
 
 Lemma
@@ -306,41 +355,69 @@ Lemma
 
 Lemma (Satisfiable patterns have pre-models)
 
-:   Given a pattern $\phi$ and an element $e$ in $M$ such that $e \in \denotation{\phi}$,
-    there is a tableau $\mathcal T$ and game $\mathcal G(\mathcal T)$
-    with a pre-model.
+: Given a pattern $\phi$ and an element $m$ in $M$ such that
+$e \in \denotation{\phi}$, then for any tableau $\mathcal T$, the game
+$\mathcal G(\mathcal T)$ contains a pre-model.
 
 Proof
 
-:   First, we will construct a tableau,
-    and then show that the game for that tableau has a winning strategy.
+:   We will build a pre-model for the game by associating each constant in each
+    position $p$ in the constructed strategy with an element in the model
+    through a function $\rho_p$, while maintaining the invariant that under this
+    interpretation the atoms in the sequent are satisfied. We will then show
+    that the strategy must be a pre-model -- i.e. winning for player 0.
 
-    While constructing the tableau, we will
-    associate each constant $c$
-    in nodes $n$ needed for the winning strategy
-    with an element in model through a function $\rho_n$.
-    We will build a set $W$ that are needed by the winning strategy.
+    The root position of the game is labeled with
+    $\mathrm{root} = (\matches{e}{\phi}, \sequent{\matches{e}{\phi}\, \{\}, \{\}, \{e\}})$.
+    Define $\rho_\mathrm{root} := e \mapsto m$
+    and select the root node as part of the strategy.
 
-    The root node of the tableau is $\mathrm{root} = \sequent{\matches{c}{\phi}; \{\}; \{c\}}$.
-    Define $\rho_\mathrm{root} := c \mapsto e$. Let $\mathrm{root} \in W$.
+    Consider a selected position $p$:
 
-    Consider an incomplete node $n$ in $W$;
+    * Suppose the (resolve) rule was applied at that position
+      on the assertion $\matches{e_0, \sigma(e_1,\ldots,e_n)}$.
+      Then if $\rho_p(c_0) \in \denotation{\sigma(e_1,\ldots,e_n)}_{\rho_p}$
+      we select the left child position, $l$,
+      (that has $\matches{c_0}{\sigma(e_1,\ldots,e_n)} \in \Atoms$).
+      Otherwise, we select the right child position, $r$,
+      (that has $\matches{c_0}{\bar\sigma(\lnot e_1,\ldots,\lnot e_n)} \in \Atoms$).
+      We define $\rho_l = \rho_r = \rho_p$.
 
-    * Suppose there is some tuple of constants $\bar c \subset C$ such that
-      neither $\matches(c_0,       \sigma(c_1,\ldots,c_n))$
-      nor     $\matches(c_0, \lnot \sigma(c_1,\ldots,c_n))$
-      are in  $\Atoms$, then we use the (resolve) rule to construct its children.
+    * If the (or) rule was applied to assertion $\matches{e}{\psi_1 \lor \psi_2}$
+      we select the child with $\matches{e}{\psi_1}$
+      if $\Sig(\matches{e}{\expand{\psi_1}_\deflist}) \le \Sig(\matches{e}{\expand{\psi_2}_\deflist})$.
+      Otherwise, we select the child with $\matches{e}{\psi_2}$.
 
-      Suppose $\rho_n(c_0) \in \denotation{\sigma(c_1,\ldots,c_n)}_{M,\rho_n}$
-      then we place the left child of (resolve) in $W$,
-      otherwise we place the right child of (resolve) in $W$.
+    * Suppose the (app) rule was applied to assertion $\matches{c}{\sigma(\phi_1,\ldots,\phi_n)}$.
+      We know that $\rho_p(c) \in \denotation{\expand{\sigma(\phi_1,\ldots,\phi_n)}}_{M,\rho_p}$.
+      Therefore there must be some $m_1,\ldots,m_n \in M$
+      such that $m_i \in \denotation{\expand{\phi_i}_{M,\rho_p}}$.
 
-    * Otherwise, if $\matches{e}{\phi\lor\psi} \in \alpha$,
+      --- TODO: Complete me.
+
+      Define a set of fresh constants .
+      such for each $m_i$ that does not appear in $p$'s elements.
+      If $m_i = m_j$ use the same constant for both.
+      For each $m_i$ such that $m_i \neq \rho_p(e_j)$ for some $e_j$ in $p$'s elements,
+      define a new constant $c'_i$.
+
+      Choose a child that corres
+
+      Define $$\rho_{p'} = \begin{cases}
+                              e \mapsto \rho_p(e) & \text{where $e$ is free in some $\phi_i$} \\
+                              c'_i \mapsto m_i
+      \end{cases}$$
+
+<!--
+
+    * If $\matches{e}{\phi\lor\psi} \in \Gamma$,
       then we construct child nodes $l$ and $r$ using the (or) rule.
       If $\signature{\matches{e}{\phi}, n}\le\signature{\matches{e}{\psi}, n}$
       we place $l$ in $W$. If not, we place $r$ in $W$.
 
-    * 
+    * If the sequent is of the form $\matches{e}{\alpha} \leadsto \sequent{...}$
+      we apply the (app)
+      or (exists) rule and 
 
     * In all other cases, it is player $1$'s turn.
       We choose any arbitary rule and place all children in $W$.
@@ -350,6 +427,7 @@ Proof
    or their negations are in $\Atoms$ and then build the tableau arbitarily.
    Since there is a rule matching any pattern we will be able to complete
    the tableau (possibly after infinite applications).
+-->
 
 Lemma
 
