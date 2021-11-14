@@ -1,2 +1,5 @@
 fromList [("C",0),("S",1),("Z",123)]
-[]
+Sat (EVar "XXX")
+Unsat (EVar "XXX")
+Valid (EVar "XXX")
+Valid (EVar "XXX")

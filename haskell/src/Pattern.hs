@@ -199,6 +199,9 @@ toksep = some space >> return ()
 
 space = matches anyChar isSpace >> return ()
 
+keyword ∷ String → Parser ()
+keyword s = optspaces >> string s
+
 nat :: Parser Int
 nat = do digits ← many digit
          return $ read digits
@@ -214,19 +217,24 @@ matches π f = do x ← π
 
 ----------------------------------------------------------------------
 -- Pattern Combinators
+--
 
 statements :: Parser [Statement]
 statements = do
-    many $ optspaces >> (symbols <|> statement)
-    optspaces
-    return []
+    -- This will eventually be expanded to allow us to define multiple
+    -- theories, and have multiple sets of statements using various
+    -- combinations of theories.
+    many symbols                    -- theory
+    ss <- many statement            -- assertions etc. about the theory
+    optspaces                       -- EOF whitespace
+    return ss
 
 getSig ∷ Parser Signature
 getSig = getState >>= return . signature
 
 symbols :: Parser ()
 symbols = do
-    string "symbols"
+    keyword "symbols"
     many $ toksep >> symbolDeclaration
     char ';'
 
@@ -242,11 +250,10 @@ addSymbol :: String → Int → Parser ()
 addSymbol name arity = setState $ \st →
     st { signature = M.insert name arity (signature st) }
 
-statement :: Parser ()
+statement :: Parser Statement
 statement = do
     stmt <- sat <|> unsat <|> valid
-    --return stmt
-    return ()
+    return stmt
 
 sat, unsat, valid :: Parser Statement
 sat   = parameterizedStatement "sat"   Sat
@@ -255,7 +262,7 @@ valid = parameterizedStatement "valid" Valid
 
 parameterizedStatement :: String → (Pat → Statement) → Parser Statement
 parameterizedStatement s cons = do
-    string s
+    keyword s
     toksep
     pat ← pattern
     optspaces

@@ -18,7 +18,7 @@ executable ml-tableau
   main-is:             Main.hs
   other-modules:       Pattern
   default-language:    Haskell2010
-  build-depends:       base >= 4.7 && < 5, containers
+  build-depends:       base >= 4.7 && < 5, containers, keys
 
 test-suite test-ml-tableau
   type:                exitcode-stdio-1.0
@@ -26,5 +26,5 @@ test-suite test-ml-tableau
   main-is:             TestMain.hs
   other-modules:       PatternTest, Pattern, Thing
   default-language:    Haskell2010
-  build-depends:       base >= 4.7 && < 5, containers
+  build-depends:       base >= 4.7 && < 5, containers, keys
                      , HTF
