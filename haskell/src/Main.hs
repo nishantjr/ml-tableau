@@ -8,7 +8,7 @@ main = do
     input ← getContents
     case runParser parser input of
         Left e  → error e
-        Right x → print x
+        Right (sig,stmts) → print sig >> print stmts
     where
         parser = do
             stmts ← statements
