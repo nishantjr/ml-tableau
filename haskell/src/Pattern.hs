@@ -9,7 +9,9 @@ import qualified Data.Map.Strict as M (Map, fromList, empty, insert)
 ----------------------------------------------------------------------
 -- A Signature is a mapping from symbol name to arity
 
-type Signature = M.Map String Int
+type SymName   = String
+type Arity     = Int
+type Signature = M.Map SymName Arity
 
 sample_symbols ∷ Signature
 sample_symbols = M.fromList [("C",0),("S",1)]
@@ -19,14 +21,16 @@ sample_symbols = M.fromList [("C",0),("S",1)]
 data Statement = Sat Pat | Unsat Pat | Valid Pat
     deriving (Show, Eq)
 
+type EVarName = String
+type SVarName = String
 data Pat
-    = EVar   String
-    | SVar   String
+    = EVar   EVarName
+    | SVar   SVarName
     | Top                   | Bot
     | Pat :∧ Pat            | Pat :∨ Pat
-    | App    String [Pat]   | DApp   String [Pat]
-    | Exists String  Pat    | Forall String  Pat
-    | Mu     String  Pat    | Nu     String  Pat
+    | App    SymName [Pat]  | DApp   SymName [Pat]
+    | Exists EVarName  Pat  | Forall EVarName  Pat
+    | Mu     SVarName  Pat  | Nu     SVarName  Pat
     deriving (Show, Eq)
 
 parsePat ∷ String → Pat
@@ -215,6 +219,13 @@ matches π f = do x ← π
                  if f x then return x
                         else empty
 
+ntimes ∷ Int → Parser α → Parser [α]
+ntimes 0 π = return []
+ntimes n π = do
+    x ← π
+    xs ← ntimes (n-1) π
+    return $ x:xs
+
 ----------------------------------------------------------------------
 -- Pattern Combinators
 --
@@ -246,7 +257,7 @@ symbolDeclaration = do
     arity ← nat
     addSymbol name arity
 
-addSymbol :: String → Int → Parser ()
+addSymbol :: SymName → Int → Parser ()
 addSymbol name arity = setState $ \st →
     st { signature = M.insert name arity (signature st) }
 
@@ -256,12 +267,12 @@ statement = do
     return stmt
 
 sat, unsat, valid :: Parser Statement
-sat   = parameterizedStatement "sat"   Sat
-unsat = parameterizedStatement "unsat" Unsat
-valid = parameterizedStatement "valid" Valid
+sat   = genericStatement "sat"   Sat
+unsat = genericStatement "unsat" Unsat
+valid = genericStatement "valid" Valid
 
-parameterizedStatement :: String → (Pat → Statement) → Parser Statement
-parameterizedStatement s cons = do
+genericStatement :: String → (Pat → Statement) → Parser Statement
+genericStatement s cons = do
     keyword s
     toksep
     pat ← pattern
@@ -269,7 +280,50 @@ parameterizedStatement s cons = do
     char ';'
     return $ cons pat
 
-pattern :: Parser Pat
+pattern ∷ Parser Pat
 pattern = do
+    optspaces
     some $ matches anyChar (';' /=)
     return $ EVar "XXX"
+
+evar ∷ Parser Pat
+evar = do
+    -- [a-z][A-Za-z0-9_]*
+    return $ EVar "XXX"
+
+svar ∷ Parser Pat
+svar = do
+    -- [A-Z][A-Za-z0-9_]*
+    return $ SVar "XXX"
+
+top, bot ∷ Parser Pat
+top = optspaces >> char '⊤' >> return Top
+bot = optspaces >> char '⊥' >> return Bot
+
+and, or ∷ Parser Pat
+and = dyadic '∧' (:∧)
+or  = dyadic '∨' (:∨)
+
+dyadic ∷ Char → (Pat → Pat → Pat) → Parser Pat
+dyadic c cons = do
+    left ← pattern
+    optspaces
+    char c
+    right ← pattern
+    return $ left `cons` right
+
+symname ∷ Parser (SymName, Arity)
+symname = empty
+
+app, dapp ∷ Parser Pat
+app  = genericApp '<' '>' App
+dapp = genericApp '[' ']' DApp
+
+genericApp ∷ Char → Char → (SymName → [Pat] → Pat) → Parser Pat
+genericApp open close cons = do
+    char open
+    (s, arity) ← symname
+    args ← ntimes arity $ toksep >> pattern
+    optspaces
+    char close
+    return $ cons s args
