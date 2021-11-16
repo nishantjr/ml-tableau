@@ -1,7 +1,13 @@
 ---
-xgeometry: margin=2cm
+geometry: margin=2cm
 header-includes: |
     \usepackage{xcolor}
+
+    \usepackage{amsthm}
+    \newtheorem{theorem}{Theorem}
+    \newtheorem{lemma}{Lemma}
+    \theoremstyle{definition}
+    \newtheorem{definition}{Definition}
 
     \renewcommand{\phi}{\varphi}
 
@@ -50,7 +56,7 @@ header-includes: |
     \newcommand{\deflist}{\mathcal D}
     \newcommand{\mkDeflist}[1]{\mathsf{deflist}(#1)}
     \newcommand{\combineDefList}{\circ}
-    \newcommand{\expand}[1]{\langle\mid #1 \mid \rangle}
+    \newcommand{\expand}[1]{\langle\hspace{-0.2em}\mid #1 \mid\hspace{-0.2em}\rangle}
     \newcommand{\Sig}{\mathsf{Sig}}
 ---
 
@@ -214,27 +220,29 @@ Definition (Tableau)
 are either existentials or applications}
 \name{choose-existential} &
 \unsatruleun {\sequent{ \Gamma; ... }}
-             {\alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; C }}
+             {\alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; \Elements }}
     \qquad  \text{where $\alpha \in \Gamma$}
    \\ 
 \name{app} &
-  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; C } }
-             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i} \text{ for each } i, \Gamma'; C' } \} } \\
+  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; \Elements } }
+             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i} \text{ for each }, \Gamma'; \Atoms' ; \Universals' ; \Elements'  } \} } \\
   & \text{where} \\
-  & \text{\qquad $\bar k \subset \free(\bar \phi) \union \{e\} \union K \setminus C$} \\
-  & \text{\qquad $C'     = \bar k \union \free(\bar \phi)$} \\
-  & \text{\qquad $A' = \{ a \mid a \in A \text{ and } \free(a) \subset C' \}$ \quad($A$ restricted to $C'$)} \\
-  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset C' \}$ \quad($\Gamma$ restricted to $C'$)} \\
+  & \text{\qquad $\bar k \subset K$} \\
+  & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free(\bar \phi)$} \\
+  & \text{\qquad $\Atoms' = \{ a \mid a \in \Atoms \text{ and } \free(a) \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free(\gamma) \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
 \\
 \name{exists} &
-  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; A; C } }
-             { \{ \sequent{ \alpha, \Gamma'; A' ; C' } \}
+  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Atoms; \Universals; \Elements } }
+             { \{ \sequent{ \alpha, \Gamma'; \Atoms' ;  \Universals'; \Elements' } \}
              } \\
   & \text{where} \\
-  & \text{\qquad $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset \free(\exists \bar x \ldotp \phi(\bar x)) \union \{e\} \union K \setminus C\}$} \\
-  & \text{\qquad $C'     = \free(\alpha)$} \\
-  & \text{\qquad $A' = \{ a \mid a \in A \text{ and } \free(a) \subset C' \}$ \quad($A$ restricted to $C'$)} \\
-  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset C' \}$ \quad($\Gamma$ restricted to $C'$)} \\
+  & \text{\qquad $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
+  & \text{\qquad $\Elements'   = \free(\alpha)$} \\
+  & \text{\qquad $\Atoms'      = \{ a \mid a \in \Atoms \text{ and } \free(a) \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free(\alpha) \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
 \\
 \cline{1-3}
 \intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
@@ -353,6 +361,51 @@ Lemma
 
 :   Given a tableau there is a pre-model or a refutation, but not both.
 
+Lemma (Signatures are (non-strictly) decreasing over children in a pre-model)
+
+:   The following facts hold about signatures under a model $M$ and interpretation $\rho$:
+
+    a. If $\matches{e}{\phi\lor\psi}$ has signature $\bar \tau$, then
+       either $\matches{e}{\phi\psi}$ or $\matches{e}{\phi\psi}$
+       has signature $\bar \tau$.
+
+    b. If $\matches{e}{\exists \bar x \ldotp \phi}$ has signature $\bar \tau$, then
+       there is a tuple $\bar m \subset M$
+       with signature of $\matches{e}{\phi}$ equal to $\bar \tau$
+       for interpretation $\rho[\bar m/\bar x]$.
+
+    c. If $\matches{e}{\sigma(\bar \phi)}$ has signature $\bar \tau$, then
+       there is a tuple $\bar m \subset M$
+       such that for each $i$,
+       the signature of $\matches{e}{\sigma(\bar x)}\land \matches{x_i}{\phi_i}$ is not bigger than $\bar \tau$
+       for interpretation $\rho[\bar m/\bar x]$.
+
+    d. If $\matches{e}{\phi\land\psi}$ has signature $\bar \tau$, then
+       both $\matches{e}{\phi\psi}$ and $\matches{e}{\phi\psi}$
+       have signature not larger than $\bar \tau$.
+
+    e. If $\matches{e}{\forall \bar x \ldotp \phi}$ has signature $\bar \tau$, then
+       for every tuple $\bar m \subset M$
+       we have signature of $\matches{e}{\phi}$ is not larger than $\bar \tau$
+       for interpretation $\rho[\bar m/\bar x]$.
+
+    f. If $\matches{e}{\kappa X\ldotp \phi}$ has signature $\bar \tau$,
+       and $\deflist(D_i) = \kappa X\ldotp \phi$ then
+       $\matches{e}{D_i}$ also has signature $\bar \tau$.
+
+    g. If $\matches{e}{D_i}$ has signature $\bar \tau$,
+       and $\deflist(D_i) = \mu X\ldotp \phi$ then
+       $\matches{e}{\phi[D_i/X]}$ has signature identical on the first $i - 1$ positions,
+       with the $i$th strictly less.
+
+    h. If $\matches{e}{D_i}$ has signature $\bar \tau$,
+       and $\deflist(D_i) = \nu X\ldotp \phi$ then
+       $\matches{e}{\phi[D_i/X]}$ also has signature $\bar \tau$.
+
+Proof
+
+:   Same as for guarded fixedpoint logic
+
 Lemma (Satisfiable patterns have pre-models)
 
 : Given a pattern $\phi$ and an element $m$ in $M$ such that
@@ -361,10 +414,14 @@ $\mathcal G(\mathcal T)$ contains a pre-model.
 
 Proof
 
-:   We will build a pre-model for the game by associating each constant in each
+:   We will build a strategy for the game by associating each constant in each
     position $p$ in the constructed strategy with an element in the model
-    through a function $\rho_p$, while maintaining the invariant that under this
-    interpretation the atoms in the sequent are satisfied. We will then show
+    through a function $\rho_p$, while maintaining two invariants:
+
+    1. under this interpretation the atoms in the sequent are satisfied.
+    2. every element in a sequent has distinct interpretations.
+
+    We will then show
     that the strategy must be a pre-model -- i.e. winning for player 0.
 
     The root position of the game is labeled with
@@ -393,41 +450,61 @@ Proof
       Therefore there must be some $m_1,\ldots,m_n \in M$
       such that $m_i \in \denotation{\expand{\phi_i}_{M,\rho_p}}$.
 
-      --- TODO: Complete me.
+      Select a child of $p$,\newline
+      say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Atoms'; \Universals'; \Elements'}$,
+      such that:
+      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free(\phi_i)$, and
+      * if for some $i$, $m_i = \rho_p(e)$ where $e \in \Elements$ then $k'_i = e$.
+      * if $m_i = m_j$, then $k_i = k_j$.
 
-      Define a set of fresh constants .
-      such for each $m_i$ that does not appear in $p$'s elements.
-      If $m_i = m_j$ use the same constant for both.
-      For each $m_i$ such that $m_i \neq \rho_p(e_j)$ for some $e_j$ in $p$'s elements,
-      define a new constant $c'_i$.
+      Define: $\rho_{p'} = \begin{cases}e   \mapsto \rho_p(e) & \text{when $e \in \Elements$} \\
+                                        k_i \mapsto  m'_i \\ \end{cases}$
 
-      Choose a child that corres
+    * Suppose the (exists) rule was applied to assertion
+      $\matches{c}{\exists \bar x \ldotp \phi}$.
+      We know that $\rho_p(c) \in \denotation{\expand{\exists \bar x \ldotp \phi}}_{M,\rho_p}$.
+      Therefore there must be some $m_1,\ldots,m_n \in M$
+      such that $\rho_p(c) \in \denotation{\expand{\phi}}_{M,\rho_p[\bar m/\bar x]}$
+      with signature $\tau$.
 
-      Define $$\rho_{p'} = \begin{cases}
-                              e \mapsto \rho_p(e) & \text{where $e$ is free in some $\phi_i$} \\
-                              c'_i \mapsto m_i
-      \end{cases}$$
+      Select a child of $p$,\newline
+      say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Atoms'; \Universals'; \Elements'}$,
+      such that:
 
-<!--
+      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free(\phi_i)$, and
+      * if for some $i$, $m_i = \rho_p(e)$ where $e \in \Elements$ then $k'_i = e$.
+      * if $m_i = m_j$, then $k_i = k_j$.
 
-    * If $\matches{e}{\phi\lor\psi} \in \Gamma$,
-      then we construct child nodes $l$ and $r$ using the (or) rule.
-      If $\signature{\matches{e}{\phi}, n}\le\signature{\matches{e}{\psi}, n}$
-      we place $l$ in $W$. If not, we place $r$ in $W$.
+      Define: $\rho_{p'} = \begin{cases}e_{\phantom{i}}   \mapsto \rho_p(e) & \text{when $e \in \Elements$} \\
+                                        k_i \mapsto  m'_i \\ \end{cases}$
 
-    * If the sequent is of the form $\matches{e}{\alpha} \leadsto \sequent{...}$
-      we apply the (app)
-      or (exists) rule and 
 
-    * In all other cases, it is player $1$'s turn.
-      We choose any arbitary rule and place all children in $W$.
+    * For all other rules, it is player $1$'s turn.
+      We must select all children as part of the strategy.
+      Since the elements do not change, associate $\rho_p$ with all children.
 
-   For incomplete nodes *not* in $W$,
-   we first apply (resolve) repeatedly until all possible atomic assertions
-   or their negations are in $\Atoms$ and then build the tableau arbitarily.
-   Since there is a rule matching any pattern we will be able to complete
-   the tableau (possibly after infinite applications).
--->
+    Now, we must show that the constructed strategy is a pre-model.
+    We must check that every trace in the pre-model is winning for player $1$.
+
+    Consider any finite trace.
+    Because of the two invariants maintained, the (conflict) and (conflict-el)
+    rules cannot apply, and all leafs are (ok) or (ok-el) nodes where player $0$ wins.
+
+    Now, consider an infinite trace.
+    If an (resolve), (or), or (and) nodes occur infinitely often,
+    some other node of lower parity must also occur infinitely often.
+
+    Consider the lowest priority node that occurs inifinitely often.
+
+    If it is a (nu), (dapp), or (forall), then player $1$ wins.
+
+    It cannot be a (mu) node since (mu) nodes strictly decrease the signature, a well-founded measure.
+
+    If it is a (exists) or (app)-node, the tableau reduces them immediately.
+    > TODO: Why can it not recurr on the same trace?
+    > 
+    > - The only way for it to recurr (on the same trace) would be through a $\forall$ it creates
+    > - But the $\forall$ pattern would have a smaller size, and therefore cannot recreate the exists?
 
 Lemma
 

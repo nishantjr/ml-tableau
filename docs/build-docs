@@ -4,4 +4,4 @@ set -eu -o pipefail
 cd $(dirname $0)/..
 
 mkdir -p .build
-pandoc --number-sections -t latex docs/tableau.md -o .build/tableau.pdf
+pandoc --number-sections -t latex docs/tableau.md  -F docs/pandocfilters/defenv.py -o .build/tableau.pdf
