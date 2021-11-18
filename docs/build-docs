@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 
 set -eu -o pipefail
-cd $(dirname $0)/..
+REPO_DIR="$(cd $(dirname $0)/..; pwd)"
+DOC_DIR="$REPO_DIR/docs"
+BUILD_DIR="$REPO_DIR/.build"
 
-mkdir -p .build
-pandoc --number-sections -t latex docs/tableau.md  -F docs/pandocfilters/defenv.py -o .build/tableau.pdf
+cd "$DOC_DIR"
+
+mkdir -p "$BUILD_DIR"
+pandoc --standalone -t latex -o "$BUILD_DIR/tableau.pdf" \
+       --citeproc --table-of-contents \
+       "$DOC_DIR"/preliminaries.md "$DOC_DIR"/tableau.md \
+       -V header-includes="\include{prelude.tex}" \
+       -V documentclass='article' \
+       -V geometry='margin=2cm' \
+       -V numbersections='true' \
+       -F pandocfilters/defenv.py

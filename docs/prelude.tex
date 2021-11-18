@@ -1,0 +1,160 @@
+% Generic definitions
+% ===================
+
+% Fix bad defaults
+% ----------------
+ 
+% We prefer varphi over phi.
+\renewcommand{\phi} {\varphi}
+% By subset we normally mean non-strict subset.
+\renewcommand{\subset}  {\subseteq}
+
+% logic operators
+% ---------------
+
+\newcommand {\lAnd} {\bigwedge}
+\newcommand {\lOr} {\bigvee}
+\newcommand {\limplies}{\rightarrow}
+\newcommand {\liff}{\leftrightarrow}
+
+\newcommand {\free}[1] {\mathsf{free}(#1)}
+
+% set operators
+% -------------
+
+\newcommand {\Intersection} {\bigcap}
+\newcommand {\Union} {\bigcup}
+\newcommand {\intersection} {\cap}
+\newcommand {\union} {\mathrel{\cup}}
+
+\newcommand {\powerset} {\mathcal P}
+\newcommand {\N} {\mathbb{N}}
+
+% Model theory
+% ------------
+ 
+\newcommand {\proves}{\vdash}
+\newcommand {\satisfies}{\models}
+
+% Matching Logic
+% --------------
+ 
+\newcommand {\Var}      {\mathsf{Var}}
+\newcommand {\EVar}     {\mathsf{EVar}}
+\newcommand {\SVar}     {\mathsf{SVar}}
+\newcommand{\denotation}[1]{\left| {#1} \right|}
+
+% K
+% -
+
+\newcommand {\K}  {$\mathbb{K}$}
+
+% Environments
+% ------------
+
+\usepackage{amsthm}
+\newtheorem{theorem}                 {Theorem} [section]
+\newtheorem{proposition}  [theorem]  {Proposition}
+\newtheorem{lemma}        [theorem]  {Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}   [theorem]  {Definition}
+\newtheorem{remark}       [theorem]  {Remark}
+\newtheorem{example}      [theorem]  {Example}
+
+% To do notes
+% -----------
+
+\usepackage{soul}
+\newcommand {\todo}[1] {\hl{TODO: #1}}
+
+% Paper Specific
+% ==============
+ 
+\usepackage{diagbox}
+
+% Fragment Definitions
+% --------------------
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.misc, positioning}
+\newcommand*\fragment[1]{
+  \tikz[baseline=(char.base)]{\node[draw,rectangle,rounded corners=2pt,inner sep=2pt,fill=black,text=white] (char){\phantom{\rlap{fgq}}$\mathsf{#1}$};}
+}
+\newcommand{\structure}      { \fragment{structure} }
+\newcommand{\logic}          { \fragment{logic} }
+\newcommand{\quantification} { \fragment{quantification} }
+\newcommand{\fixedpoint}     { \fragment{fixedpoint} }
+
+% Signatures
+\newcommand{\umeasure}{\mathsf{Measure}^\mu}
+\newcommand{\vmeasure}{\mathsf{Measure}^\nu}
+
+
+% Status Quo table
+% ----------------
+
+\usepackage{pifont}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{\ding{51}}
+\newunicodechar{✗}{\ding{55}}
+\newunicodechar{⍻}{\ding{55}}
+\newcommand{\cmark}{{\color{green}\ding{51}}}%
+\newcommand{\xmark}{{\color{red}  \ding{55}}}%
+\newcommand{\cxmark} {{\color{green}\ding{51}}\textsuperscript{\kern-0.47em\tiny\color{red}\ding{55}}}
+\newcommand{\cqmark} {{\color{green}\ding{51}}\textsuperscript{\kern-0.47em\textbf{?}}}
+\newcommand{\fin}{$_\mathrm{fin}$}
+\renewcommand{\inf}{$_\mathrm{inf}$}
+
+% Definition list, Tableau & Sequents
+% -----------------------------------
+ 
+\newcommand{\deflist}{\mathcal D}
+\newcommand{\mkDeflist}[1]{\mathsf{deflist}(#1)}
+\newcommand{\combineDefList}{\circ}
+\newcommand{\expand}[1]{\langle\hspace{-0.2em}\mid #1 \mid\hspace{-0.2em}\rangle}
+
+\newcommand{\matches}[2]{\mathsf{matches}(#1, #2)}
+\newcommand{\sequent}[1]{\left\langle #1 \right\rangle}
+\newcommand{\Sequent}[1]{\mathsf{Sequent}}
+\newcommand{\unsat}{\mathsf{unsat}}
+\newcommand{\Atoms}{\mathrm{Atoms}}
+\newcommand{\Universals}{\mathrm{Universals}}
+\newcommand{\Elements}{\mathrm{Elements}}
+
+\newcommand{\name}[1]{(\text{#1})\quad}
+
+\newcommand{\pruleun}[2]{\frac{#1}{#2}}
+\newcommand{\prulebin}[3]{\frac{#1}{#2\quad#3}}
+
+\newcommand{\satruleun}[2]
+    {{\color{green}\pruleun{\color{black}#1}{\color{black}#2}}}
+\newcommand{\satrulebin}[3]
+    {{\color{green}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
+
+\newcommand{\unsatruleun}[2]
+    {{\color{blue}\pruleun{\color{black}#1}{\color{black}#2}}}
+\newcommand{\unsatrulebin}[3]
+    {{\color{blue}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
+
+\newcommand{\inst}{\mathsf{inst}}
+
+% Games
+% -----
+
+\newcommand{\Pos}{\mathrm{Pos}}
+
+% Miscelanious
+% ============
+
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\PP}{\mathcal{P}}
+\newcommand{\TT}{\mathcal{T}}
+
+\newcommand{\size}[1] {\left\lVert #1\right\rVert}
+\newcommand{\width}[1]{\mathrm{width}(#1)}
+
+\newcommand {\where}[1] {\quad\parbox[t]{0.5\textwidth}{where #1 }}
+\newcommand {\since}[1] {\quad\parbox[t]{0.5\textwidth}{since #1 }}
+
+% End of LaTeX Prelude
+% --------------------

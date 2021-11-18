@@ -1,88 +1,46 @@
----
-documentclass: article
-geometry: margin=2cm
-numbersections: true
-header-includes: |
-    \usepackage{xcolor}
+# Guarded Matching Logic
 
-    \usepackage{amsthm}
-    \newtheorem{theorem}{Theorem}[section]
-    \newtheorem{lemma}[theorem]{Lemma}
+Definition (Guarded pattern)
+:   A guarded pattern is a pattern constructed recursively using:
 
-    \theoremstyle{definition}
-    \newtheorem{definition}[theorem]{Definition}
+    1. element variables bound by point (\ref{item:guarded-existentials}) below.
+    2. \logic and \fixedpoint
+    3. \label{item:app-no-var}
+       applications whose arguments are guarded and employ no free variables,
+    4. \label{item:app-var}
+       applications of the form $\sigma(\bar \phi)$,
+       where each $\phi \in \bar \phi$ is of the form $x \land \psi$ and $x$ is an element variable bound by point (\ref{item:guarded-existentials})
+       and $\psi$ is guarded.
+    5. \label{item:guarded-existentials} patterns of the form $\exists \bar x \ldotp \alpha(\bar x, \bar y) \land \phi(\bar x, \bar y)$
+          where:
+          * $\phi$ is a guarded matching logic pattern,
+          * $\alpha$ is a conjunction of patterns of the form $\sigma(\bar x)$, where $\bar x$ are all element variables,
+          * $\free\phi \subseteq \free\alpha = \bar x \union \bar y$,
+          * for each quantified variable $x \in \bar x$ and free variable
+                $v \in \bar x \union \bar y$ occurs together as arguments to an application
+                in the guard $\alpha$, and
 
-    \renewcommand{\phi}{\varphi}
-
-    \newcommand{\N}{\mathbb N}
-
-    \newcommand{\limplies}{\rightarrow}
-    \newcommand{\lOr}{\bigvee}
-    \newcommand{\lAnd}{\bigwedge}
-
-    \renewcommand{\subset}{\subseteq}
-    \newcommand{\union}{\mathrel{\cup}}
-    \newcommand{\Union}{\bigcup}
-    \newcommand{\intersection}{\mathrel{\cap}}
-    \newcommand{\Intersection}{\bigcap}
-
-    \newcommand{\denotation}[1]{\left\lVert #1 \right\rVert}
-    \newcommand{\free} {\mathrm{free}}
-
-    \newcommand{\matches}[2]{\mathsf{matches}(#1, #2)}
-    \newcommand{\sequent}[1]{\left\langle #1 \right\rangle}
-    \newcommand{\Sequent}[1]{\mathsf{Sequent}}
-    \newcommand{\unsat}{\mathsf{unsat}}
-    \newcommand{\Atoms}{\mathrm{Atoms}}
-    \newcommand{\Universals}{\mathrm{Universals}}
-    \newcommand{\Elements}{\mathrm{Elements}}
-    \newcommand{\signature}[1]{\mathsf{Sig}(#1)}
-
-    \newcommand{\name}[1]{(\text{#1})\quad}
-
-    \newcommand{\pruleun}[2]{\frac{#1}{#2}}
-    \newcommand{\prulebin}[3]{\frac{#1}{#2\quad#3}}
-
-    \newcommand{\satruleun}[2]
-        {{\color{green}\pruleun{\color{black}#1}{\color{black}#2}}}
-    \newcommand{\satrulebin}[3]
-        {{\color{green}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
-
-    \newcommand{\unsatruleun}[2]
-        {{\color{blue}\pruleun{\color{black}#1}{\color{black}#2}}}
-    \newcommand{\unsatrulebin}[3]
-        {{\color{blue}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
-
-    \newcommand{\Pos}{\mathrm{Pos}}
-
-    \newcommand{\inst}{\mathsf{inst}}
-
-    \newcommand{\deflist}{\mathcal D}
-    \newcommand{\mkDeflist}[1]{\mathsf{deflist}(#1)}
-    \newcommand{\combineDefList}{\circ}
-    \newcommand{\expand}[1]{\langle\hspace{-0.2em}\mid #1 \mid\hspace{-0.2em}\rangle}
-    \newcommand{\Sig}{\mathsf{Sig}}
----
-
-# Preliminaries
-
-Definition (Positive Form Pattern)
-: Positive form patterns are defined using the syntax:
-
-\begin{alignat*}{3}
-\phi := \quad&       \sigma(\phi_1, \ldots, \phi_n)
-   &\quad\mid\quad&   \bar \sigma(\phi_1, \ldots, \phi_n) \\
-    \quad\mid\quad&  \phi_1 \land \phi_2
-   &\quad\mid\quad&  \phi_1 \lor  \phi_2 \\
-    \quad\mid\quad&  \exists x \ldotp \phi
-   &\quad\mid\quad&  \forall x \ldotp \phi \\
-    \quad\mid\quad&  \mu X \ldotp \phi
-   &\quad\mid\quad&  \nu X \ldotp \phi
-\end{alignat*}
-
-where $\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$.
+    In point \ref{item:guarded-existentials}, we call $\alpha$ the "guard".
 
 # Tableau
+
+We define our procedure over "positive-form" patterns
+-- patterns where negations are pushed down as far as they can go.
+
+Definition (Positive Form Pattern)
+:   Positive form patterns are defined using the syntax:
+
+    \begin{alignat*}{3}
+    \phi := \quad&       \sigma(\phi_1, \ldots, \phi_n)
+       &\quad\mid\quad&   \bar \sigma(\phi_1, \ldots, \phi_n) \\
+        \quad\mid\quad&  \phi_1 \land \phi_2
+       &\quad\mid\quad&  \phi_1 \lor  \phi_2 \\
+        \quad\mid\quad&  \exists x \ldotp \phi
+       &\quad\mid\quad&  \forall x \ldotp \phi \\
+        \quad\mid\quad&  \mu X \ldotp \phi
+       &\quad\mid\quad&  \nu X \ldotp \phi
+    \end{alignat*}
+    where $\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$.
 
 Definition (Definition List)
 
@@ -326,9 +284,9 @@ Definition (Pre-models & Refutations)
     We call a winning strategy for player $0$ a pre-model,
     and a winning strategy for player $1$ a refutation.
 
-# Approximations & Signatures
+# Soundness & Completeness
 
-In this section, we define concepts that will be used later for proving the
+Below, we define concepts that will be used later for proving the
 soundness and completeness of the procedure.
 
 Definition (Approximations)
@@ -353,7 +311,7 @@ Definition (Approximations)
     and 
     $D \mapsto \nu^\tau X \ldotp \alpha$.
 
-Definition (Signatures)
+Definition ($\mu$-measure -- $\umeasure$)
 
 :   TODO: We need to rename this to avoid confusion with $\Sigma$.
 
@@ -361,13 +319,11 @@ Definition (Signatures)
     a model $M$ and valuation $\rho$ such that $\rho{e} \in \denotation{\expand{alpha}_\deflist}_{M,\rho}$.
 
     Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-constants occuring in $\deflist$.
-    We define the signature of $\alpha$ in $M$ for $\rho$, $\Sig(\alpha)_{M,\rho}$
+    We define the $\mu$-measure (or just measure for short) of $\alpha$ in $M$ for $\rho$, $\umeasure(\alpha)_{M,\rho}$
     to be the least tuple $(\tau_1,\ldots,\tau_n)$
     such that $\rho(e) \in \denotation{\expand{alpha}_{\deflist'}}_{M,\rho}$
     where $\deflist'$ is obtained by replacing each $\mu$-constant $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
     with $(U_{k_i} \mapsto \mu^{\tau_i} X\ldotp \alpha_{k_i}(X))$.
-
-# Soundness
 
 ## Satisfiability implies a pre-model
 
@@ -379,42 +335,42 @@ Lemma (Signatures are (non-strictly) decreasing over children in a pre-model)
 
 :   The following facts hold about signatures under a model $M$ and interpretation $\rho$:
 
-    a. If $\matches{e}{\phi\lor\psi}$ has signature $\bar \tau$, then
+    a. If $\matches{e}{\phi\lor\psi}$ has measure $\bar \tau$, then
        either $\matches{e}{\phi\psi}$ or $\matches{e}{\phi\psi}$
-       has signature $\bar \tau$.
+       has measure $\bar \tau$.
 
-    b. If $\matches{e}{\exists \bar x \ldotp \phi}$ has signature $\bar \tau$, then
+    b. If $\matches{e}{\exists \bar x \ldotp \phi}$ has measure $\bar \tau$, then
        there is a tuple $\bar m \subset M$
-       with signature of $\matches{e}{\phi}$ equal to $\bar \tau$
+       with measure of $\matches{e}{\phi}$ equal to $\bar \tau$
        for interpretation $\rho[\bar m/\bar x]$.
 
-    c. If $\matches{e}{\sigma(\bar \phi)}$ has signature $\bar \tau$, then
+    c. If $\matches{e}{\sigma(\bar \phi)}$ has measure $\bar \tau$, then
        there is a tuple $\bar m \subset M$
        such that for each $i$,
-       the signature of $\matches{e}{\sigma(\bar x)}\land \matches{x_i}{\phi_i}$ is not bigger than $\bar \tau$
+       the measure of $\matches{e}{\sigma(\bar x)}\land \matches{x_i}{\phi_i}$ is not bigger than $\bar \tau$
        for interpretation $\rho[\bar m/\bar x]$.
 
-    d. If $\matches{e}{\phi\land\psi}$ has signature $\bar \tau$, then
+    d. If $\matches{e}{\phi\land\psi}$ has measure $\bar \tau$, then
        both $\matches{e}{\phi\psi}$ and $\matches{e}{\phi\psi}$
-       have signature not larger than $\bar \tau$.
+       have measure not larger than $\bar \tau$.
 
-    e. If $\matches{e}{\forall \bar x \ldotp \phi}$ has signature $\bar \tau$, then
+    e. If $\matches{e}{\forall \bar x \ldotp \phi}$ has measure $\bar \tau$, then
        for every tuple $\bar m \subset M$
-       we have signature of $\matches{e}{\phi}$ is not larger than $\bar \tau$
+       we have measure of $\matches{e}{\phi}$ is not larger than $\bar \tau$
        for interpretation $\rho[\bar m/\bar x]$.
 
-    f. If $\matches{e}{\kappa X\ldotp \phi}$ has signature $\bar \tau$,
+    f. If $\matches{e}{\kappa X\ldotp \phi}$ has measure $\bar \tau$,
        and $\deflist(D_i) = \kappa X\ldotp \phi$ then
-       $\matches{e}{D_i}$ also has signature $\bar \tau$.
+       $\matches{e}{D_i}$ also has measure $\bar \tau$.
 
-    g. If $\matches{e}{D_i}$ has signature $\bar \tau$,
+    g. If $\matches{e}{D_i}$ has measure $\bar \tau$,
        and $\deflist(D_i) = \mu X\ldotp \phi$ then
-       $\matches{e}{\phi[D_i/X]}$ has signature identical on the first $i - 1$ positions,
+       $\matches{e}{\phi[D_i/X]}$ has measure identical on the first $i - 1$ positions,
        with the $i$th strictly less.
 
-    h. If $\matches{e}{D_i}$ has signature $\bar \tau$,
+    h. If $\matches{e}{D_i}$ has measure $\bar \tau$,
        and $\deflist(D_i) = \nu X\ldotp \phi$ then
-       $\matches{e}{\phi[D_i/X]}$ also has signature $\bar \tau$.
+       $\matches{e}{\phi[D_i/X]}$ also has measure $\bar \tau$.
 
 Proof
 
@@ -434,7 +390,7 @@ Proof
 
     1. Under this interpretation the atoms in the sequent are satisfied.
     2. Every element in a sequent has distinct interpretations.
-    3. The signature does not increase between any parent and child.
+    3. The measure does not increase between any parent and child.
 
     We will then show
     that the strategy must be a pre-model -- i.e. winning for player 0.
@@ -457,7 +413,7 @@ Proof
 
     * If the (or) rule was applied to assertion $\matches{e}{\psi_1 \lor \psi_2}$
       we select the child with $\matches{e}{\psi_1}$
-      if $\Sig(\matches{e}{\expand{\psi_1}_\deflist}) \le \Sig(\matches{e}{\expand{\psi_2}_\deflist})$.
+      if $\umeasure(\matches{e}{\expand{\psi_1}_\deflist}) \le \umeasure(\matches{e}{\expand{\psi_2}_\deflist})$.
       Otherwise, we select the child with $\matches{e}{\psi_2}$.
 
     * Suppose the (app) rule was applied to assertion $\matches{c}{\sigma(\phi_1,\ldots,\phi_n)}$.
@@ -480,7 +436,7 @@ Proof
       We know that $\rho_p(c) \in \denotation{\expand{\exists \bar x \ldotp \phi}}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
       such that $\rho_p(c) \in \denotation{\expand{\phi}}_{M,\rho_p[\bar m/\bar x]}$
-      with signature $\tau$.
+      with measure $\tau$.
 
       Select a child of $p$,\newline
       say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Atoms'; \Universals'; \Elements'}$,
@@ -510,7 +466,7 @@ Proof
     some other node of lower parity must also occur infinitely often.
     Consider the lowest priority node that occurs inifinitely often.
     If it is a (nu), (dapp), or (forall), then player $1$ wins.
-    It cannot be a (mu) node since (mu) nodes strictly decrease the signature, a well-founded measure.
+    It cannot be a (mu) node since (mu) nodes strictly decrease the measure, a well-founded measure.
     Suppose it is a (exists) or (app)-node (for sake of contradiction).
     Let us consider an (infinite) suffix of the trace that doesn't have any (nu) or (mu) nodes.
     This must exist, otherwise (mu) or (nu), with lower priority would repeat infinitely.
@@ -534,13 +490,19 @@ $c$ is in the elements of each node in the path from $v$ to $w$, inclusive.
 This relation defines an equivalence class.
 Notice that each equivalence class is a subtree of the tableau.
 
-Let $T_{equiv_c}$ be the set of equivalence classes in $T$ for a constant $c$
-and $T_{equiv_K} = \Union_{c\in K} T_{equiv_c}$.
+From our pre-model $S$, we define a model $M(S)$.
+Let $T_{\equiv_c}$ be the set of equivalence classes in $T$ for a constant $c$
+and $T_{\equiv_K} = \Union_{c\in K} T_{\equiv_c}$.
 
-Let the carrier set $M \subset K \times T_{equiv_K}$ of the constructed model
+Let the carrier set $M \subset K \times T_{\equiv_K}$ of the constructed model
 be the pairs of elements in the sequent
 and their corresponding $c$-equivalence classes
 that include a node used by the winning strategy.
+
+Definition ($\nu$-measure -- $\vmeasure$)
+
+:   Suppose, for a model $M$ and pattern $\phi$, $M\not\satisfies \phi$.
+
 
 Lemma
 
@@ -548,15 +510,11 @@ Lemma
 
 Proof
 
-:   TODO
+:   Suppose for 
 
 Lemma
 
 :  The existance of a refutation implies $\lnot \phi$ is valid.
-
-# Termination
-
-\newpage
 
 # Pseudocode
 
