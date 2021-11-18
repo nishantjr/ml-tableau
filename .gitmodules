@@ -1,0 +1,3 @@
+[submodule "docs/pandocfilters"]
+	path = docs/pandocfilters
+	url = https://github.com/01mf02/pandocfilters
