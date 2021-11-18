@@ -1,13 +1,16 @@
 ---
+documentclass: article
 geometry: margin=2cm
+numbersections: true
 header-includes: |
     \usepackage{xcolor}
 
     \usepackage{amsthm}
-    \newtheorem{theorem}{Theorem}
-    \newtheorem{lemma}{Lemma}
+    \newtheorem{theorem}{Theorem}[section]
+    \newtheorem{lemma}[theorem]{Lemma}
+
     \theoremstyle{definition}
-    \newtheorem{definition}{Definition}
+    \newtheorem{definition}[theorem]{Definition}
 
     \renewcommand{\phi}{\varphi}
 
@@ -28,6 +31,7 @@ header-includes: |
 
     \newcommand{\matches}[2]{\mathsf{matches}(#1, #2)}
     \newcommand{\sequent}[1]{\left\langle #1 \right\rangle}
+    \newcommand{\Sequent}[1]{\mathsf{Sequent}}
     \newcommand{\unsat}{\mathsf{unsat}}
     \newcommand{\Atoms}{\mathrm{Atoms}}
     \newcommand{\Universals}{\mathrm{Universals}}
@@ -60,7 +64,7 @@ header-includes: |
     \newcommand{\Sig}{\mathsf{Sig}}
 ---
 
-## Positive-form patterns
+# Preliminaries
 
 Definition (Positive Form Pattern)
 : Positive form patterns are defined using the syntax:
@@ -76,16 +80,15 @@ Definition (Positive Form Pattern)
    &\quad\mid\quad&  \nu X \ldotp \phi
 \end{alignat*}
 
-where $$\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$$
+where $\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$.
 
-## Definition List
+# Tableau
 
 Definition (Definition List)
 
 :   A definition list, $\deflist$, of a pattern $\phi$ is an ordered list assigning
     special constants, called definition constants, to fixed point patterns.
-
-    We allow the use of definitional constants whereever set variables are allowed.
+    We extend the syntax of patterns to allow definition constants.
 
     TODO: We assume no free element variables in fixed point patterns.
 
@@ -98,19 +101,17 @@ Definition (Definition List)
     \mkDeflist{\exists \bar x \ldotp\phi}  = \mkDeflist{\forall \bar x \ldotp \phi)} &= \mkDeflist{\phi} \\
     \mkDeflist{\mu X \ldotp\phi}  &= (D \mapsto \mu X . \phi[U/X]) \combineDefList \mkDeflist{\phi} \text{ where $\phi$ has no free element variables.}\\
     \mkDeflist{\nu X \ldotp\phi}  &= (D \mapsto \nu X . \phi[U/X]) \combineDefList \mkDeflist{\phi} \text{ where $\phi$ has no free element variables.}\\
-    \end{align*}
-    \begin{align*}
-                         \deflist_1 \combineDefList \cdot                           &= \deflist_1 \\
+    \\
+    \deflist_1 \combineDefList \cdot                           &= \deflist_1 \\
     (D_1 \mapsto \phi)   \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= (D_1 \mapsto \phi) \deflist_1 \combineDefList \deflist_2[D_1/D_2] \\
                          \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= \deflist_1 (D_2 \mapsto \phi) \combineDefList \deflist_2 \qquad\text{otherwise.}\\
     \end{align*}
 
-    We define the semantics of patterns with definition constants in terms
-    of an expansion operator:
-    $$\expand{\phi}_\deflist = \phi[\alpha_n/D_n]\ldots[\alpha_1/D_q]$$
-    where $\deflist = (D_1 \mapsto \alpha_1)\cdots (D_n \mapsto \alpha_n)$.
-
-## Tableau
+    For a definition list $\deflist$, the denotation of a definition constant is
+    the denotation of its expansion:
+    $$\denotation{D} = \denotation{\expand{\phi}_\deflist}$$
+    where $\expand{\phi}_\deflist = \phi[\alpha_n/D_n]\ldots[\alpha_1/D_q]$  
+    and $\deflist = (D_1 \mapsto \alpha_1)\cdots (D_n \mapsto \alpha_n)$.
 
 Definition (Assertion)
 :   An *assertion* is either:
@@ -119,8 +120,9 @@ Definition (Assertion)
     2.  a conjunction of assertions: $\alpha_1 \land a_2$
     2.  a disjunction of assertions: $\alpha_1 \lor \alpha_2$
 
-Assertions allow us to capture that a particular element in the model
-represented by the first argument $e$ is in the denotation of $\phi$.
+Assertions allow us to capture that a particular element variable matches a pattern.
+Symantically, $\matches{e}{\phi}$ is equivalent to the pattern $\lceil{e \land \phi}\rceil$
+where $\lceil \_ \rceil$ is the definedness symbol.
 
 Definition (Atomic assertions)
 :   *Atomic assertions* are assertions of the form:
@@ -138,15 +140,15 @@ Definition (Sequent)
              $\Atoms$       is a set of atomic assertions,
              $\Universals$  is a set of assertions whose pattern is of the form $\bar\sigma(...)$ or $\forall \bar x\ldotp ...$,
          and $\Elements$    is a set of element variables.
-    2. $\alpha \leadsto \mathrm{sequent}$ where $\alpha$ is an assertion.
+    2. $\alpha \leadsto \sequent{\Gamma; \Atoms; \Universals; \Elements}$ where $\alpha$ is an assertion
+       and $\Gamma, \Atoms, \Universals, \Elements$ are as above.
     3. $\unsat$
 
 Informally,
-$\Gamma$ represents the set of assertions we'd like to hold in the current tableau node,
-$\Atoms$ represents the paritally built interpretations for symbols in the model,
-and $\Elements$ are a subset of elements in the model.
-We implicitly assume that all element in $\Elements$ have distinct interpretations
-in the model.
+$\Gamma$ represents the set of assertions whose combined satisfiability we are checking.
+$\Atoms$ and $\Universals$ represent assertions we have deemed must hold for the
+variables in $\Elements$.
+We implicitly assume that all element in $\Elements$ have distinct interpretations.
 
 Definition (Tableau)
 
@@ -154,16 +156,14 @@ Definition (Tableau)
     let $\deflist$ be its definition list,
     and $K$ be a set of distinct element variables.
 
-    a tableau is a (possibly infinte) tree
+    A *tableau* is a (possibly infinte) tree
     with nodes labeled by sequents
     and built using the application of the rules below.
 
     The label of the root node is $\sequent{\matches{e}{\phi}, \{\}, \{\}, \{e\}}$ for some fresh variable $e$ drawn from $K$.
     Leaf nodes must be labeled either 
        with $\unsat$
-    or with a sequent where $\Gamma$ contains only universal assertions
-    i.e. assertions of the form $\matches{e}{\forall \bar x\ldotp \phi}$
-    or $\matches{e}{\bar\sigma(\bar\phi)}$.
+    or with a sequent where $\Gamma = \emptyset$.
 
 \allowdisplaybreaks
 \begin{align*}
@@ -187,8 +187,15 @@ Definition (Tableau)
 \cline{1-3}
 \name{and}                      & \unsatruleun{\sequent{ \matches{e}{\phi \land \psi},   \Gamma; ...}}
                                               {\sequent{ \matches{e}{\phi}, \matches{e}{\psi},  \Gamma; ...}}
+\qquad
+                                  \unsatruleun{\sequent{ \matches{e}{\phi} \land \matches{f}{\psi},   \Gamma; ...}}
+                                              {\sequent{ \matches{e}{\phi}, \matches{f}{\psi},  \Gamma; ...}}
 \\
 \name{or}                       & \satrulebin{\sequent{  \matches{e}{\phi \lor \psi}, \Gamma; ... }}
+                                              {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
+                                              {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
+\qquad
+                                  \satrulebin{\sequent{  \matches{e}{\phi \lor \psi}, \Gamma; ... }}
                                               {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
                                               {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
 \\
@@ -196,15 +203,19 @@ Definition (Tableau)
                                   {\sequent{ \matches{e}{D}, \Gamma; ...}} \\
                                 & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
 \\
-\name{unfold}                   & \pruleun{\sequent{ \matches{e}{D}, \Gamma; ... }}
+\name{mu}                    & \pruleun{\sequent{ \matches{e}{D}, \Gamma; ... }}
                                           {\sequent{ \matches{e}{\phi[D/X]}, \Gamma;... }} \\
-                                & \text{when $D := \kappa X. \phi \in \deflist$ }
+                                & \text{when $D := \mu X. \phi \in \deflist$ }
+\\
+\name{nu}                    & \pruleun{\sequent{ \matches{e}{D}, \Gamma; ... }}
+                                          {\sequent{ \matches{e}{\phi[D/X]}, \Gamma;... }} \\
+                                & \text{when $D := \nu X. \phi \in \deflist$ }
 \\
 \name{dapp} &
 \unsatruleun{\sequent{ \matches{e}{\bar\sigma(\bar \phi)}, \Gamma; \Universals; \Elements; ...}}
             { \sequent{ \mathrm{inst} \union \Gamma; 
                \matches{e}{\bar\sigma(\bar \phi)}, \Universals; \Elements; ... } } \\
-  & \text{where $\mathrm{inst} = \left\{ \matches{e}{\sigma(\bar c)} \limplies \lOr_i \matches{c_i}{\alpha_i}
+  & \text{where $\mathrm{inst} = \left\{ \matches{e}{\sigma(\bar c)} \limplies \lOr_i \matches{c_i}{\phi_i}
                                     \mid \text{ if } \bar c \subset \Elements \right\}$} \\
   & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not an atomic assertion.}
 \\
@@ -225,7 +236,7 @@ are either existentials or applications}
    \\ 
 \name{app} &
   \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; \Elements } }
-             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i} \text{ for each }, \Gamma'; \Atoms' ; \Universals' ; \Elements'  } \} } \\
+             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma'; \Atoms' ; \Universals' ; \Elements'  } \} } \\
   & \text{where} \\
   & \text{\qquad $\bar k \subset K$} \\
   & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free(\bar \phi)$} \\
@@ -255,23 +266,24 @@ $\mathsf{fresh}$ denotes the fresh variables introduced by the last application 
 \cline{1-3}
 \end{align*}
 
-## Games
+# Games & Strategies
 
-A parity game is a tuple $(\Pos_0, \Pos_1, E, \Omega)$
-where $\Pos = \Pos_0 \union \Pos_1$ is a possibly infinite set of positions;
-$E : \Pos \times \Pos$ is a transition relation;
-and $\Omega : \Pos \to \N$ is parity winning condition.
+Definition (Parity Game)
 
-The game is played between two player, player $0$ and player $1$.
-When the game is in a position $p \in \Pos_i$ then it is player $i$'s turn -- i.e. player $i$ may choose
-the next vertex to transition form the current node, along the transition
-relation $E$.
-Each "game" results in a (possible infinite) sequence of vertices, called plays: $p_0, p_1, p_2,...$.
-A play is finite iff one player is unable to make a move. In that case that player __wins__.
-For an infinite play, we look at the sequence of parities of the vertices in the play
--- i.e. $\Omega(p_0), \Omega(p_1), \ldots$.
-Player $0$ wins iff the least parity that occurs infinitely often is even, otherwise player $1$ wins.
+:   A parity game is a tuple $(\Pos_0, \Pos_1, E, \Omega)$
+    where $\Pos = \Pos_0 \union \Pos_1$ is a possibly infinite set of positions;
+    $E : \Pos \times \Pos$ is a transition relation;
+    and $\Omega : \Pos \to \N$ defines the *parity winning condition*.
 
+    The game is played between two players, player $0$ and player $1$.
+    When the game is in a position $p \in \Pos_i$ then it is player $i$'s turn -- i.e. player $i$ may choose
+    the next vertex to transition form the current node, along the transition
+    relation $E$.
+    Each "game" results in a (possible infinite) sequence of positions, called plays: $p_0, p_1, p_2,...$.
+    A play is finite iff one player is unable to make a move. In that case that player loses.
+    For an infinite play, we look at the sequence of parities of the vertices in the play
+    -- i.e. $\Omega(p_0), \Omega(p_1), \ldots$.
+    Player $0$ wins iff the least parity that occurs infinitely often is even, otherwise player $1$ wins.
 
 From the tableau, $\mathcal T$, as above we may define a parity game $\mathcal G(\mathcal T)$, as follows.
 Each position in the game is a pair $(a, v)$ where $a$ is an assertion
@@ -280,11 +292,11 @@ in the label of a vertex $v$ in the tableau.
 * A position $p = (a, v)$ is in $\Pos_0$ if:
   1.  $v$'s children were built using (or), (app), or (exists) rules
       and $a$ was the assertion matched on by that rule; or
-  2.  $v$'s children were built using (resolve), or (unify) rules; or
-  3.  $v = \top$
+  2.  $v$'s children were built using (resolve) rule; or
+  3.  $v = \unsat$
 * A position $p = (a, v)$ is in $\Pos_1$ if:
   1. $v$'s children were built using (and), (dapp), or (forall) rules;
-  2. $\bot$ is in $\Pos_1$;
+  2. $\top$ is in $\Pos_1$;
 * All other positions do not offer a choice, and so are arbitrarily assigned to $\Pos_1$.
 
 There is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ iff either:
@@ -301,20 +313,20 @@ The parity condition $\Omega$ is defined as follows:
 * $\Omega((e \in \exists \bar x\ldotp \phi, v)) = 2 \times n + 1$ where $n$ is the length of $\mathcal D$.
 * $\Omega(a, v)                                 = 2 \times n + 2$ otherwise.
 
-## Strategies
+Definition (Pre-models & Refutations)
 
-For a $\mathcal G(\mathcal T) = (\Pos_0, \Pos_1, E, \Omega)$,
-a winning strategy for a player $i$ is a subgraph $(\Pos'_i, S_i)$ such that:
+:   For a $\mathcal G(\mathcal T) = (\Pos_0, \Pos_1, E, \Omega)$,
+    a winning strategy for a player $i$ is a subgraph $(\Pos'_i, S_i)$ such that:
 
-1. If a node $p$ is in $\Pos_i$ and there are outward edges from $p$
-   then there is exactly one edge outward edge from $p$ in $S_i$ and $p \in \Pos'_i$.
-2. If a node $p$ is not in $\Pos_i$ then all outward edges from $p$ in $E$ are in $S_i$ and $p \in \Pos'_i$.
-3. Player $i$ wins from every position in $\Pos'_i$
+    1. If a node $p$ is in $\Pos_i$ and there are outward edges from $p$
+       then there is exactly one edge outward edge from $p$ in $S_i$ and $p \in \Pos'_i$.
+    2. If a node $p$ is not in $\Pos_i$ then all outward edges from $p$ in $E$ are in $S_i$ and $p \in \Pos'_i$.
+    3. Player $i$ wins from every position in $\Pos'_i$
 
-We call a winning strategy for player $0$ a pre-model,
-and a winning strategy for player $1$ a refutation.
+    We call a winning strategy for player $0$ a pre-model,
+    and a winning strategy for player $1$ a refutation.
 
-## Approximations & Signatures
+# Approximations & Signatures
 
 In this section, we define concepts that will be used later for proving the
 soundness and completeness of the procedure.
@@ -355,7 +367,9 @@ Definition (Signatures)
     where $\deflist'$ is obtained by replacing each $\mu$-constant $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
     with $(U_{k_i} \mapsto \mu^{\tau_i} X\ldotp \alpha_{k_i}(X))$.
 
-## Soundness
+# Soundness
+
+## Satisfiability implies a pre-model
 
 Lemma
 
@@ -418,8 +432,9 @@ Proof
     position $p$ in the constructed strategy with an element in the model
     through a function $\rho_p$, while maintaining two invariants:
 
-    1. under this interpretation the atoms in the sequent are satisfied.
-    2. every element in a sequent has distinct interpretations.
+    1. Under this interpretation the atoms in the sequent are satisfied.
+    2. Every element in a sequent has distinct interpretations.
+    3. The signature does not increase between any parent and child.
 
     We will then show
     that the strategy must be a pre-model -- i.e. winning for player 0.
@@ -493,33 +508,57 @@ Proof
     Now, consider an infinite trace.
     If an (resolve), (or), or (and) nodes occur infinitely often,
     some other node of lower parity must also occur infinitely often.
-
     Consider the lowest priority node that occurs inifinitely often.
-
     If it is a (nu), (dapp), or (forall), then player $1$ wins.
-
     It cannot be a (mu) node since (mu) nodes strictly decrease the signature, a well-founded measure.
+    Suppose it is a (exists) or (app)-node (for sake of contradiction).
+    Let us consider an (infinite) suffix of the trace that doesn't have any (nu) or (mu) nodes.
+    This must exist, otherwise (mu) or (nu), with lower priority would repeat infinitely.
+    Now, every rule application reduces the depth of the pattern.
+    So, (exists) or (app) cannot infinitely occur without a (mu) or (nu) rule appearing infinitely often as well.
 
-    If it is a (exists) or (app)-node, the tableau reduces them immediately.
-    > TODO: Why can it not recurr on the same trace?
-    > 
-    > - The only way for it to recurr (on the same trace) would be through a $\forall$ it creates
-    > - But the $\forall$ pattern would have a smaller size, and therefore cannot recreate the exists?
+Notice that this proof does not in anyway rely on the properties of guarded patterns.
+Thus, if it is shown that no pre-model exists for any tableau the pattern is not
+satisfiable.
+
+## Pre-models imply models
+
+Next we want to show that for any guarded pattern,
+if player $1$ wins, then the pattern is indeed satisfiable
+-- i.e. for every pre-model, there is a satisfying model.
+To do so, we will construct a model from the pre-model.
+
+Let $S$ be a pre-model for a tableau $\mathcal T = \langle N , L : N \to \Sequent \rangle$.
+For a constant $c \in K$, we say that two nodes $v, w \in N$ are $c$-equivalent if
+$c$ is in the elements of each node in the path from $v$ to $w$, inclusive.
+This relation defines an equivalence class.
+Notice that each equivalence class is a subtree of the tableau.
+
+Let $T_{equiv_c}$ be the set of equivalence classes in $T$ for a constant $c$
+and $T_{equiv_K} = \Union_{c\in K} T_{equiv_c}$.
+
+Let the carrier set $M \subset K \times T_{equiv_K}$ of the constructed model
+be the pairs of elements in the sequent
+and their corresponding $c$-equivalence classes
+that include a node used by the winning strategy.
 
 Lemma
 
-:   For a pattern $\phi$, given a pre-model we may build a satisfying model.
+:   For a *guarded* pattern $\phi$, given a pre-model we may build a satisfying model.
 
+Proof
+
+:   TODO
 
 Lemma
 
 :  The existance of a refutation implies $\lnot \phi$ is valid.
 
-## Termination
+# Termination
 
 \newpage
 
-## Pseudocode
+# Pseudocode
 
 ```
 class ClosureMembership:
