@@ -22,7 +22,7 @@ Definition (Guarded pattern)
 
     In point \ref{item:guarded-existentials}, we call $\alpha$ the "guard".
 
-# Tableau
+# Tableau, Games & Strategies
 
 We define our procedure over "positive-form" patterns
 -- patterns where negations are pushed down as far as they can go.
@@ -66,10 +66,8 @@ Definition (Definition List)
     \end{align*}
 
     For a definition list $\deflist$, the denotation of a definition constant is
-    the denotation of its expansion:
-    $$\denotation{D} = \denotation{\expand{\phi}_\deflist}$$
-    where $\expand{\phi}_\deflist = \phi[\alpha_n/D_n]\ldots[\alpha_1/D_q]$  
-    and $\deflist = (D_1 \mapsto \alpha_1)\cdots (D_n \mapsto \alpha_n)$.
+    given by:
+    $$\denotation{D} = \denotation{\deflist[D]}$$.
 
 Definition (Assertion)
 :   An *assertion* is either:
@@ -153,7 +151,7 @@ Definition (Tableau)
                                               {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
                                               {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
 \qquad
-                                  \satrulebin{\sequent{  \matches{e}{\phi \lor \psi}, \Gamma; ... }}
+                                  \satrulebin{\sequent{  \matches{e}{\phi} \lor \matches{f}{\psi}, \Gamma; ... }}
                                               {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
                                               {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
 \\
@@ -224,7 +222,7 @@ $\mathsf{fresh}$ denotes the fresh variables introduced by the last application 
 \cline{1-3}
 \end{align*}
 
-# Games & Strategies
+## Games & Strategies
 
 Definition (Parity Game)
 
@@ -250,10 +248,11 @@ in the label of a vertex $v$ in the tableau.
 * A position $p = (a, v)$ is in $\Pos_0$ if:
   1.  $v$'s children were built using (or), (app), or (exists) rules
       and $a$ was the assertion matched on by that rule; or
-  2.  $v$'s children were built using (resolve) rule; or
+  2.  $v$'s children were built using (resolve); or
   3.  $v = \unsat$
 * A position $p = (a, v)$ is in $\Pos_1$ if:
-  1. $v$'s children were built using (and), (dapp), or (forall) rules;
+  1. $v$'s children were built using (and), (dapp), (forall), or (choose-existential) rules
+     and $a$ was the assertion matched on by that rule; or
   2. $\top$ is in $\Pos_1$;
 * All other positions do not offer a choice, and so are arbitrarily assigned to $\Pos_1$.
 
@@ -313,15 +312,13 @@ Definition (Approximations)
 
 Definition ($\mu$-measure -- $\umeasure$)
 
-:   TODO: We need to rename this to avoid confusion with $\Sigma$.
-
-    Fix an assertion $\alpha = \matches{e}{\phi}$, a definition list $\deflist$,
-    a model $M$ and valuation $\rho$ such that $\rho{e} \in \denotation{\expand{alpha}_\deflist}_{M,\rho}$.
+:   For an assertion $\alpha = \matches{e}{\phi}$, a definition list $\deflist$,
+    a model $M$ and valuation $\rho$ such that $\rho{e} \in \denotation{alpha}_{M,\rho}$.
 
     Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-constants occuring in $\deflist$.
-    We define the $\mu$-measure (or just measure for short) of $\alpha$ in $M$ for $\rho$, $\umeasure(\alpha)_{M,\rho}$
+    We define the *$\mu$-measure* of $\alpha$ in $M$ for $\rho$ (or just *measure* for short), $\umeasure(\alpha)_{M,\rho}$
     to be the least tuple $(\tau_1,\ldots,\tau_n)$
-    such that $\rho(e) \in \denotation{\expand{alpha}_{\deflist'}}_{M,\rho}$
+    such that $\rho(e) \in \denotation{alpha}_{M,\rho}$
     where $\deflist'$ is obtained by replacing each $\mu$-constant $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
     with $(U_{k_i} \mapsto \mu^{\tau_i} X\ldotp \alpha_{k_i}(X))$.
 
@@ -331,7 +328,7 @@ Lemma
 
 :   Given a tableau there is a pre-model or a refutation, but not both.
 
-Lemma (Signatures are (non-strictly) decreasing over children in a pre-model)
+Lemma ($\mu$-measures are (non-strictly) decreasing over children in a pre-model) \label{lemma:measures-decreasing}
 
 :   The following facts hold about signatures under a model $M$ and interpretation $\rho$:
 
@@ -413,13 +410,13 @@ Proof
 
     * If the (or) rule was applied to assertion $\matches{e}{\psi_1 \lor \psi_2}$
       we select the child with $\matches{e}{\psi_1}$
-      if $\umeasure(\matches{e}{\expand{\psi_1}_\deflist}) \le \umeasure(\matches{e}{\expand{\psi_2}_\deflist})$.
+      if $\umeasure(\matches{e}{\psi_1}) \le \umeasure(\matches{e}{\psi_2})$.
       Otherwise, we select the child with $\matches{e}{\psi_2}$.
 
     * Suppose the (app) rule was applied to assertion $\matches{c}{\sigma(\phi_1,\ldots,\phi_n)}$.
-      We know that $\rho_p(c) \in \denotation{\expand{\sigma(\phi_1,\ldots,\phi_n)}}_{M,\rho_p}$.
+      We know that $\rho_p(c) \in \denotation{\sigma(\phi_1,\ldots,\phi_n)}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
-      such that $m_i \in \denotation{\expand{\phi_i}_{M,\rho_p}}$.
+      such that $m_i \in \denotation{\phi_i}_{M,\rho_p}$.
 
       Select a child of $p$,\newline
       say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Atoms'; \Universals'; \Elements'}$,
@@ -433,9 +430,9 @@ Proof
 
     * Suppose the (exists) rule was applied to assertion
       $\matches{c}{\exists \bar x \ldotp \phi}$.
-      We know that $\rho_p(c) \in \denotation{\expand{\exists \bar x \ldotp \phi}}_{M,\rho_p}$.
+      We know that $\rho_p(c) \in \denotation{\exists \bar x \ldotp \phi}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
-      such that $\rho_p(c) \in \denotation{\expand{\phi}}_{M,\rho_p[\bar m/\bar x]}$
+      such that $\rho_p(c) \in \denotation{\phi}_{M,\rho_p[\bar m/\bar x]}$
       with measure $\tau$.
 
       Select a child of $p$,\newline
@@ -477,6 +474,10 @@ Notice that this proof does not in anyway rely on the properties of guarded patt
 Thus, if it is shown that no pre-model exists for any tableau the pattern is not
 satisfiable.
 
+\fbox{\parbox{\textwidth}{
+\color{red}{Xiaohong: Review upto here.}
+}}
+
 ## Pre-models imply models
 
 Next we want to show that for any guarded pattern,
@@ -501,16 +502,92 @@ that include a node used by the winning strategy.
 
 Definition ($\nu$-measure -- $\vmeasure$)
 
-:   Suppose, for a model $M$ and pattern $\phi$, $M\not\satisfies \phi$.
+:   Suppose, $\rho(m) \not\in \denotation{\phi}_{M,\rho}$.
+    Then $\rho(m) \in \denotation{\lnot\phi}_{M,\rho}$
+    and the $\mu$-measure of $\matches{m}{\lnot\phi}$ is defined
+    (after converting to positive-normal form).
+    We call this the $\nu$-measure of $\matches{m}{\phi}$.
 
+Lemma 
+
+:   \label{lemma:vmeasure} For a $\nu$-measure, the dual of Lemma \ref{lemma:measures-decreasing} holds.
 
 Lemma
 
-:   For a *guarded* pattern $\phi$, given a pre-model we may build a satisfying model.
+:   \label{lemma:guards}
+    Let $\alpha = \matches{c}{\phi} = \matches{c}{\phi_1(\bar x, \bar y) \land \cdots \land \phi_n(\bar x, \bar y)}$
+    where each $\phi_i$ is of the form $\sigma(\bar x)$ where $\bar x$ is a tuple of element variables.
+    and   each variable in $\bar y$ co-exists with a variable in $\{c\} \union \bar x \union \bar y$
+          for some application $\phi_i$.
+
+    Then, if there is a valuation $\rho: \{c\} \union \bar x \union \bar y \to M(S)$ such that
+    $\rho(c) \in \denotation{\alpha}_{M(S),\rho}$ and $\Intersection_{x\in\{c\}\bar x}\rho(x) \neq \emptyset$
+    taken as a set of vertices
+    then $\Intersection_{x\in\{c\}\bar x\union\bar y}\rho(x) \neq \emptyset$.
+
 
 Proof
 
-:   Suppose for 
+:   Same as Guarded Fixedpoint Logic.
+    TODO: We can extend this to allow nested existentials just like in packed logic.
+
+Lemma (Pre-model implies satisfiability)
+
+:   For a *guarded* pattern $\phi$ and a pre-model $S$, $M(S) \satisfies \phi$.
+
+Proof
+
+:   Suppose, by way of contradiction, $\psi$ is not satisfied in $M(S)$.
+    We will use this to prove that there must by a play conforming to $S$ such that player $1$ wins
+    -- i.e. $S$ is not a winning strategy for player 0, and therefore not a pre-model.
+    Along this play we maintain these invariants:
+
+    * At each position $p = (\matches{e}{\phi}, s)$,
+      we define a evaluation $\rho_p$ such that $\rho_p(e) \not\in \denotation{\phi}_{M,\rho_p}$.
+    * The $\nu$-measure at each position is decreasing.
+
+    The root of the play is $(\matches{e}{\psi}, v = \sequent{\matches{e}{\phi}; ...; \{e\};})$.
+    By our assumptions, $\vmeasure(\psi)$ is defined.
+    We define $\rho_p(e)$ to be the $e$-equivalence defined by the root node.
+
+    Consider a paritally constructed play until position $p = (\matches{e}{\phi}, s)$:
+
+    * (conflict)/(ok): $\phi$ cannot be an atomic application or an element variable
+        by definition of $M(S)$ and by our invariants.
+    * (resolve): Application of this rule does not affect the $\nu$-measure.
+        or the elements in the sequent. We use the same $\rho_p$ for the child node.
+    * (or): if $\phi = \zeta \lor \eta$ then by Lemma \ref{lemma:vmeasure},
+        $\vmeasure(\phi) \leq \vmeasure{\zeta}$ and $\vmeasure(\phi) \leq \vmeasure{\eta}$.
+        Since it is player $1$'s turn, there is no choice to make.
+        We use the same $\rho_p$ for the child node.
+    * (and): if $\phi = \zeta \land \eta$ then by Lemma \ref{lemma:vmeasure},
+             for some $\theta \in \{\zeta, \eta\}$
+             we have $\vmeasure(\phi) = \vmeasure{\theta}$.
+             We select the child corresponding to $\theta$ as the next position in the play.
+             We use the same $\rho_p$ for the child node.
+    * (exists): if $\phi = \exists \bar x\ldotp \gamma$,
+                then by Lemma \ref{lemma:vmeasure}, the measure doesn't increase.
+                We extend $\rho_p$ to evaluate each constant to its corresponding equivalence class.
+    * (app):    Similar to above.
+    * (forall): if $\phi = \forall \bar x\ldotp \alpha(\bar x, \bar y) \limplies \phi(\bar x, \bar y)$
+        then we may choose between an immediate instantiation, or postponing instantiation
+        until until after application of (exists) or (app).
+
+        Since $\rho_p(e) \not\in \denotation{\phi}_{M,\rho_p}$
+        we know that there is some extension $\rho'$ to $\rho_p$ such that
+        $\rho'(e) \in \alpha(\bar x, \bar y) \land \lnot \phi(\bar x, \bar y)$
+        and by Lemma \ref{lemma:vmeasure} that $\nu$-measure
+        of the corresponding assertion is not larger than the current $\nu$-measure.
+
+        By Lemma \ref{lemma:guards}, there is a position $w \in \Intersection_{x\in\{c\}\bar x\union\bar y}\rho'(x)$.
+        If $v = w$ then we choose the corresponding instantiation.
+
+        If $v \neq w$ then we leave the $\forall$ choose the child the $v$ on the path to $w$.
+    * (dapp):   TODO.
+    * In the remaining cases there is no choice.
+
+    TODO: Show that the play is winning for player 1.
+
 
 Lemma
 
