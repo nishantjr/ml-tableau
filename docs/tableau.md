@@ -1,3 +1,24 @@
+
+
+Novelties:
+
+1. We build a model and refutation simultanously, throught the introduction
+   of the (resolve) tableau rule.
+2. If the tableau is not accepted, then the the negation is valid
+   (irrespective of guardedness).
+3. This has practical implications for the implementation as well
+   --- It allows us to use alpha equivalence to reduce the
+   size of the representation of the tableau.
+
+To Do:
+
+* Find a better name for $\Elements$. THey are not the same as elements in
+  the constructed model, so this is confusing. Maybe "elemental constants"?
+  to correspond with definition constants?
+* Extend \ref{lemma:guards} to allow nested existentials, as in Packed Logic
+* Look at Lucas' Basic Function Patterns to see if we can extend these results.
+* Look at finite variant property and see if we can relate it to guarded patterns 
+ 
 # Guarded Matching Logic
 
 Definition (Guarded pattern)
@@ -111,11 +132,9 @@ Definition (Tableau)
 :   For a signature $\Sigma$, and a guarded  pattern $\phi$,
     let $\deflist$ be its definition list,
     and $K$ be a set of distinct element variables.
-
     A *tableau* is a (possibly infinte) tree
     with nodes labeled by sequents
     and built using the application of the rules below.
-
     The label of the root node is $\sequent{\matches{e}{\phi}, \{\}, \{\}, \{e\}}$ for some fresh variable $e$ drawn from $K$.
     Leaf nodes must be labeled either 
        with $\unsat$
@@ -187,29 +206,29 @@ Definition (Tableau)
 are either existentials or applications}
 \name{choose-existential} &
 \unsatruleun {\sequent{ \Gamma; ... }}
-             {\alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; \Elements }}
-    \qquad  \text{where $\alpha \in \Gamma$}
+             {\{ \alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; \Elements }\}}
+    \qquad  \text{for each $\alpha \in \Gamma$}
    \\ 
 \name{app} &
   \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; \Elements } }
-             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma'; \Atoms' ; \Universals' ; \Elements'  } \} } \\
+             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Atoms' ; \{ \} ; \Elements'  } \} } \\
+  & \text{for each $\bar k \subset K$} \\
   & \text{where} \\
-  & \text{\qquad $\bar k \subset K$} \\
-  & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free(\bar \phi)$} \\
-  & \text{\qquad $\Atoms' = \{ a \mid a \in \Atoms \text{ and } \free(a) \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free(\gamma) \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free{\bar \phi}$} \\
+  & \text{\qquad $\Atoms' = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
 \\
 \name{exists} &
   \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Atoms; \Universals; \Elements } }
-             { \{ \sequent{ \alpha, \Gamma'; \Atoms' ;  \Universals'; \Elements' } \}
+             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Atoms' ;  \{ \}; \Elements' } \}
              } \\
+  & \text{for each $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
   & \text{where} \\
-  & \text{\qquad $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
-  & \text{\qquad $\Elements'   = \free(\alpha)$} \\
-  & \text{\qquad $\Atoms'      = \{ a \mid a \in \Atoms \text{ and } \free(a) \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free(\gamma) \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free(\alpha) \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Elements'   = \free{\alpha}$} \\
+  & \text{\qquad $\Atoms'      = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\alpha} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
 \\
 \cline{1-3}
 \intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
@@ -241,20 +260,11 @@ Definition (Parity Game)
     -- i.e. $\Omega(p_0), \Omega(p_1), \ldots$.
     Player $0$ wins iff the least parity that occurs infinitely often is even, otherwise player $1$ wins.
 
-From the tableau, $\mathcal T$, as above we may define a parity game $\mathcal G(\mathcal T)$, as follows.
-Each position in the game is a pair $(a, v)$ where $a$ is an assertion
-in the label of a vertex $v$ in the tableau.
+    ---
 
-* A position $p = (a, v)$ is in $\Pos_0$ if:
-  1.  $v$'s children were built using (or), (app), or (exists) rules
-      and $a$ was the assertion matched on by that rule; or
-  2.  $v$'s children were built using (resolve); or
-  3.  $v = \unsat$
-* A position $p = (a, v)$ is in $\Pos_1$ if:
-  1. $v$'s children were built using (and), (dapp), (forall), or (choose-existential) rules
-     and $a$ was the assertion matched on by that rule; or
-  2. $\top$ is in $\Pos_1$;
-* All other positions do not offer a choice, and so are arbitrarily assigned to $\Pos_1$.
+From a tableau, $\mathcal T$, we may define a parity game $\mathcal G(\mathcal T)$, as follows.
+Each position in the game is a pair $(a, v)$ where $a$ is an assertion
+in the label of a vertex $v$ of $\mathcal T$.
 
 There is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ iff either:
 
@@ -262,6 +272,24 @@ There is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ iff either:
   and $a_1$ is the newly created assertion.
 * $v_1$ is a child of $v_0$ constructed by some rule that does not match on the assertion $a_0$
   and $a_0 = a_1$.
+
+
+\newcommand{\green}[1]{{\color{green}#1}}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+A position $p = (a, v)$ is in $\Pos_0$ by rules with a \green{green} rule. That is, if:
+
+  1.  $v$'s children were built using (or), (app), or (exists) rules
+      and $a$ was the assertion matched on by that rule; or
+  2.  $v$'s children were built using (resolve); or
+  3.  $v = \unsat$
+
+A position $p = (a, v)$ is in $\Pos_1$ by rules with a \blue{blue} rule. That is if:
+
+  1. $v$'s children were built using (and), (dapp), (forall), or (choose-existential) rules
+     and $a$ was the assertion matched on by that rule;
+  2. $v$ has $\Gamma = \emptyset$.
+
+All other positions do not offer a choice, and so are arbitrarily assigned to $\Pos_1$.
 
 The parity condition $\Omega$ is defined as follows:
 
@@ -278,7 +306,7 @@ Definition (Pre-models & Refutations)
     1. If a node $p$ is in $\Pos_i$ and there are outward edges from $p$
        then there is exactly one edge outward edge from $p$ in $S_i$ and $p \in \Pos'_i$.
     2. If a node $p$ is not in $\Pos_i$ then all outward edges from $p$ in $E$ are in $S_i$ and $p \in \Pos'_i$.
-    3. Player $i$ wins from every position in $\Pos'_i$
+    3. Player $i$ wins on every trace.
 
     We call a winning strategy for player $0$ a pre-model,
     and a winning strategy for player $1$ a refutation.
@@ -307,7 +335,7 @@ Definition (Approximations)
 
     We extend the notion of definition lists by allowing mappings of the form
     $D \mapsto \mu^\tau X \ldotp \alpha$
-    and 
+    and
     $D \mapsto \nu^\tau X \ldotp \alpha$.
 
 Definition ($\mu$-measure -- $\umeasure$)
@@ -328,9 +356,10 @@ Lemma
 
 :   Given a tableau there is a pre-model or a refutation, but not both.
 
-Lemma ($\mu$-measures are (non-strictly) decreasing over children in a pre-model) \label{lemma:measures-decreasing}
+Lemma ($\mu$-measures are (non-strictly) decreasing over children in a pre-model)
 
-:   The following facts hold about signatures under a model $M$ and interpretation $\rho$:
+:   \label{lemma:measures-decreasing}
+    The following facts hold about signatures under a model $M$ and interpretation $\rho$:
 
     a. If $\matches{e}{\phi\lor\psi}$ has measure $\bar \tau$, then
        either $\matches{e}{\phi\psi}$ or $\matches{e}{\phi\psi}$
@@ -421,7 +450,7 @@ Proof
       Select a child of $p$,\newline
       say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Atoms'; \Universals'; \Elements'}$,
       such that:
-      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free(\phi_i)$, and
+      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free{\phi_i}$, and
       * if for some $i$, $m_i = \rho_p(e)$ where $e \in \Elements$ then $k'_i = e$.
       * if $m_i = m_j$, then $k_i = k_j$.
 
@@ -439,7 +468,7 @@ Proof
       say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Atoms'; \Universals'; \Elements'}$,
       such that:
 
-      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free(\phi_i)$, and
+      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free{\phi_i}$, and
       * if for some $i$, $m_i = \rho_p(e)$ where $e \in \Elements$ then $k'_i = e$.
       * if $m_i = m_j$, then $k_i = k_j$.
 
@@ -474,11 +503,7 @@ Notice that this proof does not in anyway rely on the properties of guarded patt
 Thus, if it is shown that no pre-model exists for any tableau the pattern is not
 satisfiable.
 
-\fbox{\parbox{\textwidth}{
-\color{red}{Xiaohong: Review upto here.}
-}}
-
-## Pre-models imply models
+## Pre-models imply satisfiability
 
 Next we want to show that for any guarded pattern,
 if player $1$ wins, then the pattern is indeed satisfiable
@@ -496,9 +521,25 @@ Let $T_{\equiv_c}$ be the set of equivalence classes in $T$ for a constant $c$
 and $T_{\equiv_K} = \Union_{c\in K} T_{\equiv_c}$.
 
 Let the carrier set $M \subset K \times T_{\equiv_K}$ of the constructed model
-be the pairs of elements in the sequent
-and their corresponding $c$-equivalence classes
-that include a node used by the winning strategy.
+be the pairs of elements in the sequents of nodes used by the winning strategy
+and their corresponding $c$-equivalence classes.
+
+For $m_i = (e_i, v_i) \in M$, and symbol $\sigma$,
+we define $\sigma_{S(M)}$ as follows:
+
+* $m_0 \in \sigma_M(m_1,\ldots,m_n)$
+  if $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$
+  is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
+* $m_0 \not\in \sigma_M(m_1,\ldots,m_n)$
+  if $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
+  is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
+* otherwise, it is not important which one holds.
+  Arbitarily, we choose $m_0 \in \sigma_M(m_1,\ldots,m_n)$
+  if neither $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$ nor $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
+  are in any of the nodes.
+
+This is well-defined since whenever a new element is created in the tableau (resolve) is applied immediately.
+Further, a pre-model may only include one child of the (resolve) node.
 
 Definition ($\nu$-measure -- $\vmeasure$)
 
@@ -506,9 +547,9 @@ Definition ($\nu$-measure -- $\vmeasure$)
     Then $\rho(m) \in \denotation{\lnot\phi}_{M,\rho}$
     and the $\mu$-measure of $\matches{m}{\lnot\phi}$ is defined
     (after converting to positive-normal form).
-    We call this the $\nu$-measure of $\matches{m}{\phi}$.
+    We call this the $\nu$-measure of $\matches{m}{\phi}$ in $M,\rho$.
 
-Lemma 
+Lemma
 
 :   \label{lemma:vmeasure} For a $\nu$-measure, the dual of Lemma \ref{lemma:measures-decreasing} holds.
 
@@ -519,17 +560,14 @@ Lemma
     where each $\phi_i$ is of the form $\sigma(\bar x)$ where $\bar x$ is a tuple of element variables.
     and   each variable in $\bar y$ co-exists with a variable in $\{c\} \union \bar x \union \bar y$
           for some application $\phi_i$.
-
     Then, if there is a valuation $\rho: \{c\} \union \bar x \union \bar y \to M(S)$ such that
     $\rho(c) \in \denotation{\alpha}_{M(S),\rho}$ and $\Intersection_{x\in\{c\}\bar x}\rho(x) \neq \emptyset$
     taken as a set of vertices
     then $\Intersection_{x\in\{c\}\bar x\union\bar y}\rho(x) \neq \emptyset$.
 
-
 Proof
 
 :   Same as Guarded Fixedpoint Logic.
-    TODO: We can extend this to allow nested existentials just like in packed logic.
 
 Lemma (Pre-model implies satisfiability)
 
@@ -556,6 +594,7 @@ Proof
         by definition of $M(S)$ and by our invariants.
     * (resolve): Application of this rule does not affect the $\nu$-measure.
         or the elements in the sequent. We use the same $\rho_p$ for the child node.
+        Since it is player $1$'s turn, there is no choice to make.
     * (or): if $\phi = \zeta \lor \eta$ then by Lemma \ref{lemma:vmeasure},
         $\vmeasure(\phi) \leq \vmeasure{\zeta}$ and $\vmeasure(\phi) \leq \vmeasure{\eta}$.
         Since it is player $1$'s turn, there is no choice to make.
@@ -568,7 +607,7 @@ Proof
     * (exists): if $\phi = \exists \bar x\ldotp \gamma$,
                 then by Lemma \ref{lemma:vmeasure}, the measure doesn't increase.
                 We extend $\rho_p$ to evaluate each constant to its corresponding equivalence class.
-    * (app):    Similar to above.
+    * (app):    Similar to (exists).
     * (forall): if $\phi = \forall \bar x\ldotp \alpha(\bar x, \bar y) \limplies \phi(\bar x, \bar y)$
         then we may choose between an immediate instantiation, or postponing instantiation
         until until after application of (exists) or (app).
@@ -581,17 +620,36 @@ Proof
 
         By Lemma \ref{lemma:guards}, there is a position $w \in \Intersection_{x\in\{c\}\bar x\union\bar y}\rho'(x)$.
         If $v = w$ then we choose the corresponding instantiation.
+        If $v \neq w$ then choose the child the $v$ on the path to $w$.
 
-        If $v \neq w$ then we leave the $\forall$ choose the child the $v$ on the path to $w$.
-    * (dapp):   TODO.
+    * (dapp): Similar to (forall).
     * In the remaining cases there is no choice.
 
-    TODO: Show that the play is winning for player 1.
+    We must show that the trace constructed above is winning for player $1$.
+    First, note that the above trace is infinite.
+    If the node with least parity occuring infinitely often is an existential, then player $1$ wins.
+    If cannot be a universal, because of the way we build the trace -- we know that
+    there is a finite path to a node with an instatiation that contradicts the quantifier.
+    $\mu$ patterns are winning for player $1$ while $\nu$ patterns decrease the $\nu$-measure.
+    So, the trace must be winning for player $1$ and the pattern is satisfiable.
 
+\fbox{\parbox{\textwidth}{
+\color{red}{Xiaohong: Review upto here.}
+}}
+
+## Refutations and Proofs
 
 Lemma
 
-:  The existance of a refutation implies $\lnot \phi$ is valid.
+:   For any pattern (guarded or not), the existance of a refutation implies
+    $\lnot \phi$ is valid.
+
+
+Theorem (Emerson; Julta)
+
+: For every parity game, if a player has a winning strategy, then there is a
+  memoryless winning strategy for player $i$.
+
 
 # Pseudocode
 
