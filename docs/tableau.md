@@ -13,6 +13,7 @@ Definition (Guarded pattern)
     1. Every existential   sub-pattern is of the form $\exists \bar x. \alpha \land     \phi$
        and every universal sub-pattern is of the form $\forall \bar x. \alpha \limplies \phi$
        where:
+
        a)   $\alpha = \lAnd_i \sigma_i(\bar {z_i})$ is a conjunction of application patterns where each argument is an element variable,
        b)   for each pair of variables $x \in \bar x$
             and $y \in \free{\phi} \setminus \bar x$
@@ -20,12 +21,14 @@ Definition (Guarded pattern)
             \label{gp:xxx}
 
        We call $\alpha$ a guard.
+
     2. Each application sub-pattern is either quantifier-free (i.e. has no universal or existential quantifiers as sub-patterns),
        or
        has arguments of the form $x \land \phi$
        where $x$ is an element variable.  
        Note that the pattern $x$ is equivalent to $x \land \top$
        and we consider that as matching this criteria.
+
     3. Each fixedpoint sub-pattern $\mu X \ldotp \phi$ and $\nu X \ldotp \phi$ has no free element variables.
 
 Example
@@ -34,11 +37,11 @@ Example
   Here the guard is the empty conjunction. Since $c$ has no free variables, Condition (\ref{gp:xxx})
   becomes true trivially.
 
-
 # Tableau, Games & Strategies
 
 We define our procedure over "positive-form" patterns
--- patterns where negations are pushed down as far as they can go using De Morgan's and related equivalences.
+-- patterns where negations are pushed down as far as they can go using De
+Morgan's and related equivalences.
 
 Definition (Positive Form Pattern)
 :   Positive form patterns are defined using the syntax:
@@ -64,30 +67,53 @@ Remark
 : We allow negation of element variables, but not set variables.
   This ensures that set variables may only occur positively in their binding fixedpoint.
 
-Definition (Definition List)
+Further, we restrict ourselves to "well-named" patterns
+-- patterns where each set and element variable is uniquely named.
+Through alpha-renaming, all patterns are equivalent to some well-named pattern
+so there is no loss in generality.
 
-:   A definition list, $\deflist$, of a pattern $\phi$ is an ordered list assigning
-    special constants, called fixedpoint constants, to fixed point patterns.
-    We extend the syntax of patterns to allow fixedpoint constants.
+Definition (Definition list; Dependency order; Fixedpoint marker)
 
-    Given a pattern $\phi$, a definition list is constructed as follows:
+:   For a guarded pattern $\phi$, a *definition list*
+    (denoted $\deflist^\phi$ or just $\deflist$ when $\phi$ is understood)
+    is a mapping from each occurring set variable to the pattern by which it is bound.
 
-    \begin{align*}
-    \mkDeflist{D} &= \emptyset \qquad \text{where $D$ is a fixedpoint constant.} \\
-    \mkDeflist{\sigma(\phi_1,\ldots,\phi_n)} = \mkDeflist{\bar\sigma(\phi_1,\ldots,\phi_n)} &= \mkDeflist{\phi_1}\combineDefList\cdots\combineDefList\mkDeflist{\phi_n} \\
-    \mkDeflist{\phi_1\lor\phi_2}  = \mkDeflist{\phi_1\land\phi_2)} &= \mkDeflist{\phi_1}\combineDefList\mkDeflist{\phi_2} \\
-    \mkDeflist{\exists \bar x \ldotp\phi}  = \mkDeflist{\forall \bar x \ldotp \phi)} &= \mkDeflist{\phi} \\
-    \mkDeflist{\mu X \ldotp\phi}  &= (D \mapsto \mu X . \phi[U/X]) \combineDefList \mkDeflist{\phi} \text{ where $\phi$ has no free element variables.}\\
-    \mkDeflist{\nu X \ldotp\phi}  &= (D \mapsto \nu X . \phi[U/X]) \combineDefList \mkDeflist{\phi} \text{ where $\phi$ has no free element variables.}\\
-    \\
-    \deflist_1 \combineDefList \cdot                           &= \deflist_1 \\
-    (D_1 \mapsto \phi)   \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= (D_1 \mapsto \phi) \deflist_1 \combineDefList \deflist_2[D_1/D_2] \\
-                         \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= \deflist_1 (D_2 \mapsto \phi) \combineDefList \deflist_2 \qquad\text{otherwise.}\\
-    \end{align*}
+    For a definition list $\deflist^\phi$,
+    we call $\deflist^\phi_X$ (or just $\deflist_X$ when $\phi$ is understood)
+    a *fixedpoint marker*
+    and extend the syntax of patterns to allow fixedpoint markers.
+    We define the denotation of fixedpoint makers as:
+    $$\denotation{\deflist^\phi_X} = \denotation{\deflist^\phi(X)}$$
 
-    For a definition list $\deflist$, the denotation of a fixedpoint constant is
-    given by:
-    $$\denotation{D} = \denotation{\deflist[D]}$$.
+    We say a fixedpoint marker $\deflist^\phi_X$ *depends on* another $\deflist^\phi_Y$
+    iff $X$ occurs free in $\deflist^\phi(Y)$.
+    The transitive closure of this relation is a pre-order.
+
+    For a pattern $\phi$, a *dependency order*, 
+    (denoted $\prec^\phi$),
+    is an extension of the above pre-order to a total order.
+
+Example
+
+:   For the pattern, $\nu X \ldotp (s(X) \land \mu Y \ldotp z \lor s(Y))$,
+    we have $$\deflist^\phi = 
+    \begin{array}{rl}
+    X &\mapsto \nu X \ldotp (s(X) \land \mu Y \ldotp z \lor s(Y)) \\
+    Y &\mapsto \mu Y \ldotp z \lor s(Y)
+    \end{array}$$
+
+    and two possible dependency orders: $X \prec^\phi Y$ and $Y \prec^\phi X$
+
+Example
+
+:   For the pattern, $\nu X \ldotp \mu Y \ldotp s(X) \land (z \lor s(Y))$,
+    we have $$\deflist^\phi = 
+    \begin{array}{rl}
+    X &\mapsto \nu X \ldotp \mu Y \ldotp s(X) \land (z \lor s(Y)) \\
+    Y &\mapsto              \mu Y \ldotp s(X) \land (z \lor s(Y))
+    \end{array}$$
+
+    and only one dependency order: $X \prec^\phi Y$
 
 Definition (Assertion)
 
@@ -130,7 +156,7 @@ We implicitly assume that all element in $\Elements$ have distinct interpretatio
 Definition (Tableau)
 
 :   For a signature $\Sigma$, and a guarded  pattern $\phi$,
-    let $\deflist$ be its definition list,
+    let $\deflist$ be its dependency order,
     and $K$ be a set of distinct element variables.
     A *tableau* is a (possibly infinte) tree
     with nodes labeled by sequents
@@ -340,7 +366,7 @@ Definition (Approximations)
 
 Definition ($\mu$-measure -- $\umeasure$)
 
-:   For an assertion $\alpha = \matches{e}{\phi}$, a definition list $\deflist$,
+:   For an assertion $\alpha = \matches{e}{\phi}$, a dependency order $\deflist$,
     a model $M$ and valuation $\rho$ such that $\rho{e} \in \denotation{alpha}_{M,\rho}$.
 
     Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-constants occuring in $\deflist$.
@@ -965,12 +991,6 @@ def complete_nodes(incomplete_nodes, processed_nodes):
 
 ## Notes
 
-- Clean up deflist
-    - Add deflist case for element, set variables
-    - Clarify merge operator ofr deflists
-    - Use list of order list of constants
-    - Give examples
-    - Can we define a pre-order
 - Assertions
     - use x instead of c/e
     - ELement variables x, y, z
@@ -1012,7 +1032,7 @@ Novelties:
 
     1. Find a better name for $\Elements$. THey are not the same as elements in
        the constructed model, so this is confusing. Maybe "elemental constants"?
-       to correspond with fixedpoint constants?
+       to correspond with fixedpoint markers?
 
 ---
 
