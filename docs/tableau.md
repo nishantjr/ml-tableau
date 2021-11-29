@@ -1,80 +1,79 @@
-
-
-Novelties:
-
-1. We build a model and refutation simultanously, throught the introduction
-   of the (resolve) tableau rule.
-2. If the tableau is not accepted, then the the negation is valid
-   (irrespective of guardedness).
-3. This has practical implications for the implementation as well
-   --- It allows us to use alpha equivalence to reduce the
-   size of the representation of the tableau.
-
-To Do:
-
-* Find a better name for $\Elements$. THey are not the same as elements in
-  the constructed model, so this is confusing. Maybe "elemental constants"?
-  to correspond with definition constants?
-* Extend \ref{lemma:guards} to allow nested existentials, as in Packed Logic
-* Look at Lucas' Basic Function Patterns to see if we can extend these results.
-* Look at finite variant property and see if we can relate it to guarded patterns 
- 
 # Guarded Matching Logic
 
+Remark
+
+:   For a nonempty tuple $\bar x$,
+    We treat $\exists \bar x  \ldotp \phi$ and $\forall \bar x  \ldotp \phi$
+    as shorthand for nested quantifier patterns.
+
 Definition (Guarded pattern)
-:   A guarded pattern is a pattern constructed recursively using:
+:   A guarded pattern is a closed pattern (i.e. without any free element or set variables)
+    such that:
 
-    1. element variables bound by point (\ref{item:guarded-existentials}) below.
-    2. \logic and \fixedpoint
-    3. \label{item:app-no-var}
-       applications whose arguments are guarded and employ no free variables,
-    4. \label{item:app-var}
-       applications of the form $\sigma(\bar \phi)$,
-       where each $\phi \in \bar \phi$ is of the form $x \land \psi$ and $x$ is an element variable bound by point (\ref{item:guarded-existentials})
-       and $\psi$ is guarded.
-    5. \label{item:guarded-existentials} patterns of the form $\exists \bar x \ldotp \alpha(\bar x, \bar y) \land \phi(\bar x, \bar y)$
-          where:
-          * $\phi$ is a guarded matching logic pattern,
-          * $\alpha$ is a conjunction of patterns of the form $\sigma(\bar x)$, where $\bar x$ are all element variables,
-          * $\free\phi \subseteq \free\alpha = \bar x \union \bar y$,
-          * for each quantified variable $x \in \bar x$ and free variable
-                $v \in \bar x \union \bar y$ occurs together as arguments to an application
-                in the guard $\alpha$, and
+    1. Every existential   sub-pattern is of the form $\exists \bar x. \alpha \land     \phi$
+       and every universal sub-pattern is of the form $\forall \bar x. \alpha \limplies \phi$
+       where:
+       a)   $\alpha = \lAnd_i \sigma_i(\bar {z_i})$ is a conjunction of application patterns where each argument is an element variable,
+       b)   for each pair of variables $x \in \bar x$
+            and $y \in \free{\phi} \setminus \bar x$
+            there is some application $\sigma_i(\bar {z_i})$ in $\alpha$ where $x, y \in \bar {z_i}$.
+            \label{gp:xxx}
 
-    In point \ref{item:guarded-existentials}, we call $\alpha$ the "guard".
+       We call $\alpha$ a guard.
+    2. Each application sub-pattern is either quantifier-free (i.e. has no universal or existential quantifiers as sub-patterns),
+       or
+       has arguments of the form $x \land \phi$
+       where $x$ is an element variable.  
+       Note that the pattern $x$ is equivalent to $x \land \top$
+       and we consider that as matching this criteria.
+    3. Each fixedpoint sub-pattern $\mu X \ldotp \phi$ and $\nu X \ldotp \phi$ has no free element variables.
+
+Example
+
+: The pattern $\exists x. c$ is a guarded pattern where $c$ is a nullary symbol.
+  Here the guard is the empty conjunction. Since $c$ has no free variables, Condition (\ref{gp:xxx})
+  becomes true trivially.
+
 
 # Tableau, Games & Strategies
 
 We define our procedure over "positive-form" patterns
--- patterns where negations are pushed down as far as they can go.
+-- patterns where negations are pushed down as far as they can go using De Morgan's and related equivalences.
 
 Definition (Positive Form Pattern)
 :   Positive form patterns are defined using the syntax:
 
-    \begin{alignat*}{3}
+    \begin{alignat*}{5}
     \phi := \quad&       \sigma(\phi_1, \ldots, \phi_n)
-       &\quad\mid\quad&   \bar \sigma(\phi_1, \ldots, \phi_n) \\
+       &\quad\mid\quad&  \bar \sigma(\phi_1, \ldots, \phi_n) \\
         \quad\mid\quad&  \phi_1 \land \phi_2
        &\quad\mid\quad&  \phi_1 \lor  \phi_2 \\
-        \quad\mid\quad&  \exists x \ldotp \phi
+        \quad\mid\quad&  x
+       &\quad\mid\quad&  \lnot x
+       &\quad\mid\quad&  \exists x \ldotp \phi
        &\quad\mid\quad&  \forall x \ldotp \phi \\
+        \quad\mid\quad&  X &
+                      &    &
         \quad\mid\quad&  \mu X \ldotp \phi
        &\quad\mid\quad&  \nu X \ldotp \phi
     \end{alignat*}
     where $\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$.
 
+Remark
+
+: We allow negation of element variables, but not set variables.
+  This ensures that set variables may only occur positively in their binding fixedpoint.
+
 Definition (Definition List)
 
 :   A definition list, $\deflist$, of a pattern $\phi$ is an ordered list assigning
-    special constants, called definition constants, to fixed point patterns.
-    We extend the syntax of patterns to allow definition constants.
-
-    TODO: We assume no free element variables in fixed point patterns.
+    special constants, called fixedpoint constants, to fixed point patterns.
+    We extend the syntax of patterns to allow fixedpoint constants.
 
     Given a pattern $\phi$, a definition list is constructed as follows:
 
     \begin{align*}
-    \mkDeflist{D} &= \emptyset \qquad \text{where $D$ is a definition constant.} \\
+    \mkDeflist{D} &= \emptyset \qquad \text{where $D$ is a fixedpoint constant.} \\
     \mkDeflist{\sigma(\phi_1,\ldots,\phi_n)} = \mkDeflist{\bar\sigma(\phi_1,\ldots,\phi_n)} &= \mkDeflist{\phi_1}\combineDefList\cdots\combineDefList\mkDeflist{\phi_n} \\
     \mkDeflist{\phi_1\lor\phi_2}  = \mkDeflist{\phi_1\land\phi_2)} &= \mkDeflist{\phi_1}\combineDefList\mkDeflist{\phi_2} \\
     \mkDeflist{\exists \bar x \ldotp\phi}  = \mkDeflist{\forall \bar x \ldotp \phi)} &= \mkDeflist{\phi} \\
@@ -86,11 +85,12 @@ Definition (Definition List)
                          \deflist_1 \combineDefList (D_2 \mapsto \phi)   \deflist_2 &= \deflist_1 (D_2 \mapsto \phi) \combineDefList \deflist_2 \qquad\text{otherwise.}\\
     \end{align*}
 
-    For a definition list $\deflist$, the denotation of a definition constant is
+    For a definition list $\deflist$, the denotation of a fixedpoint constant is
     given by:
     $$\denotation{D} = \denotation{\deflist[D]}$$.
 
 Definition (Assertion)
+
 :   An *assertion* is either:
 
     1.  a pair of an element variable and a pattern, denoted $\matches{e}{\phi}$,
@@ -496,7 +496,7 @@ Proof
     Suppose it is a (exists) or (app)-node (for sake of contradiction).
     Let us consider an (infinite) suffix of the trace that doesn't have any (nu) or (mu) nodes.
     This must exist, otherwise (mu) or (nu), with lower priority would repeat infinitely.
-    Now, every rule application reduces the depth of the pattern.
+    Now, every the remaining rules (i.e. excluding (mu) and (nu)) reduce the depth of the pattern.
     So, (exists) or (app) cannot infinitely occur without a (mu) or (nu) rule appearing infinitely often as well.
 
 Notice that this proof does not in anyway rely on the properties of guarded patterns.
@@ -637,7 +637,137 @@ Proof
 \color{red}{Xiaohong: Review upto here.}
 }}
 
-## Refutations and Proofs
+## Refutations as proofs
+
+Let us take a look refutations through the lens of checking the validity of a pattern.
+
+\newcommand{\vmatches}[2]{( #1 \land #2 ) \limplies \bot}
+
+- If a game position is labeled with assertion $\matches{e}{\phi}$,
+  it may be viewed as a proof for then validity of the pattern $\vmatches{e}{\phi}$.
+- The (exists) can be thought of as a combination of
+  the matching logic proof rule ($\exists$-Generalization)
+  and a case analysis over the distinctness of each pair of free variables and the newly introduced variables.
+
+  This also validates the (conflict-el) rule.
+- The difficult things left involve dealing with infinite traces:
+    1. Constructing a finite proof from a $\mu$-traces.
+       We could likely use unfolding within a contextual implication here.
+    2. $\exists$-traces must decrease the size of the pattern at each step, and so cannot be infinite.
+    3. $\nu$-traces     are winning for player $0$ and cannot be part of a refutation.
+    4. $\forall$-traces are winning for player $0$ and cannot be part of a refutation.
+
+----
+
+\fbox{\parbox{\textwidth}{
+\color{red}{Under construction, do not review}
+}}
+
+1. View them as transitions in the strategy rather than in the tableau
+2. Only consider the perspective of building a refutation
+3. Sequents and assertions are presented differently.
+4. Display them as proof rules rather than tableaux rules.
+
+\begin{align*}
+\cline{1-3}
+\name{conflict}                 & \vruleun{ \Atoms, ... \proves \alpha \limplies \bot }
+                                          { \valid } \\
+                                & \text{when $\alpha$ is an atomic assertion, with its negation  in $\Atoms$.}
+\\
+\name{conflict-el}              & \vruleun{ \Atoms, ... \proves \vmatches{e}{e'} }
+                                          { \valid } \\
+                                & \text{when $e' \neq e$ is an element in $\Elements$.}
+\\
+\cline{1-3}
+\name{and}                      & \vruleun{ ... \proves \vmatches{e}{\phi \land \psi} }
+                                           { ... \proves \vmatches{e}{\phi} }
+\qquad
+                                  \vruleun{ \vmatches{e}{\phi} \land \vmatches{f}{\psi}}
+                                           { ... \proves \vmatches{e}{\phi} }
+\\
+                                & \vruleun{ ... \proves \vmatches{e}{\phi \land \psi} }
+                                           { ... \proves \vmatches{e}{\psi} }
+\qquad
+                                  \vruleun{ \vmatches{e}{\phi} \land \vmatches{f}{\psi}}
+                                           { ... \proves \vmatches{f}{\psi} }
+\\
+\name{or}                       & \vrulebin{...\proves \vmatches{e}{\phi \lor \psi} }
+                                           {...\proves \vmatches{e}{\phi}}
+                                           {...\proves \vmatches{e}{\psi}}
+\qquad
+                                  \vrulebin{...\proves \vmatches{e}{\phi} \lor \vmatches{f}{\psi} }
+                                           {...\proves \vmatches{e}{\phi}}
+                                           {...\proves \vmatches{e}{\psi}}
+\\
+\name{def}                      & \vruleun{...\proves \vmatches{e}{\kappa X . \phi(X)}}
+                                  {\vmatches{e}{D}} \\
+                                & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
+\\
+\name{mu}                    & \vruleun{ ...\proves \vmatches{e}{D}}
+                                       { ...\proves \vmatches{e}{\phi[D/X]}} \\
+                                & \text{when $D := \mu X. \phi \in \deflist$ }
+\\
+\name{nu}                    & \vruleun{ ...\proves \vmatches{e}{D} }
+                                       { ...\proves \vmatches{e}{\phi[D/X]} } \\
+                                & \text{when $D := \nu X. \phi \in \deflist$ }
+\\
+\name{dapp} &
+    \vruleun{ \vmatches{e}{\bar\sigma(\bar \phi)} }
+            { \mathrm{inst} \union \Gamma; 
+              \vmatches{e}{\bar\sigma(\bar \phi)} } \\
+  & \text{where $\mathrm{inst} = \left\{ \vmatches{e}{\sigma(\bar c)} \limplies \lOr_i \vmatches{c_i}{\phi_i}
+                                    \mid \text{ if } \bar c \subset \Elements \right\}$} \\
+  & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not an atomic assertion.}
+\\
+\name{forall}                   & \unsatruleun { \sequent{ \matches{e}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Universals; \Elements; ... } }
+                                               { \sequent{ \mathrm{inst} \union \Gamma
+                                                         ; \matches{e}{\forall \bar x \ldotp \phi}, \Universals
+                                                         ; \Elements
+                                                         ; ... } } \\
+                                & \text{where $\mathrm{inst} = \{ e \in \phi[\bar c / \bar x] \mid c \subset \Elements \}$}
+\\
+\cline{1-3}
+\intertext{The following rules may only apply when none of the above rules apply -- i.e. when all assertions in $\alpha$
+are either existentials or applications}
+\name{choose-existential} &
+\unsatruleun {\sequent{ \Gamma; ... }}
+             {\{ \alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; \Elements }\}}
+    \qquad  \text{for each $\alpha \in \Gamma$}
+   \\ 
+\name{app} &
+  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; \Elements } }
+             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Atoms' ; \{ \} ; \Elements'  } \} } \\
+  & \text{for each $\bar k \subset K$} \\
+  & \text{where} \\
+  & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free{\bar \phi}$} \\
+  & \text{\qquad $\Atoms' = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
+\\
+\name{exists} &
+  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Atoms; \Universals; \Elements } }
+             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Atoms' ;  \{ \}; \Elements' } \}
+             } \\
+  & \text{for each $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
+  & \text{where} \\
+  & \text{\qquad $\Elements'   = \free{\alpha}$} \\
+  & \text{\qquad $\Atoms'      = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\alpha} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
+\\
+\cline{1-3}
+\intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
+$\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
+\name{resolve} & \satrulebin{\sequent{\Gamma; A; C}}
+                            {\sequent{ \Gamma; \matches{e}{\sigma(\bar a)}, A; C}}
+                            {\sequent{ \Gamma; \matches{e}{\lnot\sigma(\bar a)}, A; C}} \\
+               & \text{when $\{e\}\union \bar a \subset C$ and $(\{e\}\union \bar a)\intersection \mathsf{fresh} \neq \emptyset$.}
+\\
+\cline{1-3}
+\end{align*}
+-->
+
+----
 
 Lemma
 
@@ -650,6 +780,18 @@ Theorem (Emerson; Julta)
 : For every parity game, if a player has a winning strategy, then there is a
   memoryless winning strategy for player $i$.
 
+# Functional symbols
+
+A symbol $f$ is called functional
+if, for any tuple of element $\bar a$,
+$\size{f_M(\bar a)} = 1$.
+
+Proposition (Functional Axioms)
+
+:   A symbol $f$ is functional iff it satisfies the axiom:
+    $$\forall \bar x \ldotp \exists y. f(\bar x) = y$$
+
+This axiom is 
 
 # Pseudocode
 
@@ -820,4 +962,57 @@ def complete_nodes(incomplete_nodes, processed_nodes):
         complete_nodes(curr.children + remaining, {curr} + processed_nodes)
         return
 ```
+
+## Notes
+
+- Clean up deflist
+    - Add deflist case for element, set variables
+    - Clarify merge operator ofr deflists
+    - Use list of order list of constants
+    - Give examples
+    - Can we define a pre-order
+- Assertions
+    - use x instead of c/e
+    - ELement variables x, y, z
+    - Symantically => Intuitively
+    - ONly use positive form for assertions
+- Seqeunts
+    - Atoms, Univesrals, Elements => Use greek letters
+- Tableau
+    - Remove requirement for guarded pattern
+    - Remove K is a set of "distinct"
+    - Get rid of K
+        - State that tableau if for $\phi$
+- Proof that there we use a bounded set of constatns
+
+Novelties:
+
+1. We build a model and refutation simultanously, throught the introduction
+   of the (resolve) tableau rule.
+2. If the tableau is not accepted, then the the negation is valid
+   (irrespective of guardedness).
+3. This has practical implications for the implementation as well
+   --- It allows us to use alpha equivalence to reduce the
+   size of the representation of the tableau.
+
+1. Implementation
+
+    a. Implement resolution procedure
+    b. Implement alpha-equivalence over the nodes in the tableau (very important for efficiency)
+    c. Test on benchmarks (LTL (finite/infinite); PDL; SL)
+
+2. Theory
+
+    a. Extend to handle nested guards, as in packed logic.
+    b. Extract proof object from refutation.
+    c. Handling functional symbols. Look at Lucas' work on Basic Function Patterns.
+    d. Look at finite variant property and see if we can relate it to guarded patterns
+
+3.  Minor additional work
+
+    1. Find a better name for $\Elements$. THey are not the same as elements in
+       the constructed model, so this is confusing. Maybe "elemental constants"?
+       to correspond with fixedpoint constants?
+
+---
 
