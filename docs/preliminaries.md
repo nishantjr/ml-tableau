@@ -64,7 +64,7 @@ Logical constructs are thought of as set operations over matched elements
 while $\lnot \phi$ matches all elements \emph{not} matched by $\phi$.
 An existential $\exists x \ldotp \phi(x)$ is interpreted as the union of all patterns matching $\phi(x)$ for all valuations of $x$.
 $\mu X \ldotp \phi(X)$ matches the \emph{least} set $X$ such that $X$ and $\phi(X)$ match the same elements.
-An important point to note here is that element variables have as denotation exactly a single element,
+An important point to note here is that element variables have as evaluation exactly a single element,
 whereas set variables may be interpreted as any subset of the carrier set.
 
 \begin{definition}[$\Sigma$-models]
@@ -82,15 +82,15 @@ for all sets $A_i \subseteq M$.
 \label{def:semantics}
 Let $\rho : \EVar{} \union \SVar{} \to \powerset(M)$ be a function such that $\rho(x)$ is a singleton set when $x \in \EVar$,
 called an evaluation.
-Then, the denotation of a pattern $\phi$, written $\denotation{\phi}_{M,\rho}$ is defined inductively by:
+Then, the evaluation of a pattern $\phi$, written $\evaluation{\phi}_{M,\rho}$ is defined inductively by:
 \begin{align*}
-\denotation{\sigma(\phi_1, \ldots, \phi_n)}_\rho &= \sigma_M(\denotation{\phi_1}, \ldots, \denotation{\phi_n}) \text{ for $\sigma$ of arity $n$} \\
-\denotation{\phi_1 \land \phi_2}_\rho            &= \denotation{\phi_1}_\rho \intersection \denotation{\phi_2}_\rho \\
-\denotation{\lnot \phi}_\rho                     &= M\setminus \denotation{\phi}_\rho \\ 
-\denotation{x}_\rho                              &= \rho(x) \text{ for } x \in \EVar \\
-\denotation{\exists x \ldotp \phi}_\rho          &= \bigcup_{a \in M}  \denotation{\phi}_{\rho[a/x]}\\
-\denotation{X}_\rho                              &= \rho(X) \text{ for } X \in \SVar  \\
-\denotation{\mu X \ldotp \phi}_\rho              &= \mathsf{LFP}(\FF) \text{ where } \FF(A) = \denotation{\phi}_{\rho[A/X]} \text{ for } A \subseteq M
+\evaluation{\sigma(\phi_1, \ldots, \phi_n)}_\rho &= \sigma_M(\evaluation{\phi_1}, \ldots, \evaluation{\phi_n}) \text{ for $\sigma$ of arity $n$} \\
+\evaluation{\phi_1 \land \phi_2}_\rho            &= \evaluation{\phi_1}_\rho \intersection \evaluation{\phi_2}_\rho \\
+\evaluation{\lnot \phi}_\rho                     &= M\setminus \evaluation{\phi}_\rho \\ 
+\evaluation{x}_\rho                              &= \rho(x) \text{ for } x \in \EVar \\
+\evaluation{\exists x \ldotp \phi}_\rho          &= \bigcup_{a \in M}  \evaluation{\phi}_{\rho[a/x]}\\
+\evaluation{X}_\rho                              &= \rho(X) \text{ for } X \in \SVar  \\
+\evaluation{\mu X \ldotp \phi}_\rho              &= \mathsf{LFP}(\FF) \text{ where } \FF(A) = \evaluation{\phi}_{\rho[A/X]} \text{ for } A \subseteq M
 \end{align*}
 \end{definition}
 
@@ -122,13 +122,13 @@ satisfies both $\mathsf{even}$ and $\lnot \mathsf{even}$ (i.e. the set of odd na
 \begin{definition}[Satisfiability in a model]
 We say a $\Sigma$-model $M$ \emph{satisfies} a $\Sigma$-pattern
 iff there is some evaluation $\rho$ and an element $m$
-such that $m \in \denotation{\phi}_{M,\rho}$.
+such that $m \in \evaluation{\phi}_{M,\rho}$.
 A $\Sigma$-pattern $\phi$ is \emph{satisfiable} iff there is a model $M$ that satisfies $\phi$.
 \end{definition}
 
 \begin{definition}[Validity in a model]
 We say a $\Sigma$-pattern is \emph{valid} in a $\Sigma$-model $M$
-iff for all evaluations $\rho$, $\denotation{\phi}_{M,\rho} = M$.
+iff for all evaluations $\rho$, $\evaluation{\phi}_{M,\rho} = M$.
 \end{definition}
 
 Analogously to FOL, we may define theories in  matching logic.
@@ -256,13 +256,13 @@ We first prove that $M$ is infinite for any $M \vDash \Gamma$.
 Let $z_M \subseteq M$ and $s_M,f_M \colon M \to \PP{M}$ be the 
 interpretations of $z$, $s$, and $f$ in $M$. 
 Since $M \vDash f(s^n(z))$ for every $n \in \N$,
-and $f(s^n(z))$ is a sentence, we have $\denotation{f(s^n(z))} = M$.
-This implies that $\denotation{s^n(z)} \neq \emptyset$.
+and $f(s^n(z))$ is a sentence, we have $\evaluation{f(s^n(z))} = M$.
+This implies that $\evaluation{s^n(z)} \neq \emptyset$.
 Because $M \vDash \neg (s^m(z) \wedge s^n(z))$ for every $m,n$ with $m \neq n$,
-we have $\denotation{\neg (s^m(z) \wedge s^n(z))} = M \setminus (\denotation{s^m(z)} \cap 
-\denotation{s^n(z)})$ = M, which implies that
-$\denotation{s^m(z)} \cap \denotation{s^n(z)} = \emptyset$ for every $m,n$ with $m \neq n$.
-Therefore, $\denotation{s^0(z)}, \denotation{s^1(z)}, \denotation{s^2(z)},\dots$ is a sequence of
+we have $\evaluation{\neg (s^m(z) \wedge s^n(z))} = M \setminus (\evaluation{s^m(z)} \cap 
+\evaluation{s^n(z)})$ = M, which implies that
+$\evaluation{s^m(z)} \cap \evaluation{s^n(z)} = \emptyset$ for every $m,n$ with $m \neq n$.
+Therefore, $\evaluation{s^0(z)}, \evaluation{s^1(z)}, \evaluation{s^2(z)},\dots$ is a sequence of
 nonempty, pairwisely distinct subsets of $M$.
 And thus, $M$ is infinite.
 
@@ -271,7 +271,7 @@ Let $\N$ be domain of $M_0$.
 Let $z_{M_0} = \{ 0 \}$,  $s_{M_0}(n) = \{ n+1 \}$, and $f_{M_0}(n) = \N$ for
 $n \in \N$.
 By mathematical induction, we can prove that
-$\denotation{s^m(z)} = \{ m \}$ for all $m \in \N$.
+$\evaluation{s^m(z)} = \{ m \}$ for all $m \in \N$.
 By Definition~\ref{def:semantics}, we conclude that $M_0 \vDash \Gamma$.
 \end{proof}
 

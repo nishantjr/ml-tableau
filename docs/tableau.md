@@ -72,20 +72,27 @@ Further, we restrict ourselves to "well-named" patterns
 Through alpha-renaming, all patterns are equivalent to some well-named pattern
 so there is no loss in generality.
 
-Definition (Definition list; Dependency order; Fixedpoint marker)
+Definition (Definition list)
 
 :   For a guarded pattern $\phi$, a *definition list*
     (denoted $\deflist^\phi$ or just $\deflist$ when $\phi$ is understood)
     is a mapping from each occurring set variable to the pattern by which it is bound.
+    Since we assume well-named patterns, such a mapping is well-defined.
+    We use $\deflist^\phi(X)$ to denote the fixedpoint sub-pattern corresponding to the set variable $X$.
 
-    For a definition list $\deflist^\phi$,
+Definition (Fixedpoint marker)
+
+:   For a definition list $\deflist^\phi$,
     we call $\deflist^\phi_X$ (or just $\deflist_X$ when $\phi$ is understood)
     a *fixedpoint marker*
     and extend the syntax of patterns to allow fixedpoint markers.
-    We define the denotation of fixedpoint makers as:
-    $$\denotation{\deflist^\phi_X} = \denotation{\deflist^\phi(X)}$$
+    We define the evaluation of fixedpoint makers as:
+    $$\evaluation{\deflist^\phi_X} = \evaluation{\deflist^\phi(X)}$$.
 
-    We say a fixedpoint marker $\deflist^\phi_X$ *depends on* another $\deflist^\phi_Y$
+
+Definition (Dependency order) 
+
+:   We say a fixedpoint marker $\deflist^\phi_X$ *depends on* another $\deflist^\phi_Y$
     iff $X$ occurs free in $\deflist^\phi(Y)$.
     The transitive closure of this relation is a pre-order.
 
@@ -348,15 +355,15 @@ Definition (Approximations)
     $\mu^\tau X\ldotp \alpha(X)$ and
     $\nu^\tau X\ldotp \alpha(X)$, with the following semantics:
 
-    * $\denotation{\mu^0 X\ldotp \alpha(X)}_{M,\rho} = \emptyset$
-    * $\denotation{\nu^0 X\ldotp \alpha(X)}_{M,\rho} = M$
-    * $\denotation{\kappa^{\tau + 1} X\ldotp \alpha(X)}_{M,\rho}
-      = \denotation{\alpha(X)}_{M,\rho[{\kappa^{\tau + 1} X\ldotp \alpha(X)}/X]}$
+    * $\evaluation{\mu^0 X\ldotp \alpha(X)}_{M,\rho} = \emptyset$
+    * $\evaluation{\nu^0 X\ldotp \alpha(X)}_{M,\rho} = M$
+    * $\evaluation{\kappa^{\tau + 1} X\ldotp \alpha(X)}_{M,\rho}
+      = \evaluation{\alpha(X)}_{M,\rho[{\kappa^{\tau + 1} X\ldotp \alpha(X)}/X]}$
       where $\kappa$ is either $\mu$ or $\nu$.
 
     Then we have
-    $\denotation{\mu X\ldotp \alpha(X)}_{M,\rho} = \Union_{\tau'} \denotation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$
-    and $\denotation{\nu X\ldotp \alpha(X)}_{M,\rho} = \Intersection_{\tau'} \denotation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$.
+    $\evaluation{\mu X\ldotp \alpha(X)}_{M,\rho} = \Union_{\tau'} \evaluation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$
+    and $\evaluation{\nu X\ldotp \alpha(X)}_{M,\rho} = \Intersection_{\tau'} \evaluation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$.
     TODO: We need to prove this.
 
     We extend the notion of definition lists by allowing mappings of the form
@@ -367,12 +374,12 @@ Definition (Approximations)
 Definition ($\mu$-measure -- $\umeasure$)
 
 :   For an assertion $\alpha = \matches{e}{\phi}$, a dependency order $\deflist$,
-    a model $M$ and valuation $\rho$ such that $\rho{e} \in \denotation{alpha}_{M,\rho}$.
+    a model $M$ and valuation $\rho$ such that $\rho{e} \in \evaluation{alpha}_{M,\rho}$.
 
     Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-constants occuring in $\deflist$.
     We define the *$\mu$-measure* of $\alpha$ in $M$ for $\rho$ (or just *measure* for short), $\umeasure(\alpha)_{M,\rho}$
     to be the least tuple $(\tau_1,\ldots,\tau_n)$
-    such that $\rho(e) \in \denotation{alpha}_{M,\rho}$
+    such that $\rho(e) \in \evaluation{alpha}_{M,\rho}$
     where $\deflist'$ is obtained by replacing each $\mu$-constant $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
     with $(U_{k_i} \mapsto \mu^{\tau_i} X\ldotp \alpha_{k_i}(X))$.
 
@@ -431,7 +438,7 @@ Proof
 Lemma (Satisfiable patterns have pre-models)
 
 : Given a pattern $\phi$ and an element $m$ in $M$ such that
-$e \in \denotation{\phi}$, then for any tableau $\mathcal T$, the game
+$e \in \evaluation{\phi}$, then for any tableau $\mathcal T$, the game
 $\mathcal G(\mathcal T)$ contains a pre-model.
 
 Proof
@@ -456,7 +463,7 @@ Proof
 
     * Suppose the (resolve) rule was applied at that position
       on the assertion $\matches{e_0, \sigma(e_1,\ldots,e_n)}$.
-      Then if $\rho_p(c_0) \in \denotation{\sigma(e_1,\ldots,e_n)}_{\rho_p}$
+      Then if $\rho_p(c_0) \in \evaluation{\sigma(e_1,\ldots,e_n)}_{\rho_p}$
       we select the left child position, $l$,
       (that has $\matches{c_0}{\sigma(e_1,\ldots,e_n)} \in \Atoms$).
       Otherwise, we select the right child position, $r$,
@@ -469,9 +476,9 @@ Proof
       Otherwise, we select the child with $\matches{e}{\psi_2}$.
 
     * Suppose the (app) rule was applied to assertion $\matches{c}{\sigma(\phi_1,\ldots,\phi_n)}$.
-      We know that $\rho_p(c) \in \denotation{\sigma(\phi_1,\ldots,\phi_n)}_{M,\rho_p}$.
+      We know that $\rho_p(c) \in \evaluation{\sigma(\phi_1,\ldots,\phi_n)}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
-      such that $m_i \in \denotation{\phi_i}_{M,\rho_p}$.
+      such that $m_i \in \evaluation{\phi_i}_{M,\rho_p}$.
 
       Select a child of $p$,\newline
       say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Atoms'; \Universals'; \Elements'}$,
@@ -485,9 +492,9 @@ Proof
 
     * Suppose the (exists) rule was applied to assertion
       $\matches{c}{\exists \bar x \ldotp \phi}$.
-      We know that $\rho_p(c) \in \denotation{\exists \bar x \ldotp \phi}_{M,\rho_p}$.
+      We know that $\rho_p(c) \in \evaluation{\exists \bar x \ldotp \phi}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
-      such that $\rho_p(c) \in \denotation{\phi}_{M,\rho_p[\bar m/\bar x]}$
+      such that $\rho_p(c) \in \evaluation{\phi}_{M,\rho_p[\bar m/\bar x]}$
       with measure $\tau$.
 
       Select a child of $p$,\newline
@@ -569,8 +576,8 @@ Further, a pre-model may only include one child of the (resolve) node.
 
 Definition ($\nu$-measure -- $\vmeasure$)
 
-:   Suppose, $\rho(m) \not\in \denotation{\phi}_{M,\rho}$.
-    Then $\rho(m) \in \denotation{\lnot\phi}_{M,\rho}$
+:   Suppose, $\rho(m) \not\in \evaluation{\phi}_{M,\rho}$.
+    Then $\rho(m) \in \evaluation{\lnot\phi}_{M,\rho}$
     and the $\mu$-measure of $\matches{m}{\lnot\phi}$ is defined
     (after converting to positive-normal form).
     We call this the $\nu$-measure of $\matches{m}{\phi}$ in $M,\rho$.
@@ -587,7 +594,7 @@ Lemma
     and   each variable in $\bar y$ co-exists with a variable in $\{c\} \union \bar x \union \bar y$
           for some application $\phi_i$.
     Then, if there is a valuation $\rho: \{c\} \union \bar x \union \bar y \to M(S)$ such that
-    $\rho(c) \in \denotation{\alpha}_{M(S),\rho}$ and $\Intersection_{x\in\{c\}\bar x}\rho(x) \neq \emptyset$
+    $\rho(c) \in \evaluation{\alpha}_{M(S),\rho}$ and $\Intersection_{x\in\{c\}\bar x}\rho(x) \neq \emptyset$
     taken as a set of vertices
     then $\Intersection_{x\in\{c\}\bar x\union\bar y}\rho(x) \neq \emptyset$.
 
@@ -607,7 +614,7 @@ Proof
     Along this play we maintain these invariants:
 
     * At each position $p = (\matches{e}{\phi}, s)$,
-      we define a evaluation $\rho_p$ such that $\rho_p(e) \not\in \denotation{\phi}_{M,\rho_p}$.
+      we define a evaluation $\rho_p$ such that $\rho_p(e) \not\in \evaluation{\phi}_{M,\rho_p}$.
     * The $\nu$-measure at each position is decreasing.
 
     The root of the play is $(\matches{e}{\psi}, v = \sequent{\matches{e}{\phi}; ...; \{e\};})$.
@@ -638,7 +645,7 @@ Proof
         then we may choose between an immediate instantiation, or postponing instantiation
         until until after application of (exists) or (app).
 
-        Since $\rho_p(e) \not\in \denotation{\phi}_{M,\rho_p}$
+        Since $\rho_p(e) \not\in \evaluation{\phi}_{M,\rho_p}$
         we know that there is some extension $\rho'$ to $\rho_p$ such that
         $\rho'(e) \in \alpha(\bar x, \bar y) \land \lnot \phi(\bar x, \bar y)$
         and by Lemma \ref{lemma:vmeasure} that $\nu$-measure
@@ -1036,3 +1043,16 @@ Novelties:
 
 ---
 
+<!--
+* You may introduce this notation first. To say that it denotes the sub-pattern associated with X (or something like that).
+* Then, when defining things, I'll try to avoid abbreviations. So I'll write |...|_{M,\rho} instead of just |...|. I also think we should add more explanation wrt "adding fixpoint markers to the syntax". It goes too fast. We need to keep the text slow, so the reader is convinced it's OK to do so.
+* We say ... iff ... => We say that ... if.
+* "We say ..." => For two fixpoint markers DX and DY, we say that DX depends on DY if ...
+* It's also a nice place to remind the reader that all bound variables are assumed disjoint.
+* "The transitive closure ..." shouldn't belong to the definition. It's a property, not a definition.
+* We go too fast from the depend-on to the total order. What happened? Keep it slow.
+* Not everyone remembers what a pre-order, a partial-order, and/or a total-order mean. I know they exist, but I expect to see clear explanation. (edited) 
+* same with "asymmetric".I think it's better to have a definition for dependency orders. And then, after the definition, say that it is a total order, etc.
+* It's confusing to see "two possible dependency orders". We need to tell the reader whether we are going to deal with all these dependency orders, or we'll just pick any one.If it's the first case, we need to say why. If it's the latter case, we need to say so, and in the example, instead of saying "two possible orders", I would say "... is a dependency order. And then, say "Note that it is not the only one. For example, ... is another dependency order, according to Def. XX.
+* hmm actually I may not even make a big deal of it.
+-->
