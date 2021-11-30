@@ -37,6 +37,8 @@ Example
   Here the guard is the empty conjunction. Since $c$ has no free variables, Condition (\ref{gp:xxx})
   becomes true trivially.
 
+\newpage
+
 # Tableau, Games & Strategies
 
 We define our procedure over "positive-form" patterns
@@ -70,57 +72,82 @@ Remark
 Further, we restrict ourselves to "well-named" patterns
 -- patterns where each set and element variable is uniquely named.
 Through alpha-renaming, all patterns are equivalent to some well-named pattern
-so there is no loss in generality.
+so there is no loss in generality here.
+
+To simplify the presentation of the tableau and parity game,
+we introduce *fixedpoint markers*.
+Fixedpoint markers are notational shorthand to represent fixedpoint sub-patterns of a pattern.
 
 Definition (Definition list)
 
 :   For a guarded pattern $\phi$, a *definition list*
     (denoted $\deflist^\phi$ or just $\deflist$ when $\phi$ is understood)
     is a mapping from each occurring set variable to the pattern by which it is bound.
-    Since we assume well-named patterns, such a mapping is well-defined.
+    Since we assume well-named patterns, each set variable is bound by a unique
+    fixedpoint pattern and such a mapping is well-defined.
     We use $\deflist^\phi(X)$ to denote the fixedpoint sub-pattern corresponding to the set variable $X$.
 
 Definition (Fixedpoint marker)
 
 :   For a definition list $\deflist^\phi$,
     we call $\deflist^\phi_X$ (or just $\deflist_X$ when $\phi$ is understood)
-    a *fixedpoint marker*
-    and extend the syntax of patterns to allow fixedpoint markers.
-    We define the evaluation of fixedpoint makers as:
-    $$\evaluation{\deflist^\phi_X} = \evaluation{\deflist^\phi(X)}$$.
+    a *fixedpoint marker*.
+    We call a marker a $\mu$-marker if the corresponding fixedpoint pattern is a $\mu$ pattern
+    and a $\nu$-marker otherwise.
+    We extend the syntax of patterns to allow fixedpoint markers. These markers may
+    be used whereever set variables may be used -- in particular, they may not
+    appear negated in positive-form patterns. We define the evaluation of fixedpoint
+    makers as the evaluation of their corresponding fixedpoint pattern:
+    $$\evaluation{\deflist^\phi_X}_{M,\rho} = \evaluation{\deflist^\phi(X)}_{M,\rho}$$
 
 
-Definition (Dependency order) 
+\newcommand {\dependson}{\prec^\phi}
 
-:   We say a fixedpoint marker $\deflist^\phi_X$ *depends on* another $\deflist^\phi_Y$
-    iff $X$ occurs free in $\deflist^\phi(Y)$.
-    The transitive closure of this relation is a pre-order.
+Definition (depends on) 
 
-    For a pattern $\phi$, a *dependency order*, 
-    (denoted $\prec^\phi$),
-    is an extension of the above pre-order to a total order.
+:   For two fixedpoint markers $\deflist^\phi_X$ and $\deflist^\phi_Y$,
+    we say $\deflist^\phi_X$ *depends on* $\deflist^\phi_Y$
+    if $X$ occurs free in $\deflist^\phi(Y)$.
+
+The transitive closure of this relation is a pre-order -- i.e. it is reflexive and transitive.
+It is also antisymmetric -- for a pair of distinct markers $\deflist^\phi_X$ and $\deflist^\phi_Y$
+we may have either $\deflist^\phi_X$ transitively depends on $\deflist^\phi_Y$
+or $\deflist^\phi_Y$ transitively depends on $\deflist^\phi_X$ but not both.
+So, it is also a partial order.
+
+Definition (Dependency order)
+
+:   For a pattern $\phi$, a *dependency order*, 
+    is an (arbitary) extension of the above partial order to a total (linear) order.
+
+Note that the partial order may extend to several total orders.
+For defining our parity game, it does not matter which one we choose so long as it is a total order.
+So, through abuse of notation, we use $\dependson$ to denote some arbitary dependency order.
 
 Example
 
 :   For the pattern, $\nu X \ldotp (s(X) \land \mu Y \ldotp z \lor s(Y))$,
     we have $$\deflist^\phi = 
-    \begin{array}{rl}
+    \begin{cases}
     X &\mapsto \nu X \ldotp (s(X) \land \mu Y \ldotp z \lor s(Y)) \\
     Y &\mapsto \mu Y \ldotp z \lor s(Y)
-    \end{array}$$
+    \end{cases}$$
 
-    and two possible dependency orders: $X \prec^\phi Y$ and $Y \prec^\phi X$
+    and a dependency order: $X \dependson Y$.
+    This isn't the only dependency order --  we may also use $Y \dependson X$.
 
 Example
 
 :   For the pattern, $\nu X \ldotp \mu Y \ldotp s(X) \land (z \lor s(Y))$,
     we have $$\deflist^\phi = 
-    \begin{array}{rl}
+    \begin{cases}
     X &\mapsto \nu X \ldotp \mu Y \ldotp s(X) \land (z \lor s(Y)) \\
     Y &\mapsto              \mu Y \ldotp s(X) \land (z \lor s(Y))
-    \end{array}$$
+    \end{cases}$$
 
-    and only one dependency order: $X \prec^\phi Y$
+    and dependency order: $X \dependson Y$
+
+Now, we shall begin defining the sequents over which our tableau operates.
 
 Definition (Assertion)
 
@@ -1043,16 +1070,3 @@ Novelties:
 
 ---
 
-<!--
-* You may introduce this notation first. To say that it denotes the sub-pattern associated with X (or something like that).
-* Then, when defining things, I'll try to avoid abbreviations. So I'll write |...|_{M,\rho} instead of just |...|. I also think we should add more explanation wrt "adding fixpoint markers to the syntax". It goes too fast. We need to keep the text slow, so the reader is convinced it's OK to do so.
-* We say ... iff ... => We say that ... if.
-* "We say ..." => For two fixpoint markers DX and DY, we say that DX depends on DY if ...
-* It's also a nice place to remind the reader that all bound variables are assumed disjoint.
-* "The transitive closure ..." shouldn't belong to the definition. It's a property, not a definition.
-* We go too fast from the depend-on to the total order. What happened? Keep it slow.
-* Not everyone remembers what a pre-order, a partial-order, and/or a total-order mean. I know they exist, but I expect to see clear explanation. (edited) 
-* same with "asymmetric".I think it's better to have a definition for dependency orders. And then, after the definition, say that it is a total order, etc.
-* It's confusing to see "two possible dependency orders". We need to tell the reader whether we are going to deal with all these dependency orders, or we'll just pick any one.If it's the first case, we need to say why. If it's the latter case, we need to say so, and in the example, instead of saying "two possible orders", I would say "... is a dependency order. And then, say "Note that it is not the only one. For example, ... is another dependency order, according to Def. XX.
-* hmm actually I may not even make a big deal of it.
--->
