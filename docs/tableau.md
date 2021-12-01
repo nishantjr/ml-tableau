@@ -336,7 +336,6 @@ Proof
     We may build a tableau where the (resolve) rule
     is applied for this basic assertion after this (exists)/(app) rule. 
 
-\newpage
 ## Parity Game
 
 Now that we have defined how a tableau is built,
@@ -363,16 +362,22 @@ From a tableau, $\mathcal T$, we now define a parity game $\mathcal G(\mathcal T
 In this game, player $0$ may be thought of as trying to prove the satisfiablity of the pattern,
 and player $1$ as trying to prove it unsatisfiable.
 
-For each position in the game is a pair $(a, v)$ where $a$ is an assertion in the label of a tableau node $v$ of $\mathcal T$.
-There is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ iff:
+Each position in the game is a pair $(a, v)$ where $a$ is an assertion.
+If $v = \unsat$, then $a$ is of the form $\matches{x}{\bot}$.
+If $\Gamma = \emptyset$, then $a$ is of the form $\matches{x}{\top}$.
+Otherwise, $a \in \Gamma$.
 
-* $v_1$ is a child of $v_0$ constructed by some rule that does not modify the assertion $a_0$
+If $v_1$ is a child of $v_0$
+there is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ with if:
+
+* $v_1$ is constructed by some rule that does not modify the assertion $a_0$
   and $a_0 = a_1$, or
-* $v_1$ is a child of $v_0$ constructed by some rule that modifies the assertion $a_0 \in Gamma$
+* $v_1$ is constructed by some rule that modifies the assertion $a_0 \in \Gamma$
   and $a_1$ is a newly created assertion, or
-* $v_1$ is a child of $v_0$ constructed by an application of one of the (conflict-*) rules
-  and $a_1$ is $\matches{e}{\top}$ where $e$ is the element marker of the assertion $a_0$, or
-* $v_1$ is a child of $v_0$ constructed by an application of one of the (ok-*) rules,
+* $a_0 = a_1$ is an assertion in the child $v_1$'s $\Universals$, or
+* $v_1$ is constructed by an application of one of the (conflict-*) rules
+  and $a_1$ is $\matches{x}{\bot}$ where $x$ is the element variable of the assertion $a_0$, or
+* $v_1$ is constructed by an application of one of the (ok-*) rules,
   $a_0$ is removed from $\Gamma$ by the rule, and $a_1$ is $\matches{e}{\top}$ where $e$ is the element marker of the assertion $a_0$.
 
 \newcommand{\green}[1]{{\color{green}#1}}
@@ -394,23 +399,26 @@ All other positions do not offer a choice, and so are arbitrarily assigned to $\
 
 The parity condition $\Omega$ is defined as follows:
 
-* $\Omega((e \in D_i, v))                       = 2 \times i$     if $D_i$ is a $\mu$ constant with index $i$ in $\mathcal D$.
-* $\Omega((e \in D_i, v))                       = 2 \times i + 1$ if $D_i$ is a $\nu$ constant with index $i$ in $\mathcal D$.
-* $\Omega((e \in \exists \bar x\ldotp \phi, v)) = 2 \times n + 1$ where $n$ is the length of $\mathcal D$.
-* $\Omega(a, v)                                 = 2 \times n + 2$ otherwise.
+* $\Omega((e \in D_X, v))                       = 2 \times i$     if $D_i$ is a $\mu$-marker that is $i$th in the dependency order.
+* $\Omega((e \in D_X, v))                       = 2 \times i + 1$ if $D_i$ is a $\nu$-marker that is $i$th in the dependency order.
+* $\Omega((e \in \exists \bar x\ldotp \phi, v)) = 2 \times N + 1$ where $N$ is the number of fixedpoint markers in $\deflist$.
+* $\Omega(a, v)                                 = 2 \times N + 2$ otherwise.
 
 Definition (Pre-models & Refutations)
 
 :   For a $\mathcal G(\mathcal T) = (\Pos_0, \Pos_1, E, \Omega)$,
-    a winning strategy for a player $i$ is a subgraph $(\Pos'_i, S_i)$ such that:
+    a winning strategy from a position $q$ for a player $i$ is a subtree $(P \subset \Pos, S \subset E)$ such that:
 
-    1. If a node $p$ is in $\Pos_i$ and there are outward edges from $p$
-       then there is exactly one edge outward edge from $p$ in $S_i$ and $p \in \Pos'_i$.
-    2. If a node $p$ is not in $\Pos_i$ then all outward edges from $p$ in $E$ are in $S_i$ and $p \in \Pos'_i$.
+    1. $q \in P$
+    1. If a node $p \in P \intersection \Pos_i$
+       then there is exactly one edge outward edge $(p, p')$ in $S$ and $p' \in P$.
+    2. If a node $p \not\in \Pos_i$ and $p \in P$ then all outward edges from $p$ in $E$ are in $S_i$ and $p \in W_i$.
     3. Player $i$ wins on every trace.
 
     We call a winning strategy for player $0$ a pre-model,
     and a winning strategy for player $1$ a refutation.
+
+\newpage
 
 # Soundness & Completeness
 
@@ -958,7 +966,7 @@ def build_game_init(phi):
 
 def complete_nodes(incomplete_nodes, processed_nodes):
     curr, remaining = incomplete_nodes
-    
+
     if has_same_existentials_universals_atoms_and_matched_in(curr, processed_nodes):
         curr.type = Backlink(curr)
         complete_nodes(remaining, processed_nodes)
@@ -1128,9 +1136,9 @@ Novelties:
     I was thinking something like:
 
     ```
-            xxx                                        xxx                                
-    ------------------------------------①      ------------------------------------② 
-            yyy                                        yyy                                
+            xxx                                        xxx
+    ------------------------------------⓪      ------------------------------------①
+            yyy                                        yyy
     ```
 
 *   > the (ok) rule can be applied when (conflict) can be applied, which is unexpected and strange.
