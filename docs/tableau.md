@@ -64,6 +64,8 @@ Definition (Positive Form Pattern)
     \end{alignat*}
     where $\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$.
 
+When $\sigma$ is a nullary symbol we use $\sigma$ and $\bar \sigma$ as shorthand for $\sigma()$ and $\bar \sigma()$.
+
 Remark
 
 : We allow negation of element variables, but not set variables.
@@ -107,7 +109,7 @@ Definition (depends on)
 
 :   For two fixedpoint markers $\deflist^\phi_X$ and $\deflist^\phi_Y$,
     we say $\deflist^\phi_X$ *depends on* $\deflist^\phi_Y$
-    if $X$ occurs free in $\deflist^\phi(Y)$.
+    if $\deflist^\phi(Y)$ is a sub-pattern of $\deflist^\phi(X)$.
 
 The transitive closure of this relation is a pre-order -- i.e. it is reflexive and transitive.
 It is also antisymmetric -- for a pair of distinct markers $\deflist^\phi_X$ and $\deflist^\phi_Y$
@@ -134,18 +136,18 @@ Example
     \end{cases}$$
 
     and a dependency order: $X \dependson Y$.
-    This isn't the only dependency order --  we may also use $Y \dependson X$.
 
 Example
 
-:   For the pattern, $\nu X \ldotp \mu Y \ldotp s(X) \land (z \lor s(Y))$,
+:   For the pattern, $\nu X \ldotp s(X) \land \bar p \land \mu Y \ldotp s(Y) \land p$,
     we have $$\deflist^\phi = 
     \begin{cases}
-    X &\mapsto \nu X \ldotp \mu Y \ldotp s(X) \land (z \lor s(Y)) \\
-    Y &\mapsto              \mu Y \ldotp s(X) \land (z \lor s(Y))
+    X &\mapsto \nu X \ldotp s(X) \land \bar p \\
+    Y &\mapsto \mu Y \ldotp s(Y) \land p
     \end{cases}$$
 
-    and dependency order: $X \dependson Y$
+    and dependency order: $X \dependson Y$.
+    However, this isn't the only dependency order -- we also have $Y \dependson X$.
 
 Now, we shall begin defining the sequents over which our tableau operates.
 
@@ -153,186 +155,225 @@ Definition (Assertion)
 
 :   An *assertion* is either:
 
-    1.  a pair of an element variable and a pattern, denoted $\matches{e}{\phi}$,
+    1.  a pair of an element variable and a pattern, denoted $\matches{x}{\phi}$,
     2.  a conjunction of assertions: $\alpha_1 \land a_2$
     2.  a disjunction of assertions: $\alpha_1 \lor \alpha_2$
 
-Assertions allow us to capture that a particular element variable matches a pattern.
-Symantically, $\matches{e}{\phi}$ is equivalent to the pattern $\lceil{e \land \phi}\rceil$
-where $\lceil \_ \rceil$ is the definedness symbol.
+Informally, assertions allow us to capture that a element in the model matches a pattern.
+*Basic* assertions, directly specify the relational interpretation of each symbol.
 
-Definition (Atomic assertions)
-:   *Atomic assertions* are assertions of the form:
+Definition (Restriction)
 
-    1.  $\matches{e}{\sigma(a_1, \ldots, a_n)}$,
-    2.  $\matches{e}{\lnot\sigma(a_1, \ldots, a_n)} \equiv \matches{e}{\bar\sigma(\lnot a_1, \ldots, \lnot a_n)}$.
+:   The *free variables* of an assertion $\matches{x}{\phi}$ are $\{x\} \union \free\phi$.
+    For conjunctions and disjunctions of assertion, it is the union of the free variables
+    in each sub-pattern.
+    For a set of assertions $A$ and a set of element variables $E$,
+    the restriction of $A$ to $E$, denoted $A|_{E}$,
+    is the subset of assertion in $A$ whose free variables are a subset of $E$.
 
-    where $e$ and each $a_i$ is an element variable.
+Definition (Basic assertions)
+:   *Basic assertions* are assertions of the form:
+
+    1.  $\matches{x_0}{\sigma(x_1, \ldots, x_n)}$,
+    2.  $\matches{x_0}{\bar\sigma(\lnot x_1, \ldots, \lnot x_n)}$.
+
+    where each $x_i$ is an element variable.
+
+    \todo{XC: Do you prefer $\matches{x_0}{\sigma(x_1, ... x_n)}$ or $\matches{x}{\sigma(y_1, ... y_n)}$?}
+
+From here on, we treat $\matches{x}{\phi_1\lor\phi_2}$ as equivalent to 
+$\matches{x}{\phi_1} \lor \matches{x}{\phi_2}$.
+and $\matches{x}{\phi_1\land\phi_2}$ as equivalent to 
+$\matches{x}{\phi_1} \land \matches{x}{\phi_2}$.
 
 Definition (Sequent)
 :   A *sequent* is:
 
-    1. a tuple, $\sequent{\Gamma; \Atoms; \Universals; \Elements}$,
+    1. a tuple, $\sequent{\Gamma; \Basic; \Universals; \Elements}$,
        where $\Gamma$       is a set of assertions,
-             $\Atoms$       is a set of atomic assertions,
+             $\Basic$       is a set of basic assertions,
              $\Universals$  is a set of assertions whose pattern is of the form $\bar\sigma(...)$ or $\forall \bar x\ldotp ...$,
          and $\Elements$    is a set of element variables.
-    2. $\alpha \leadsto \sequent{\Gamma; \Atoms; \Universals; \Elements}$ where $\alpha$ is an assertion
-       and $\Gamma, \Atoms, \Universals, \Elements$ are as above.
+    2. $\alpha \leadsto \sequent{\Gamma; \Basic; \Universals; \Elements}$ where $\alpha$ is an assertion
+       and $\Gamma, \Basic, \Universals, \Elements$ are as above.
     3. $\unsat$
 
 Informally,
 $\Gamma$ represents the set of assertions whose combined satisfiability we are checking.
-$\Atoms$ and $\Universals$ represent assertions we have deemed must hold for the
-variables in $\Elements$.
-We implicitly assume that all element in $\Elements$ have distinct interpretations.
+$\Basic$ and $\Universals$ represent assertions we have deemed must hold for the variables in $\Elements$.
+Each variable in $\Elements$ corresponds (roughly) to a distinct element in the
+model we are building (if one exists).
+We will go into more details about this later.
 
 Definition (Tableau)
 
 :   For a signature $\Sigma$, and a guarded  pattern $\phi$,
-    let $\deflist$ be its dependency order,
-    and $K$ be a set of distinct element variables.
+    fix an arbitary dependency order,
+    and let $K$ be an (arbitary) finite set of fresh element variables.
     A *tableau* is a (possibly infinte) tree
     with nodes labeled by sequents
     and built using the application of the rules below.
-    The label of the root node is $\sequent{\matches{e}{\phi}, \{\}, \{\}, \{e\}}$ for some fresh variable $e$ drawn from $K$.
-    Leaf nodes must be labeled either 
-       with $\unsat$
+    The label of the root node is $\sequent{\matches{x}{\phi}, \emptyset, \emptyset, \{x\}}$
+    where $x \in K$.
+    Leaf nodes must be labeled either with $\unsat$
     or with a sequent where $\Gamma = \emptyset$.
+    -- i.e. it is not a valid tableau when some leaf node does not meet this condition.
 
 \allowdisplaybreaks
 \begin{align*}
 \cline{1-3}
-\name{conflict}                 & \pruleun{\sequent{\alpha, \Gamma; \Atoms; ...}}
-                                          { \unsat } \\
-                                & \text{when $\alpha$ is an atomic assertion, with its negation  in $\Atoms$.}
+\name{conflict}                 & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \fnot{\alpha} \} \union \Basic; \Universals; \Elements}}
+                                          { \unsat }
+                           \qquad \text{when $\alpha$ is a basic assertion.}
 \\
-\name{ok}                       & \pruleun{\sequent{\alpha, \Gamma; \Atoms; ...}}
-                                    {\sequent{        \Gamma; \Atoms; ...}} \\
-                                & \text{when $\alpha$ is an atomic assertion in $\Atoms$.}
+\name{ok}                       & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \alpha \} \union \Basic; \Universals; \Elements}}
+                                    {\sequent{        \Gamma; \Basic; \Universals; \Elements}}
+                           \quad \text{when $\alpha$ is a basic assertion.}
 \\
-\name{conflict-el}              & \pruleun{\sequent{\matches{e}{e'}, \Gamma; \Atoms; ...}}
-                                          { \unsat } \\
-                                & \text{when $e' \neq e$ is an element in $\Elements$.}
+\name{conflict-el}              & \pruleun{\sequent{\matches{x}{y}, \Gamma; \Basic; \Universals; \Elements}}
+                                          { \unsat }
+                            \quad \text{when $x$ and $y$ are distinct.}
 \\
-\name{ok-el}                    & \pruleun{\sequent{\matches{e}{e}, \Gamma; \Atoms; ...}}
-                                          {\sequent{        \Gamma; \Atoms; ...}} \\
-                                & \text{when $\alpha$ is an atomic assertion in $\Atoms$.}
+\name{ok-el}                    & \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals; \Elements}}
+                                          {\sequent{                \Gamma; \Basic; \Universals; \Elements}} \\
 \\
 \cline{1-3}
-\name{and}                      & \unsatruleun{\sequent{ \matches{e}{\phi \land \psi},   \Gamma; ...}}
-                                              {\sequent{ \matches{e}{\phi}, \matches{e}{\psi},  \Gamma; ...}}
-\qquad
-                                  \unsatruleun{\sequent{ \matches{e}{\phi} \land \matches{f}{\psi},   \Gamma; ...}}
-                                              {\sequent{ \matches{e}{\phi}, \matches{f}{\psi},  \Gamma; ...}}
+\name{and} &
+                                  \unsatruleun{\sequent{ \matches{z}{\phi} \land \matches{w}{\psi},   \Gamma; \Basic; \Universals; \Elements}}
+                                              {\sequent{ \matches{z}{\phi}, \matches{w}{\psi},  \Gamma; \Basic; \Universals; \Elements}}
 \\
-\name{or}                       & \satrulebin{\sequent{  \matches{e}{\phi \lor \psi}, \Gamma; ... }}
-                                              {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
-                                              {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
-\qquad
-                                  \satrulebin{\sequent{  \matches{e}{\phi} \lor \matches{f}{\psi}, \Gamma; ... }}
-                                              {\sequent{ \matches{e}{\phi}, \Gamma; ... }}
-                                              {\sequent{ \matches{e}{\psi},  \Gamma; ... }}
+\name{or} &
+                                  \satrulebin{\sequent{  \matches{z}{\phi} \lor \matches{w}{\psi}, \Gamma; \Basic; \Universals; \Elements }}
+                                              {\sequent{ \matches{z}{\phi}, \Gamma; \Basic; \Universals; \Elements }}
+                                              {\sequent{ \matches{z}{\psi},  \Gamma; \Basic; \Universals; \Elements }}
 \\
-\name{def}                      & \pruleun{\sequent{ \matches{e}{\kappa X . \phi(X)}, \Gamma; ...}}
-                                  {\sequent{ \matches{e}{D}, \Gamma; ...}} \\
+\name{def}                      & \pruleun{\sequent{ \matches{z}{\kappa X . \phi(X)}, \Gamma; \Basic; \Universals; \Elements }}
+                                  {\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }} \\
                                 & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
 \\
-\name{mu}                    & \pruleun{\sequent{ \matches{e}{D}, \Gamma; ... }}
-                                          {\sequent{ \matches{e}{\phi[D/X]}, \Gamma;... }} \\
+\name{mu}                    & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }} \\
                                 & \text{when $D := \mu X. \phi \in \deflist$ }
 \\
-\name{nu}                    & \pruleun{\sequent{ \matches{e}{D}, \Gamma; ... }}
-                                          {\sequent{ \matches{e}{\phi[D/X]}, \Gamma;... }} \\
+\name{nu}                    & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }} \\
                                 & \text{when $D := \nu X. \phi \in \deflist$ }
 \\
 \name{dapp} &
-\unsatruleun{\sequent{ \matches{e}{\bar\sigma(\bar \phi)}, \Gamma; \Universals; \Elements; ...}}
-            { \sequent{ \mathrm{inst} \union \Gamma; 
-               \matches{e}{\bar\sigma(\bar \phi)}, \Universals; \Elements; ... } } \\
-  & \text{where $\mathrm{inst} = \left\{ \matches{e}{\sigma(\bar c)} \limplies \lOr_i \matches{c_i}{\phi_i}
-                                    \mid \text{ if } \bar c \subset \Elements \right\}$} \\
-  & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not an atomic assertion.}
+\unsatruleun{\sequent{ \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Gamma; \Basic; \Universals; \Elements}}
+            { \sequent{ \mathrm{inst} \union \Gamma;
+                        \Basic;
+                        \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Universals;
+                        \Elements } }
+\qquad \text{when $\matches{z}{\bar \sigma(\bar \phi)}$ is not a basic assertion.} \\
+  & \text{where $\mathrm{inst} = \left\{ \matches{z}{\sigma(\bar y)} \limplies \lOr_i \matches{y_i}{\phi_i}
+                                    \mid \bar y \subset \Elements \right\}$} \\
 \\
-\name{forall}                   & \unsatruleun { \sequent{ \matches{e}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Universals; \Elements; ... } }
+\name{forall}                   & \unsatruleun { \sequent{ \matches{z}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Basic; \Universals; \Elements} }
                                                { \sequent{ \mathrm{inst} \union \Gamma
-                                                         ; \matches{e}{\forall \bar x \ldotp \phi}, \Universals
+                                                         ; \Basic
+                                                         ; \matches{z}{\forall \bar x \ldotp \phi}, \Universals
                                                          ; \Elements
                                                          ; ... } } \\
-                                & \text{where $\mathrm{inst} = \{ e \in \phi[\bar c / \bar x] \mid c \subset \Elements \}$}
+                                & \text{where $\mathrm{inst} = \{ \matches{z}{ \phi[\bar y / \bar x]} \mid \bar y \subset \Elements \}$}
 \\
 \cline{1-3}
 \intertext{The following rules may only apply when none of the above rules apply -- i.e. when all assertions in $\alpha$
 are either existentials or applications}
 \name{choose-existential} &
-\unsatruleun {\sequent{ \Gamma; ... }}
-             {\{ \alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; \Elements }\}}
-    \qquad  \text{for each $\alpha \in \Gamma$}
+\unsatruleun {\sequent{ \Gamma; \Basic; \Universals; \Elements }}
+             {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals; \Elements } \mid \text{for each $\alpha \in \Gamma$}\}}
    \\ 
 \name{app} &
-  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; \Elements } }
-             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Atoms' ; \{ \} ; \Elements'  } \} } \\
-  & \text{for each $\bar k \subset K$} \\
+  \satruleun { \matches{z}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Elements } }
+             { \{ \sequent{ \matches{z}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \} ; \Elements'  } \} } \\
+  & \text{for each $\bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements)$} \\
   & \text{where} \\
-  & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free{\bar \phi}$} \\
-  & \text{\qquad $\Atoms' = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Elements' = \bar k \union \{ z \} \union  \free{\bar \phi}$} \\
+  & \text{\qquad $\Basic' = \Basic|_{\Elements'}$},
+    \text{       $\Gamma' = \Gamma|_{\Elements'}$},
+    \text{and    $\Universals' = \Universals|_{\Elements'}$} \\
 \\
 \name{exists} &
-  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Atoms; \Universals; \Elements } }
-             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Atoms' ;  \{ \}; \Elements' } \}
+  \satruleun { \matches{z}{\exists \bar x \ldotp \phi} \leadsto \sequent{ \Gamma; \Basic; \Universals; \Elements } }
+             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \}; \Elements' } \}
              } \\
-  & \text{for each $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
+  & \text{for each $\alpha \in \{ \matches{z}{\phi[\bar k/\bar x]} \mid \bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements) \}$} \\
   & \text{where} \\
   & \text{\qquad $\Elements'   = \free{\alpha}$} \\
-  & \text{\qquad $\Atoms'      = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\alpha} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Basic' = \Basic|_{\Elements'}$},
+    \text{       $\Gamma' = \Gamma|_{\Elements'}$},
+    \text{and    $\Universals' = \Universals|_{\Elements'}$} \\
 \\
 \cline{1-3}
-\intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
+\intertext{This rule may only apply (as many times as needed) immediately after the (exists)/(app) rules or on the root node.
 $\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
-\name{resolve} & \satrulebin{\sequent{\Gamma; A; C}}
-                            {\sequent{ \Gamma; \matches{e}{\sigma(\bar a)}, A; C}}
-                            {\sequent{ \Gamma; \matches{e}{\lnot\sigma(\bar a)}, A; C}} \\
-               & \text{when $\{e\}\union \bar a \subset C$ and $(\{e\}\union \bar a)\intersection \mathsf{fresh} \neq \emptyset$.}
+\name{resolve} & \satrulebin{\sequent{\Gamma; \Basic; \Universals; \Elements}}
+                            {\sequent{ \Gamma; \matches{z}{\sigma(\bar a)} \union \Basic; \Universals; \Elements}}
+                            {\sequent{ \Gamma; \matches{z}{\lnot\sigma(\bar a)} \union \Basic; \Universals; \Elements}} \\
+               & \text{when neither $\matches{z}{{\sigma(\bar a)}}$ nor $\matches{z}{\fnot{\sigma(\bar a)}}$ are in $\Basic$} \\
+               & \text{and  $\{z\}\union \bar a \subset \Elements$ and $(\{z\}\union \bar a)\intersection \mathsf{fresh} \neq \emptyset$.} \\
 \\
 \cline{1-3}
 \end{align*}
 
-## Games & Strategies
+Proposition
+:   For any sequent built using these rules, we cannot have both $\matches{x}{\phi}$ and $\matches{x}{\fnot\phi}$ in $\Basic$
 
-Definition (Parity Game)
+Proof
+:   The root node starts with $\Basic$ empty, and therefore this invariant is maintained.
+    Basic assertions are added to $\Basic$ only through the (resolve) rule which maintains the invariant.
+
+Proposition
+:   There is a tableau for any guarded pattern
+
+Proof
+:   For any assertion that is not basic, there is some rule that applies.
+    For a basic assertion if either the assertion itself or its negation in in $\Basic$,
+    then the (conflict) or (ok) rule applies.
+    Otherwise, there was some application of the (exists),  (app) rule
+    after which all variables in the assertion are in $\Elements$.
+    We may build a tableau where the (resolve) rule
+    is applied for this basic assertion after this (exists)/(app) rule. 
+
+\newpage
+## Parity Game
+
+Now that we have defined how a tableau is built,
+we define how we may build a parity game from this.
+But first, we must define what a parity game is.
+
+Definition (Parity game)
 
 :   A parity game is a tuple $(\Pos_0, \Pos_1, E, \Omega)$
     where $\Pos = \Pos_0 \union \Pos_1$ is a possibly infinite set of positions;
     $E : \Pos \times \Pos$ is a transition relation;
     and $\Omega : \Pos \to \N$ defines the *parity winning condition*.
-
     The game is played between two players, player $0$ and player $1$.
     When the game is in a position $p \in \Pos_i$ then it is player $i$'s turn -- i.e. player $i$ may choose
     the next vertex to transition form the current node, along the transition
     relation $E$.
-    Each "game" results in a (possible infinite) sequence of positions, called plays: $p_0, p_1, p_2,...$.
-    A play is finite iff one player is unable to make a move. In that case that player loses.
+    Each game results in a (possible infinite) sequence of positions, called plays: $p_0, p_1, p_2,...$.
+    A play is finite if a player is unable to make a move. In that case that player loses.
     For an infinite play, we look at the sequence of parities of the vertices in the play
-    -- i.e. $\Omega(p_0), \Omega(p_1), \ldots$.
+    -- i.e. $\Omega(p_0), \Omega(p_1), ...$.
     Player $0$ wins iff the least parity that occurs infinitely often is even, otherwise player $1$ wins.
 
-    ---
+From a tableau, $\mathcal T$, we now define a parity game $\mathcal G(\mathcal T)$.
+In this game, player $0$ may be thought of as trying to prove the satisfiablity of the pattern,
+and player $1$ as trying to prove it unsatisfiable.
 
-From a tableau, $\mathcal T$, we may define a parity game $\mathcal G(\mathcal T)$, as follows.
-Each position in the game is a pair $(a, v)$ where $a$ is an assertion
-in the label of a vertex $v$ of $\mathcal T$.
+For each position in the game is a pair $(a, v)$ where $a$ is an assertion in the label of a tableau node $v$ of $\mathcal T$.
+There is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ iff:
 
-There is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ iff either:
-
-* $v_1$ is a child of $v_0$ constructed by some rule that matches on the assertion $a_0$
-  and $a_1$ is the newly created assertion.
-* $v_1$ is a child of $v_0$ constructed by some rule that does not match on the assertion $a_0$
-  and $a_0 = a_1$.
-
+* $v_1$ is a child of $v_0$ constructed by some rule that does not modify the assertion $a_0$
+  and $a_0 = a_1$, or
+* $v_1$ is a child of $v_0$ constructed by some rule that modifies the assertion $a_0 \in Gamma$
+  and $a_1$ is a newly created assertion, or
+* $v_1$ is a child of $v_0$ constructed by an application of one of the (conflict-*) rules
+  and $a_1$ is $\matches{e}{\top}$ where $e$ is the element marker of the assertion $a_0$, or
+* $v_1$ is a child of $v_0$ constructed by an application of one of the (ok-*) rules,
+  $a_0$ is removed from $\Gamma$ by the rule, and $a_1$ is $\matches{e}{\top}$ where $e$ is the element marker of the assertion $a_0$.
 
 \newcommand{\green}[1]{{\color{green}#1}}
 \newcommand{\blue}[1]{{\color{blue}#1}}
@@ -492,9 +533,9 @@ Proof
       on the assertion $\matches{e_0, \sigma(e_1,\ldots,e_n)}$.
       Then if $\rho_p(c_0) \in \evaluation{\sigma(e_1,\ldots,e_n)}_{\rho_p}$
       we select the left child position, $l$,
-      (that has $\matches{c_0}{\sigma(e_1,\ldots,e_n)} \in \Atoms$).
+      (that has $\matches{c_0}{\sigma(e_1,\ldots,e_n)} \in \Basic$).
       Otherwise, we select the right child position, $r$,
-      (that has $\matches{c_0}{\bar\sigma(\lnot e_1,\ldots,\lnot e_n)} \in \Atoms$).
+      (that has $\matches{c_0}{\bar\sigma(\lnot e_1,\ldots,\lnot e_n)} \in \Basic$).
       We define $\rho_l = \rho_r = \rho_p$.
 
     * If the (or) rule was applied to assertion $\matches{e}{\psi_1 \lor \psi_2}$
@@ -508,7 +549,7 @@ Proof
       such that $m_i \in \evaluation{\phi_i}_{M,\rho_p}$.
 
       Select a child of $p$,\newline
-      say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Atoms'; \Universals'; \Elements'}$,
+      say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Basic'; \Universals'; \Elements'}$,
       such that:
       * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free{\phi_i}$, and
       * if for some $i$, $m_i = \rho_p(e)$ where $e \in \Elements$ then $k'_i = e$.
@@ -525,7 +566,7 @@ Proof
       with measure $\tau$.
 
       Select a child of $p$,\newline
-      say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Atoms'; \Universals'; \Elements'}$,
+      say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Basic'; \Universals'; \Elements'}$,
       such that:
 
       * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free{\phi_i}$, and
@@ -650,7 +691,7 @@ Proof
 
     Consider a paritally constructed play until position $p = (\matches{e}{\phi}, s)$:
 
-    * (conflict)/(ok): $\phi$ cannot be an atomic application or an element variable
+    * (conflict)/(ok): $\phi$ cannot be a basic application or an element variable
         by definition of $M(S)$ and by our invariants.
     * (resolve): Application of this rule does not affect the $\nu$-measure.
         or the elements in the sequent. We use the same $\rho_p$ for the child node.
@@ -730,11 +771,11 @@ Let us take a look refutations through the lens of checking the validity of a pa
 
 \begin{align*}
 \cline{1-3}
-\name{conflict}                 & \vruleun{ \Atoms, ... \proves \alpha \limplies \bot }
+\name{conflict}                 & \vruleun{ \Basic, ... \proves \alpha \limplies \bot }
                                           { \valid } \\
-                                & \text{when $\alpha$ is an atomic assertion, with its negation  in $\Atoms$.}
+                                & \text{when $\alpha$ is a basic assertion, with its negation  in $\Basic$.}
 \\
-\name{conflict-el}              & \vruleun{ \Atoms, ... \proves \vmatches{e}{e'} }
+\name{conflict-el}              & \vruleun{ \Basic, ... \proves \vmatches{e}{e'} }
                                           { \valid } \\
                                 & \text{when $e' \neq e$ is an element in $\Elements$.}
 \\
@@ -777,7 +818,7 @@ Let us take a look refutations through the lens of checking the validity of a pa
               \vmatches{e}{\bar\sigma(\bar \phi)} } \\
   & \text{where $\mathrm{inst} = \left\{ \vmatches{e}{\sigma(\bar c)} \limplies \lOr_i \vmatches{c_i}{\phi_i}
                                     \mid \text{ if } \bar c \subset \Elements \right\}$} \\
-  & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not an atomic assertion.}
+  & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not a basic assertion.}
 \\
 \name{forall}                   & \unsatruleun { \sequent{ \matches{e}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Universals; \Elements; ... } }
                                                { \sequent{ \mathrm{inst} \union \Gamma
@@ -791,37 +832,37 @@ Let us take a look refutations through the lens of checking the validity of a pa
 are either existentials or applications}
 \name{choose-existential} &
 \unsatruleun {\sequent{ \Gamma; ... }}
-             {\{ \alpha \leadsto \sequent{ \Gamma;\Atoms; \Universals; \Elements }\}}
+             {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals; \Elements }\}}
     \qquad  \text{for each $\alpha \in \Gamma$}
    \\ 
 \name{app} &
-  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Atoms; \Elements } }
-             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Atoms' ; \{ \} ; \Elements'  } \} } \\
+  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Elements } }
+             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \} ; \Elements'  } \} } \\
   & \text{for each $\bar k \subset K$} \\
   & \text{where} \\
   & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free{\bar \phi}$} \\
-  & \text{\qquad $\Atoms' = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Basic' = \{ a \mid a \in \Basic \text{ and } \free{a} \subset \Elements' \}$ \quad($\Basic$ restricted to $\Elements'$)} \\
   & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
   & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
 \\
 \name{exists} &
-  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Atoms; \Universals; \Elements } }
-             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Atoms' ;  \{ \}; \Elements' } \}
+  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Basic; \Universals; \Elements } }
+             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \}; \Elements' } \}
              } \\
   & \text{for each $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
   & \text{where} \\
   & \text{\qquad $\Elements'   = \free{\alpha}$} \\
-  & \text{\qquad $\Atoms'      = \{ a \mid a \in \Atoms \text{ and } \free{a} \subset \Elements' \}$ \quad($\Atoms$ restricted to $\Elements'$)} \\
+  & \text{\qquad $\Basic'      = \{ a \mid a \in \Basic \text{ and } \free{a} \subset \Elements' \}$ \quad($\Basic$ restricted to $\Elements'$)} \\
   & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
   & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\alpha} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
 \\
 \cline{1-3}
 \intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
-$\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
-\name{resolve} & \satrulebin{\sequent{\Gamma; A; C}}
-                            {\sequent{ \Gamma; \matches{e}{\sigma(\bar a)}, A; C}}
-                            {\sequent{ \Gamma; \matches{e}{\lnot\sigma(\bar a)}, A; C}} \\
-               & \text{when $\{e\}\union \bar a \subset C$ and $(\{e\}\union \bar a)\intersection \mathsf{fresh} \neq \emptyset$.}
+$\mathsf{fresh}$ denotes the fresh variables introduced by the last application of either of those rules.}
+\name{resolve} & \satrulebin{\sequent{\Gamma; \Basic; \Universals; \Elements}}
+                            {\sequent{ \Gamma; \matches{e}{\sigma(\bar f)}, \Basic; \Universals; \Elements}}
+                            {\sequent{ \Gamma; \matches{e}{\lnot\sigma(\bar f)}, \Basic; \Universals; \Elements}} \\
+               & \text{when $\{e\}\union \bar f \subset \Elements$ and $(\{e\}\union \bar f)\intersection \mathsf{fresh} \neq \emptyset$.}
 \\
 \cline{1-3}
 \end{align*}
@@ -1062,11 +1103,59 @@ Novelties:
     c. Handling functional symbols. Look at Lucas' work on Basic Function Patterns.
     d. Look at finite variant property and see if we can relate it to guarded patterns
 
-3.  Minor additional work
 
-    1. Find a better name for $\Elements$. THey are not the same as elements in
-       the constructed model, so this is confusing. Maybe "elemental constants"?
-       to correspond with fixedpoint markers?
+3. Misc
+
+    * The parity game looks like an extension of binary decision trees or BDDs
+      (depending on how you look at it).
+      This may be a  useful source of optimizations. 
 
 ---
 
+<!--
+
+*   > try to put rules in one figure, or many figures. and put the figures at the top.
+
+    Let's handle presentation later?
+    There's a lot of work to put in here, but I'd like focus on the content first. 
+
+*   > why some rules are blue/green? Try avoiding using colors at all.
+
+    The green lines correspond to nodes at which Player 0 has a choice in the parity game.
+    The blue  lines correspond to nodes at which Player 1 has a choice in the parity game.
+    Lets discuss this after we've reached the definition of the parity game.
+    I agree that using color is a bad idea and they should be visually distinct instead.
+    I was thinking something like:
+
+    ```
+            xxx                                        xxx                                
+    ------------------------------------①      ------------------------------------② 
+            yyy                                        yyy                                
+    ```
+
+*   > the (ok) rule can be applied when (conflict) can be applied, which is unexpected and strange.
+
+    This is fine. The tableau is non-deterministic, and (ok) is not a leaf,
+    (conflict) will apply eventually. Note that $B$ may not have both an assertion and its negation.
+    I've added a proposition later that states this
+
+*   > "Leaf nodes must be labeled either with unsat or with a sequent where Γ = ∅." This should be a property right?
+ 
+    It's not a property, but a condition.
+    I've made this explicit, and added a proposition that states that a tableau must exist for any guarded pattern.
+
+*   > I feel like it's a bit overkill to allow all these: ...
+
+    wrt `match(x, ph1 /\ ph2)` vs  `match(x, ph1) /\ match(x, ph2)`,
+    How do you feel about saying "we treat match(x, ph1 /\ ph2) as syntactic sugar for match(x, ph1) /\ match(x, ph2)`
+    and only incldue `(and-assertion)` and `(or-assertion)`
+
+    wrt `match(x, ph1) /\ match(x, ph2)` and `match(x, ph1), match(x, ph2), Gamma`.
+    This is a trade off between the complexity of the sequents and the complexity of the (app)
+    rule. (app) is already quite complex so I don't want complicate it further.
+    If we do not use this approach, we would need to do something similar to the (app-1)
+    and (app-2) rules you did in the previous tableau.
+
+    Let's discuss this again once we reach the parity game construction.
+
+ -->
