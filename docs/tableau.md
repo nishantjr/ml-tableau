@@ -432,10 +432,6 @@ Theorem
 
 :   If a guarded pattern has a tableau with a refutation, then it is unsatisfiable.
 
-Theorem
-
-:   Every tableau has either a pre-model or refutation a refutation but not both.
-
 \newpage
 
 # Soundness & Completeness
