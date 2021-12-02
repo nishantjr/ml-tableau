@@ -198,6 +198,9 @@ Definition (Sequent)
        and $\Gamma, \Basic, \Universals, \Elements$ are as above.
     3. $\unsat$
 
+    For a sequent $v$ of the first two forms, we use $\Gamma(v), \Basic(v), \Universals(v)$ and $\Elements(v)$
+    to denote the corresponding component of the sequent.
+
 Informally,
 $\Gamma$ represents the set of assertions whose combined satisfiability we are checking.
 $\Basic$ and $\Universals$ represent assertions we have deemed must hold for the variables in $\Elements$.
@@ -374,7 +377,7 @@ there is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ with if:
   and $a_0 = a_1$, or
 * $v_1$ is constructed by some rule that modifies the assertion $a_0 \in \Gamma$
   and $a_1$ is a newly created assertion, or
-* $a_0 = a_1$ is an assertion in the child $v_1$'s $\Universals$, or
+* $a_0 = a_1$ is an assertion $\Universals(v_1)$, or
 * $v_1$ is constructed by an application of one of the (conflict-*) rules
   and $a_1$ is $\matches{x}{\bot}$ where $x$ is the element variable of the assertion $a_0$, or
 * $v_1$ is constructed by an application of one of the (ok-*) rules,
@@ -417,6 +420,21 @@ Definition (Pre-models & Refutations)
 
     We call a winning strategy for player $0$ a pre-model,
     and a winning strategy for player $1$ a refutation.
+
+In the next sections we prove some important theorems:
+
+Theorem
+
+:   If a guarded pattern has a tableau with a pre-model, then it is satisfiable.
+
+
+Theorem
+
+:   If a guarded pattern has a tableau with a refutation, then it is unsatisfiable.
+
+Theorem
+
+:   Every tableau has either a pre-model or refutation a refutation but not both.
 
 \newpage
 
