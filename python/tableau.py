@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
 from functools import reduce
-from itertools import chain, count, islice, product
-from typing import Any, Callable, Container, Dict, FrozenSet, Iterable, Iterator, List, Tuple, Union, cast
+from itertools import chain, count, filterfalse, islice, product
+from typing import Any, Callable, Container, Dict, FrozenSet, \
+                   Iterable, Iterator, List, Optional, Tuple, Union, cast
 import re
 
 from pml import *
@@ -182,10 +184,415 @@ class ForallAssertion(Assertion):
         return '∀ ' + ','.join(map(lambda p: p.to_utf(), self.bound)) + \
                     ' . ' + self.subassertion.to_utf()
 
+
+def is_existential(alpha: Assertion) -> bool:
+    if not isinstance(alpha, Matches): return False
+    return isinstance(alpha.pattern, (App, Exists))
+
+@dataclass(frozen=False, unsafe_hash=True)
+class Membership:
+    """ Represents the membership of a tuple of constants in a symbols interpretation.
+
+        This is NOT a frozen class to allow for postponing the resolution step as far as
+        possible.
+    """
+
+    symbol:   Symbol
+    elements: Tuple[EVar,...]
+    class Status(Enum):
+        Undecided   = 0
+        Holds       = 1
+        DoesNotHold = 2
+    status: Status = field(compare=False)
+
+    owning_sequent: Optional['Sequent']
+
+class BasicSequent:
+    gamma          : List[Assertion]
+    basics         : List[Membership]
+    universals     : List[ForallAssertion]
+
+    children       : List['Sequent']            = []
+    game_edges     : List[Tuple[ Assertion      # Parent assertion
+                               , 'Sequent'
+                               , Assertion      # Child assertion
+                         ]     ] \
+                   = []
+
+    def __init__(self, gamma:List[Assertion], basics:List[Membership], universals:List[ForallAssertion]) -> None:
+        self.gamma      = gamma
+        self.basics     = basics
+        self.universals = universals
+
+    def get_children(self) -> List['Sequent']:
+        return self.children
+
+    def extend_memberships(self, signature : Signature, vars : List[EVar]) -> None:
+        C = free_evars(self.gamma).union(vars)
+        for (symbol, arity) in signature.items():
+            # TODO: only consider tuples that include something from vars
+            for tuple in product(C, repeat = arity + 1):
+                self.basics += [ Membership( symbol = symbol
+                                           , elements = tuple
+                                           , status = Membership.Status.Undecided
+                                           , owning_sequent = self
+                                           ) ]
+
+    def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
+        non_existential = filterfalse(is_existential, self.gamma)
+        if non_existential:
+            alpha, *_ = self.gamma
+            return self.apply_nonexistential_rule()
+        return self.apply_choose_existentials()
+
+    def apply_choose_existentials(self) -> Tuple[Optional[Membership], List[Sequent]]:
+        for existential in self.gamma:
+            child = ChooseExistentialSeqeunt(existential, self)
+            self.children += [ child ]
+            self.game_edges += [(existential, child, existential)]
+        return (None, self.children)
+
+    def apply_nonexistential_rule(self) -> Tuple[Optional[Membership], List[Sequent]]:
+        assertion, *rest = self.gamma
+        if isinstance(assertion, Matches):
+            p = assertion.pattern
+            if   isinstance(p, (Bottom)):
+                self.children = [ UnsatSequent() ]
+                return (None, [])
+            elif isinstance(p, (Top)):
+                self.children = [BasicSequent(gamma = rest, basics = self.basics, universals = self.universals)]
+                return (None, self.children)
+            assert False
+        return (None, [])
+
+class UnsatSequent:
+    def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
+        return (None, [])
+
+    def get_children(self) -> List['Sequent']:
+        return [self]
+
+@dataclass(frozen=False)
+class ChooseExistentialSeqeunt:
+    alpha   : Assertion
+    parent  : BasicSequent
+
+    def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
+        assert False
+
+    def get_children(self) -> List['Sequent']:
+        assert False
+        return []
+
+Sequent = Union[BasicSequent, UnsatSequent, ChooseExistentialSeqeunt]
+
+class BasicGameNode:
+    assertion:  Assertion
+    sequent:    Sequent
+
+    def __init__(self, assertion: Assertion, sequent: Sequent) -> None:
+        self.assertion = assertion
+        self.sequent = sequent
+
+    def priority(self, def_list: DefList) -> int: 
+        if isinstance(self.sequent, UnsatSequent):
+            return 1
+        if isinstance(self.assertion, Matches):
+            p = self.assertion.pattern
+            if isinstance(p, Top):
+                return 0 # Tops only child is Top, so this can be any even value`
+            if isinstance(p, (Bottom, EVar)) \
+               or (isinstance(p, Not) and isinstance(p.subpattern, EVar)):
+                return 0 # Cannot repeat infinitly on any trace, so value doesn't matter.
+            if isinstance(p, (And, Or, SVar)) \
+               or (isinstance(p, Not) and isinstance(p.subpattern, SVar)):
+                return 2 * len(def_list) + 2 # Not relevant; some other node will have lower or equal priority
+            if isinstance(p, Nu):
+                return 2 * def_list.index(p.negate())
+            if isinstance(p, Mu):
+                return 2 * def_list.index(p) + 1
+            if isinstance(p,  App) and is_atomic_application(p) or \
+               isinstance(p, DApp) and is_atomic_application(p.negate()):
+                # These are equivalent to Top()
+                return 0
+            if isinstance(p, (Exists, App)):
+                return 2 * len(def_list) + 1
+            if     isinstance(p, (Forall, DApp)):
+                return 2 * len(def_list) + 2
+            raise RuntimeError("Unimplemented: " + str(p))
+        if isinstance(self.assertion, ExistsAssertion):
+            return 2 * len(def_list) + 1
+        if isinstance(self.assertion, ForallAssertion):
+            return 2 * len(def_list) + 2
+        if isinstance(self.assertion, (AllOf, AnyOf)):
+            return 2 * len(def_list) + 2 # Not relevant; some other node will have lower or equal priority
+        else:
+            raise RuntimeError("Unimplemented: " + str(self.assertion))
+
+    def player(self) -> int:
+        # If a node has player N, then that player can make a move
+        if isinstance(self.sequent, UnsatSequent):
+            # There is no choice to be made here, so it does not matter whose turn it is.
+            return 0
+        if isinstance(self.assertion, Matches):
+            if isinstance(self.assertion.pattern, (Top, Bottom, Mu, Nu, SVar, EVar)) or \
+               (isinstance(self.assertion.pattern, Not) and isinstance(self.assertion.pattern.subpattern, SVar)) or \
+               (isinstance(self.assertion.pattern, Not) and isinstance(self.assertion.pattern.subpattern, EVar)):
+                # There is no choice to be made here, so it does not matter whose turn it is.
+                return 0
+            if isinstance(self.assertion.pattern, (And, Forall, DApp)):
+                return 1
+            if isinstance(self.assertion.pattern, (Or,  Exists, App)):
+                return 0
+            raise RuntimeError("Unimplemented: " + str(self.assertion.pattern))
+        if isinstance(self.assertion, (AllOf, ForallAssertion)):
+            return 1
+        if isinstance(self.assertion, (AnyOf, ExistsAssertion)):
+            return 0
+        raise RuntimeError("Unimplemented: " + str(self))
+
+    def label(self) -> str:
+        if isinstance(self.sequent, UnsatSequent):
+            return "Unsat"
+        else:
+            return self.assertion.to_utf()
+
+
+    def get_children(self) -> List[GameNode]:
+        assert False
+        pass
+
+@dataclass
+class ResolveGameNode:
+    assertion:  Assertion
+    membership: Membership
+    sequent:    Sequent
+
+    def priority(self, def_list: DefList) -> int:
+        return 2 * len(def_list) + 2 # Not relevant; some other node will have lower or equal priority
+
+    def player(self) -> int:
+        return 0
+
+    def get_children(self) -> List[GameNode]:
+        assert False
+        pass
+
+    def label(self) -> str:
+        return "Resolve on:" + str(self.membership)
+
+GameNode = Union[ BasicGameNode, ResolveGameNode ]
+
+class Tableau:
+    root : BasicSequent
+    def_list : DefList
+
+    def __init__(self, pattern: Pattern, sig: Signature, K: List[EVar]):
+        self.root = BasicSequent( gamma        = [Matches(K[0], pattern)]
+                           , basics       = []
+                           , universals   = []
+                           )
+        self.root.extend_memberships(sig, [K[0]])
+        self.def_list = definition_list(pattern, def_list = [])
+        next_nodes : List[Sequent] = [self.root]
+        while next_nodes:
+            first, *rest = next_nodes
+            (resolve_on, new_nodes) = first.build_children()
+            next_nodes = new_nodes + rest
+            if resolve_on:
+                next_nodes = self.resolve(resolve_on, next_nodes)
+        return
+
+    def resolve(self, membership: Membership, next_nodes : List[Sequent]) -> List[Sequent]:
+        assert False
+
+    def serialize_game(self) -> SerializedParityGame:
+        ret = []
+        serialized_nodes : Dict[GameNode, int] = {}
+
+        def ident(node: GameNode) -> int:
+            if node not in serialized_nodes:
+                serialized_nodes[node] = len(serialized_nodes)
+            return 1 + serialized_nodes[node]
+
+        def pgsolver_priority(node: GameNode) -> int:
+            # While in our paper, we define the lowest priority infinitly recurring sequent
+            # to be the deciding priority, PGSolver considers the highest priority infinitly recurring sequent.
+
+            # Must be greater than max possible priority and an even number.
+            max_priority = 2 * len(self.def_list) + 2
+            return max_priority - node.priority(self.def_list)
+
+        sequent_queue : List[GameNode] = [BasicGameNode(self.root.gamma[0], self.root)]
+        while sequent_queue:
+            parent, *sequent_queue = sequent_queue
+            if parent in serialized_nodes:
+                continue
+            ret += [(ident(parent),
+                     pgsolver_priority(parent),
+                     parent.player(),
+                     sorted(list(map(ident, parent.get_children()))),
+                     parent.label()
+                    )]
+            sequent_queue = parent.get_children() + sequent_queue
+        return ret
+
+    """
+    def add( self
+           , assertion: Assertion
+           , C: FrozenSet[EVar]
+           , K: List[EVar]
+           , def_list: DefList
+           ) -> None:
+        next : Assertion
+
+        if isinstance(assertion, Matches):
+            p = assertion.pattern
+            if   isinstance(p, (Bottom)):
+                self.satisfiable = False
+                return
+            elif isinstance(p, (Top)):
+                self.internal_edges += [(assertion, assertion)]
+            elif isinstance(p, EVar):
+                if assertion.variable != p:
+                    next = Matches(assertion.variable, Bottom())
+                    self.internal_edges += [(assertion, next)]
+                    self.add(next, C, K, def_list)
+                    return
+                else:
+                    self.internal_edges += [(assertion, assertion)]
+                    return
+            elif isinstance(p, Not) and isinstance(p.subpattern, EVar): # x \in Not(y)
+                if assertion.variable == p.subpattern: # if x \in Not(x)
+                    next = Matches(assertion.variable, Bottom())
+                    self.internal_edges += [(assertion, next)]
+                    self.add(next, C, K, def_list)
+                    return
+                else: # x \in Not(y)
+                    self.internal_edges += [(assertion, assertion)]
+                    return
+
+            elif isinstance(p, App):
+                if (is_atomic_application(p)):
+                    membership = Membership( p.symbol
+                                           , tuple([assertion.variable, *cast(Iterable[EVar], p.arguments)])
+                                           , Membership.Status.Holds
+                                           )
+                    if membership in self.memberships:
+                        self.internal_edges += [(assertion, assertion)]
+                        return
+                    else:
+                        next = Matches(assertion.variable, Bottom())
+                        self.internal_edges += [(assertion,next), (assertion.negate(), next)]
+                        self.add(next, C, K , def_list)
+                        return
+
+                bound_vars = list(take(len(p.arguments), diff(K, C)))
+                next = ExistsAssertion(frozenset(bound_vars)
+                                      , AllOf(frozenset( [ Matches( assertion.variable, App(p.symbol, *bound_vars)) ]
+                                                       + [ Matches(bound, arg) for (bound, arg) in zip(bound_vars, p.arguments) ]
+                                      )      )         )
+                self.internal_edges += [(assertion, next)]
+                self.add(next, C, K, def_list)
+                return
+            elif isinstance(p, DApp):
+                if (is_atomic_application(p.negate())):
+                    membership = Membership( p.symbol
+                                           , tuple([assertion.variable, *cast(Iterable[EVar], p.negate().arguments)])
+                                           , Membership.Status.DoesNotHold
+                                           )
+                    if membership in self.memberships:
+                        self.internal_edges += [(assertion, assertion)]
+                        return
+                    else:
+                        next = Matches(assertion.variable, Bottom())
+                        self.internal_edges += [(assertion,next), (assertion.negate(), next)]
+                        self.add(next, C, K , def_list)
+                        return
+
+                bound_vars = list(take(len(p.arguments), diff(K, C)))
+                next  = ForallAssertion( frozenset(bound_vars)
+                                       , AnyOf(frozenset( [ Matches( assertion.variable, App(p.symbol, *bound_vars).negate()) ]
+                                                        + [ Matches(bound, arg) for (bound, arg) in zip(bound_vars, p.arguments) ]
+                                       )      )         )
+                self.internal_edges += [(assertion, next)]
+                self.add(next , C, K , def_list)
+                return
+            elif isinstance(p, And):
+                next = AllOf(frozenset([ Matches(assertion.variable, p.left), Matches(assertion.variable, p.right) ]))
+                self.internal_edges += [(assertion, next)]
+                self.add(next , C, K , def_list)
+                return
+            elif isinstance(p, Or):
+                next = AnyOf(frozenset([ Matches(assertion.variable, p.left), Matches(assertion.variable, p.right)]))
+                self.internal_edges += [(assertion, next)]
+                self.add(next , C, K , def_list)
+                return
+            elif isinstance(p, (Nu, Mu)):
+                next = Matches(assertion.variable, unfold(p, def_list))
+                if (assertion, next) in self.internal_edges:
+                    return
+                self.internal_edges += [(assertion, next)]
+                self.add(next, C, K, def_list)
+                return
+            elif isinstance(p, SVar) and isinstance(p.name, int): # Only consider bound `SVar`s.
+                next = Matches(assertion.variable, def_list[p.name])
+                self.internal_edges += [(assertion, next)]
+                self.add(next, C, K, def_list)
+                return
+            elif isinstance(p, Not) and isinstance(p.subpattern, SVar) and isinstance(p.subpattern.name, int): # Only consider bound `SVar`s.
+                next = Matches(assertion.variable, def_list[p.subpattern.name].negate())
+                self.internal_edges += [(assertion, next)]
+                self.add(next, C, K, def_list)
+                return
+            else:
+                raise RuntimeError("Unimplemented: " + str(assertion))
+        elif isinstance(assertion, AllOf):
+            for a in assertion.assertions:
+                node.internal_edges += [(assertion, a)]
+                self.add(a, C, K, def_list)
+            return
+        elif isinstance(assertion, AnyOf):
+            ret = []
+            for a in assertion.assertions:
+                ret += add_to_closure(a, partial_closure, partial_edges + [(assertion, a)], C, K, def_list)
+            ret
+            return
+        elif isinstance(assertion, ExistsAssertion):
+            self.existentials += [assertion]
+            return
+        elif isinstance(assertion, ForallAssertion):
+            self.universals += [assertion]
+            bound = list(assertion.bound)
+            for instantiation in product(C, repeat = len(assertion.bound)):
+                new_closures = []
+                for (closure, edges) in curr_closures:
+                    next = assertion.subassertion.substitute_multi(bound, instantiation)
+                    new_closures += add_to_closure( next
+                                                  , closure
+                                                  , edges + [(assertion, next)]
+                                                  , C, K, def_list)
+                curr_closures = new_closures
+            return curr_closures
+        else:
+            raise RuntimeError("Unimplemented: " + str(assertion))
+
+    def free_evars(self) -> FrozenSet[EVar]:
+        ret : FrozenSet[EVar] = frozenset()
+        for assertion in chain(self.existentials, self.universals):
+            ret = ret.union(assertion.free_evars())
+        for membership in self.memberships:
+            ret = ret.union(membership.elements)
+        return ret
+    """
+
+# ----
+
 Closure = FrozenSet[Union[Matches, ForallAssertion, ExistsAssertion]]
-def free_evars(cl: Closure) -> FrozenSet[EVar]:
+
+def free_evars(assertions: Iterable[Assertion]) -> FrozenSet[EVar]:
     ret : FrozenSet[EVar] = frozenset()
-    for assertion in cl:
+    for assertion in assertions:
         ret = ret.union(assertion.free_evars())
     return ret
 
@@ -197,6 +604,11 @@ class PGNode():
 @dataclass(frozen=True)
 class Unsat():
     pass
+
+PGNodeGeneralized = Union[PGNode, Unsat]
+ParityGame = Dict[PGNodeGeneralized, FrozenSet[PGNodeGeneralized]]
+SerializedParityGameEntry = Tuple[int, int, int, List[int], str]
+SerializedParityGame = List[SerializedParityGameEntry]
 
 def instantiations( length: int
                   , curr_assertion: FrozenSet[EVar]
@@ -223,116 +635,6 @@ def instantiations_lists(length: int, curr: List[EVar], avail: List[EVar]) -> It
     for tuple in instantiations_lists(length - 1, curr + [avail[0]], avail[1:]):
         yield (avail[0], *tuple)
     return
-
-
-
-PGNodeGeneralized = Union[PGNode, Unsat]
-
-ParityGame = Dict[PGNodeGeneralized, FrozenSet[PGNodeGeneralized]]
-SerializedParityGameEntry = Tuple[int, int, int, List[int], str]
-SerializedParityGame = List[SerializedParityGameEntry]
-
-Tableau = Dict[Closure, FrozenSet[Closure]]
-
-def serialize_parity_game(root: PGNodeGeneralized, edges: ParityGame, def_list: DefList) -> SerializedParityGame:
-    ret = []
-    keys = dict(zip(edges.keys(), range(0, len(edges))))
-
-    def ident(node: PGNodeGeneralized) -> int:
-        if isinstance(node, Unsat):
-            return 1
-        if node in keys:
-            return 2 + keys[node]
-        print(hash(node), label(node))
-        return hash(node)
-        raise RuntimeError("Trace terminates at node: " + str(node))
-
-    def priority(node: PGNodeGeneralized, def_list: DefList) -> int:
-        # If the lowest priority infinitly recurring node has even priority, player 0  wins (pattern is sat).
-        # Otherwise player 1 wins (pattern is unsat).
-
-        if isinstance(node, Unsat):
-            return 1
-        if isinstance(node.assertion, Matches):
-            p = node.assertion.pattern
-            if isinstance(p, Top):
-                return 0 # Tops only child is Top, so this can be any even value`
-            if isinstance(p, (Bottom, EVar)) \
-               or (isinstance(p, Not) and isinstance(p.subpattern, EVar)):
-                return 0 # Cannot repeat infinitly on any trace, so value doesn't matter.
-            if isinstance(p, (And, Or, SVar)) \
-               or (isinstance(p, Not) and isinstance(p.subpattern, SVar)):
-                return 2 * len(def_list) + 2 # Not relevant; some other node will have lower or equal priority
-            if isinstance(p, Nu):
-                return 2 * def_list.index(p.negate())
-            if isinstance(p, Mu):
-                return 2 * def_list.index(p) + 1
-            if isinstance(p,  App) and is_atomic_application(p) or \
-               isinstance(p, DApp) and is_atomic_application(p.negate()):
-                # These are equivalent to Top()
-                return 0
-            if isinstance(p, (Exists, App)):
-                return 2 * len(def_list) + 1
-            if     isinstance(p, (Forall, DApp)):
-                return 2 * len(def_list) + 2
-            raise RuntimeError("Unimplemented: " + str(p))
-        if isinstance(node.assertion, ExistsAssertion):
-            return 2 * len(def_list) + 1
-        if isinstance(node.assertion, ForallAssertion):
-            return 2 * len(def_list) + 2
-        if isinstance(node.assertion, (AllOf, AnyOf)):
-            return 2 * len(def_list) + 2 # Not relevant; some other node will have lower or equal priority
-        else:
-            raise RuntimeError("Unimplemented: " + str(node.assertion))
-
-    def pgsolver_priority(node: PGNodeGeneralized, def_list: DefList) -> int:
-        # While in our paper, we define the lowest priority infinitly recurring node
-        # to be the deciding priority, PGSolver considers the highest priority infinitly recurring node.
-
-        # Must be greater than max possible priority and an even number.
-        max_priority = 2 * len(def_list) + 2
-        return max_priority - priority(node, def_list)
-
-    def player(node: PGNodeGeneralized) -> int:
-        # If a node has player N, then that player can make a move
-        if isinstance(node, (Unsat)):
-            # There is no choice to be made here, so it does not matter whose turn it is.
-            return 0
-        if isinstance(node.assertion, Matches):
-            if isinstance(node.assertion.pattern, (Top, Bottom, Mu, Nu, SVar, EVar)) or \
-               (isinstance(node.assertion.pattern, Not) and isinstance(node.assertion.pattern.subpattern, SVar)) or \
-               (isinstance(node.assertion.pattern, Not) and isinstance(node.assertion.pattern.subpattern, EVar)):
-                # There is no choice to be made here, so it does not matter whose turn it is.
-                return 0
-            if isinstance(node.assertion.pattern, (And, Forall, DApp)):
-                return 1
-            if isinstance(node.assertion.pattern, (Or,  Exists, App)):
-                return 0
-            raise RuntimeError("Unimplemented: " + str(node.assertion.pattern))
-        if isinstance(node.assertion, (AllOf, ForallAssertion)):
-            return 1
-        if isinstance(node.assertion, (AnyOf, ExistsAssertion)):
-            return 0
-        raise RuntimeError("Unimplemented: " + str(node))
-
-    def label(node: PGNodeGeneralized) -> str:
-        if isinstance(node, Unsat):
-            return "Unsat"
-        else:
-            free = [v.name for v in free_evars(node.closure)]
-            apps  = [a.to_utf() for a in node.closure if isinstance(a, Matches) and isinstance(a.pattern, App) and is_atomic_application(a.pattern)]
-            dapps = [a.to_utf() for a in node.closure if isinstance(a, Matches) and isinstance(a.pattern, DApp) and is_atomic_application(a.pattern.negate())]
-            return node.assertion.to_utf() + '\\nfree: ' + ','.join(free) + ';\\nApps: ' +  ','.join(apps) + ';\\nDApps: ' +  ','.join(dapps)
-
-    ret = [(0, 0, 0, [ident(root)], "root")] # Bug in PGSolver requires root == 0
-    for source, destinations in edges.items():
-        ret += [(ident(source),
-                 pgsolver_priority(source, def_list),
-                 player(source),
-                 sorted(list(map(ident, destinations))),
-                 label(source)
-                )]
-    return ret
 
 run = 0
 def run_pgsolver(game: SerializedParityGame) -> bool:
@@ -364,185 +666,10 @@ def run_pgsolver(game: SerializedParityGame) -> bool:
 
     return match.group(1) == '0'
 
-PartialEdges = List[Tuple[Assertion, Assertion]]
-
 def is_atomic_application(app : App) -> bool:
     return all(map(lambda arg: isinstance(arg, EVar), app.arguments))
 
-def add_to_closures( assertion: Assertion
-                   , closures: List[Tuple[Closure, PartialEdges]]
-                   , C: FrozenSet[EVar]
-                   , K: List[EVar]
-                   , def_list: DefList
-                   ) -> List[Tuple[Closure, PartialEdges]]:
-    return  list(flat_map( lambda cl_pe: add_to_closure(assertion, *cl_pe, C, K, def_list)
-                         , closures
-                )        )
-
-def add_to_closure( assertion: Assertion
-                  , partial_closure: Closure
-                  , partial_edges: PartialEdges
-                  , C: FrozenSet[EVar]
-                  , K: List[EVar]
-                  , def_list: DefList
-                  ) -> List[Tuple[Closure, PartialEdges]]:
-    next : Assertion
-
-    if assertion in partial_closure:
-        return [(partial_closure, partial_edges)]
-
-    if isinstance(assertion, Matches):
-        p = assertion.pattern
-        if   isinstance(p, (Bottom)):
-            return []
-        elif isinstance(p, (Top)):
-            return [( partial_closure
-                    , partial_edges + [(assertion, assertion)]
-                    )]
-        elif isinstance(p, EVar):
-            if assertion.variable != p:
-                return add_to_closure( Matches(assertion.variable, Bottom())
-                                     , partial_closure
-                                     , partial_edges + [(assertion, Matches(assertion.variable, Bottom()))]
-                                     , C, K
-                                     , def_list)
-            return [( partial_closure.union([assertion])
-                    , partial_edges + [(assertion, assertion)]
-                    )]
-        elif isinstance(p, Not) and isinstance(p.subpattern, EVar):
-            if Matches(assertion.variable, p.negate()) in partial_closure:
-                return add_to_closure( Matches(assertion.variable, Bottom())
-                                     , partial_closure
-                                     , partial_edges + [(assertion, Matches(assertion.variable, Bottom()))]
-                                     , C, K
-                                     , def_list)
-            return [(partial_closure, partial_edges)]
-        elif isinstance(p, App):
-            if (is_atomic_application(p)):
-                partial_closure = partial_closure.union([assertion])
-                if assertion.negate() in partial_closure:
-                    next = Matches(assertion.variable, Bottom())
-                    return add_to_closure( next
-                                         , partial_closure, partial_edges + [(assertion,next), (assertion.negate(), next)]
-                                         , C, K , def_list)
-                partial_edges = partial_edges + [(assertion, assertion)]
-                return [(partial_closure, partial_edges)]
-
-            bound_vars = list(take(len(p.arguments), diff(K, C)))
-            next = ExistsAssertion(frozenset(bound_vars)
-                                  , AllOf(frozenset( [ Matches( assertion.variable, App(p.symbol, *bound_vars)) ]
-                                                   + [ Matches(bound, arg) for (bound, arg) in zip(bound_vars, p.arguments) ]
-                                  )      )         )
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        elif isinstance(p, DApp):
-            if (is_atomic_application(p.negate())):
-                partial_closure = partial_closure.union([assertion])
-                if assertion.negate() in partial_closure:
-                    next = Matches(assertion.variable, Bottom())
-                    return add_to_closure( next
-                                         , partial_closure, partial_edges + [(assertion,next), (assertion.negate(), next)]
-                                         , C, K , def_list)
-                partial_edges = partial_edges + [(assertion, assertion)]
-                return [(partial_closure, partial_edges)]
-
-            bound_vars = list(take(len(p.arguments), diff(K, C)))
-            next  = ForallAssertion( frozenset(bound_vars)
-                                   , AnyOf(frozenset( [ Matches( assertion.variable, App(p.symbol, *bound_vars).negate()) ]
-                                                    + [ Matches(bound, arg) for (bound, arg) in zip(bound_vars, p.arguments) ]
-                                   )      )         )
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        elif isinstance(p, And):
-            next = AllOf(frozenset([ Matches(assertion.variable, p.left), Matches(assertion.variable, p.right) ]))
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        elif isinstance(p, Or):
-            next = AnyOf(frozenset([ Matches(assertion.variable, p.left), Matches(assertion.variable, p.right)]))
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        elif isinstance(p, (Nu, Mu)):
-            next = Matches(assertion.variable, unfold(p, def_list))
-            if (assertion, next) in partial_edges:
-                return [(partial_closure, partial_edges)]
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        elif isinstance(p, SVar) and isinstance(p.name, int): # Only consider bound `SVar`s.
-            next = Matches(assertion.variable, def_list[p.name])
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        elif isinstance(p, Not) and isinstance(p.subpattern, SVar) and isinstance(p.subpattern.name, int): # Only consider bound `SVar`s.
-            next = Matches(assertion.variable, def_list[p.subpattern.name].negate())
-            return add_to_closure( next
-                                 , partial_closure
-                                 , partial_edges + [(assertion, next)]
-                                 , C, K
-                                 , def_list
-                                 )
-        else:
-            raise RuntimeError("Unimplemented: " + str(assertion))
-    elif isinstance(assertion, AllOf):
-        curr_closures = [(partial_closure, partial_edges)]
-        for a in assertion.assertions:
-            new_closures = []
-            for (closure, edges) in curr_closures:
-                new_closures += add_to_closure( a
-                                              , closure
-                                              , edges + [(assertion, a)]
-                                              , C, K
-                                              , def_list
-                                              )
-            curr_closures = new_closures
-        return curr_closures
-    elif isinstance(assertion, AnyOf):
-        ret = []
-        for a in assertion.assertions:
-            ret += add_to_closure(a, partial_closure, partial_edges + [(assertion, a)], C, K, def_list)
-        return ret
-    elif isinstance(assertion, ExistsAssertion):
-        return [( partial_closure.union([assertion])
-                , partial_edges + [(assertion, assertion)]
-                )]
-    elif isinstance(assertion, ForallAssertion):
-        curr_closures = [(partial_closure.union([assertion]), partial_edges + [(assertion, assertion)])]
-        bound = list(assertion.bound)
-        for instantiation in product(C, repeat = len(assertion.bound)):
-            new_closures = []
-            for (closure, edges) in curr_closures:
-                next = assertion.subassertion.substitute_multi(bound, instantiation)
-                new_closures += add_to_closure( next
-                                              , closure
-                                              , edges + [(assertion, next)]
-                                              , C, K, def_list)
-            curr_closures = new_closures
-        return curr_closures
-    else:
-        raise RuntimeError("Unimplemented: " + str(assertion))
-
+"""
 def complete_closures_for_signature( closures: List[Tuple[Closure, PartialEdges]]
                                    , C: FrozenSet[EVar]
                                    , K: List[EVar]
@@ -562,7 +689,9 @@ def complete_closures_for_signature( closures: List[Tuple[Closure, PartialEdges]
                 new_closures += y
             closures = new_closures
     return closures
+"""
 
+"""
 def instantiate_universals( closures: List[Tuple[Closure, PartialEdges]]
                           , C: FrozenSet[EVar]
                           , K: List[EVar]
@@ -577,101 +706,14 @@ def instantiate_universals( closures: List[Tuple[Closure, PartialEdges]]
             curr_closures = add_to_closures(universal, curr_closures, C, K, def_list)
         ret += curr_closures
     return ret
+"""
 
-def build_games( closures: List[Tuple[Closure, PartialEdges]]
-               , parity_game: ParityGame
-               ) -> List[Tuple[Closure, ParityGame]]:
-    ret : List[Tuple[Closure, ParityGame]] = []
-    for (closure, partial_edges) in closures:
-        game = parity_game.copy()
-        for (source, dest) in partial_edges:
-            source_node = PGNode(source, closure)
-            game[source_node] = game.get(source_node, frozenset()).union([PGNode(dest, closure)])
-        ret += [(closure, game)]
-    return ret
-
-def build_tableaux( curr_closure: Closure
-                  , curr_partial_tableau: Tableau
-                  , curr_partial_game : ParityGame
-                  , K: List[EVar]
-                  , signature: Signature
-                  , def_list : DefList
-                  ) -> Iterator[Tuple[Tableau, ParityGame]]:
-    if curr_closure in curr_partial_tableau.keys():
-        yield (curr_partial_tableau,  curr_partial_game)
-        return
-
-    tableau_games : Iterable[Tuple[Tableau, ParityGame]] = [(curr_partial_tableau, curr_partial_game)]
-    for existential in (a for a in curr_closure if isinstance(a, ExistsAssertion)):
-        for (partial_tableau, partial_game) in tableau_games:
-            bound = list(existential.bound)
-
-            new_tableau_games : Iterable[Tuple[Tableau, ParityGame]] = []
-            prev_instantiations_negated : FrozenSet[Assertion] = frozenset()
-
-            for instantiation in instantiations(len(bound), existential.free_evars(), free_evars(curr_closure), K):
-                new_assertion = existential.subassertion.substitute_multi(list(bound), instantiation)
-                build_new_node = not new_assertion.free_evars() <= free_evars(curr_closure) # Partial order, not equivalent to >
-                new_closure: Closure
-                C = new_assertion.free_evars()
-                new_closures : List[Tuple[Closure, PartialEdges]] = [(frozenset(), [])]
-                for assertion in curr_closure:
-                    if not assertion.free_evars() <= C: # Beware, not a total order.
-                        continue
-                    if not  isinstance(assertion, ForallAssertion) \
-                         or ( isinstance(assertion, ExistsAssertion) and not assertion == existential) \
-                         or (     isinstance(assertion, Matches)
-                              and ( (isinstance(assertion.pattern, App)  and is_atomic_application(assertion.pattern))
-                                or (isinstance(assertion.pattern, DApp) and is_atomic_application(assertion.pattern.negate()))
-                                 )
-                            ):
-                        continue
-                    new_closures = add_to_closures(assertion, new_closures, C, K, def_list)
-
-                new_closures = add_to_closures(new_assertion, new_closures, C, K, def_list)
-                new_closures = add_to_closures(AllOf(prev_instantiations_negated), new_closures, C, K, def_list)
-                prev_instantiations_negated = prev_instantiations_negated.union([new_assertion.negate()])
-                new_closures = instantiate_universals(new_closures, C, K, def_list)
-                new_closures = complete_closures_for_signature( new_closures
-                                                              , C
-                                                              , K
-                                                              , signature
-                                                              , def_list
-                                                              )
-
-                for (new_closure, new_game) in build_games(new_closures, partial_game):
-                    source_node = PGNode(existential,   curr_closure)
-                    dest_node   = PGNode(new_assertion, new_closure)
-                    new_tableau = partial_tableau.copy()
-                    connect_new_tableau_node(source_node, dest_node, new_tableau, new_game)
-                    new_tableau_games = chain(new_tableau_games, build_tableaux(new_closure, new_tableau, new_game, K, signature, def_list))
-            tableau_games = new_tableau_games
-    yield from tableau_games
-
-def connect_new_tableau_node(source_node: PGNode, dest_node: PGNode, tableau: Tableau, game: ParityGame) -> None:
-    # modifies tableau, game
-    tableau[source_node.closure] = frozenset([dest_node.closure])
-
-    game[source_node] = game.get(source_node, frozenset()).union([dest_node])
-    if source_node.closure == dest_node.closure:
-        return
-    for common in source_node.closure.intersection(dest_node.closure):
-        print('common', common.to_utf())
-        node_of_common_assertion = PGNode(common, source_node.closure)
-        game[node_of_common_assertion] = game.get(node_of_common_assertion, frozenset()).union([PGNode(common, dest_node.closure)])
-
-def is_sat(pattern: Pattern, K: List[EVar], signature: Signature) -> bool:
+def is_sat(pattern: Pattern, K: List[EVar], sig: Signature) -> bool:
     print('---- is_sat')
     pattern = pattern.to_positive_normal_form()
-    def_list : DefList = definition_list(pattern, def_list = [])
-    assertion = ExistsAssertion(frozenset({K[0]}), Matches(K[0], pattern))
-    root = frozenset({assertion})
-    root_pgnode = PGNode(assertion, root)
-    tableau_games = build_tableaux(root, {}, {}, K, signature, def_list)
-    for (tableau, game) in tableau_games:
-        game[Unsat()] = frozenset({Unsat()})
-        serialized = serialize_parity_game(root_pgnode, game, def_list)
-        if run_pgsolver(serialized):
-            return True
+    tableau = Tableau(pattern, sig, K)
+    serialized = tableau.serialize_game()
+    if run_pgsolver(serialized):
+        return True
     return False
 
