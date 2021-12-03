@@ -160,16 +160,11 @@ Definition (Assertion)
     2.  a disjunction of assertions: $\alpha_1 \lor \alpha_2$
 
 Informally, assertions allow us to capture that a element in the model matches a pattern.
-*Basic* assertions, directly specify the relational interpretation of each symbol.
 
-Definition (Restriction)
-
-:   The *free variables* of an assertion $\matches{x}{\phi}$ are $\{x\} \union \free\phi$.
-    For conjunctions and disjunctions of assertion, it is the union of the free variables
-    in each sub-pattern.
-    For a set of assertions $A$ and a set of element variables $E$,
-    the restriction of $A$ to $E$, denoted $A|_{E}$,
-    is the subset of assertion in $A$ whose free variables are a subset of $E$.
+From here on, we treat $\matches{x}{\phi_1\lor\phi_2}$ as equivalent to 
+$\matches{x}{\phi_1} \lor \matches{x}{\phi_2}$.
+and $\matches{x}{\phi_1\land\phi_2}$ as equivalent to 
+$\matches{x}{\phi_1} \land \matches{x}{\phi_2}$.
 
 Definition (Basic assertions)
 :   *Basic assertions* are assertions of the form:
@@ -179,12 +174,17 @@ Definition (Basic assertions)
 
     where each $x_i$ is an element variable.
 
-    \todo{XC: Do you prefer $\matches{x_0}{\sigma(x_1, ... x_n)}$ or $\matches{x}{\sigma(y_1, ... y_n)}$?}
+*Basic* assertions, capture the relational interpretation of each symbol
+and directly specify (portions) of the model.
 
-From here on, we treat $\matches{x}{\phi_1\lor\phi_2}$ as equivalent to 
-$\matches{x}{\phi_1} \lor \matches{x}{\phi_2}$.
-and $\matches{x}{\phi_1\land\phi_2}$ as equivalent to 
-$\matches{x}{\phi_1} \land \matches{x}{\phi_2}$.
+Definition (Restriction)
+
+:   The *free variables* of an assertion $\matches{x}{\phi}$ are $\{x\} \union \free\phi$.
+    For conjunctions and disjunctions of assertion, it is the union of the free variables
+    in each sub-pattern.
+    For a set of assertions $A$ and a set of element variables $E$,
+    the restriction of $A$ to $E$, denoted $A|_{E}$,
+    is the subset of assertion in $A$ whose free variables are a subset of $E$.
 
 Definition (Sequent)
 :   A *sequent* is:
@@ -246,9 +246,9 @@ Definition (Tableau)
                                               {\sequent{ \matches{z}{\phi}, \matches{w}{\psi},  \Gamma; \Basic; \Universals; \Elements}}
 \\
 \name{or} &
-                                  \satrulebin{\sequent{  \matches{z}{\phi} \lor \matches{w}{\psi}, \Gamma; \Basic; \Universals; \Elements }}
-                                              {\sequent{ \matches{z}{\phi}, \Gamma; \Basic; \Universals; \Elements }}
-                                              {\sequent{ \matches{z}{\psi},  \Gamma; \Basic; \Universals; \Elements }}
+                                  \satrulebin{\sequent{ \matches{z}{\phi} \lor \matches{w}{\psi}, \Gamma; \Basic; \Universals; \Elements }}
+                                             {\sequent{ \matches{z}{\phi}, \Gamma; \Basic; \Universals; \Elements }}
+                                             {\sequent{ \matches{w}{\psi}, \Gamma; \Basic; \Universals; \Elements }}
 \\
 \name{def}                      & \pruleun{\sequent{ \matches{z}{\kappa X . \phi(X)}, \Gamma; \Basic; \Universals; \Elements }}
                                   {\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }} \\
@@ -262,22 +262,22 @@ Definition (Tableau)
                                           {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }} \\
                                 & \text{when $D := \nu X. \phi \in \deflist$ }
 \\
-\name{dapp} &
+\name{\dapp} &
 \unsatruleun{\sequent{ \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Gamma; \Basic; \Universals; \Elements}}
             { \sequent{ \mathrm{inst} \union \Gamma;
                         \Basic;
                         \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Universals;
                         \Elements } }
 \qquad \text{when $\matches{z}{\bar \sigma(\bar \phi)}$ is not a basic assertion.} \\
-  & \text{where $\mathrm{inst} = \left\{ \matches{z}{\sigma(\bar y)} \limplies \lOr_i \matches{y_i}{\phi_i}
+  & \text{where $\mathrm{inst} = \left\{ \matches{z}{\fnot{\sigma(\bar y)}} \lor \lOr_i \matches{y_i}{\phi_i}
                                     \mid \bar y \subset \Elements \right\}$} \\
 \\
-\name{forall}                   & \unsatruleun { \sequent{ \matches{z}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Basic; \Universals; \Elements} }
+\name{forall}                   & \unsatruleun { \sequent{ \matches{z}{\forall \bar x \ldotp \phi}, \Gamma; \Basic; \Universals; \Elements} }
                                                { \sequent{ \mathrm{inst} \union \Gamma
                                                          ; \Basic
                                                          ; \matches{z}{\forall \bar x \ldotp \phi}, \Universals
                                                          ; \Elements
-                                                         ; ... } } \\
+                                                         } } \\
                                 & \text{where $\mathrm{inst} = \{ \matches{z}{ \phi[\bar y / \bar x]} \mid \bar y \subset \Elements \}$}
 \\
 \cline{1-3}
@@ -288,7 +288,7 @@ are either existentials or applications}
              {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals; \Elements } \mid \text{for each $\alpha \in \Gamma$}\}}
    \\ 
 \name{app} &
-  \satruleun { \matches{z}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Elements } }
+  \satruleun { \matches{z}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Universals ; \Elements } }
              { \{ \sequent{ \matches{z}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \} ; \Elements'  } \} } \\
   & \text{for each $\bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements)$} \\
   & \text{where} \\
@@ -311,11 +311,11 @@ are either existentials or applications}
 \cline{1-3}
 \intertext{This rule may only apply (as many times as needed) immediately after the (exists)/(app) rules or on the root node.
 $\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
-\name{resolve} & \satrulebin{\sequent{\Gamma; \Basic; \Universals; \Elements}}
-                            {\sequent{ \Gamma; \matches{z}{\sigma(\bar a)} \union \Basic; \Universals; \Elements}}
-                            {\sequent{ \Gamma; \matches{z}{\lnot\sigma(\bar a)} \union \Basic; \Universals; \Elements}} \\
-               & \text{when neither $\matches{z}{{\sigma(\bar a)}}$ nor $\matches{z}{\fnot{\sigma(\bar a)}}$ are in $\Basic$} \\
-               & \text{and  $\{z\}\union \bar a \subset \Elements$ and $(\{z\}\union \bar a)\intersection \mathsf{fresh} \neq \emptyset$.} \\
+\name{resolve} & \satrulebin{\sequent{ \Gamma; \Basic; \Universals; \Elements}}
+                            {\sequent{ \Gamma; \matches{x_0}{\sigma(x_1,\ldots,x_n)}      \union \Basic; \Universals; \Elements}}
+                            {\sequent{ \Gamma; \matches{x_0}{\lnot\sigma(x_1,\ldots,x_n)} \union \Basic; \Universals; \Elements}} \\
+               & \text{when neither $\matches{x}{{\sigma(x_1,\ldots,x_n)}}$ nor $\matches{x}{\fnot{\sigma(x_1,\ldots,x_n)}}$ are in $\Basic$} \\
+               & \text{and  $\bar x \subset \Elements$ and $\bar x \intersection \mathsf{fresh} \neq \emptyset$.} \\
 \\
 \cline{1-3}
 \end{align*}
@@ -394,7 +394,7 @@ A position $p = (a, v)$ is in $\Pos_0$ by rules with a \green{green} rule. That 
 
 A position $p = (a, v)$ is in $\Pos_1$ by rules with a \blue{blue} rule. That is if:
 
-  1. $v$'s children were built using (and), (dapp), (forall), or (choose-existential) rules
+  1. $v$'s children were built using (and), (\dapp), (forall), or (choose-existential) rules
      and $a$ was the assertion matched on by that rule;
   2. $v$ has $\Gamma = \emptyset$.
 
@@ -614,7 +614,7 @@ Proof
     If an (resolve), (or), or (and) nodes occur infinitely often,
     some other node of lower parity must also occur infinitely often.
     Consider the lowest priority node that occurs inifinitely often.
-    If it is a (nu), (dapp), or (forall), then player $1$ wins.
+    If it is a (nu), (\dapp), or (forall), then player $1$ wins.
     It cannot be a (mu) node since (mu) nodes strictly decrease the measure, a well-founded measure.
     Suppose it is a (exists) or (app)-node (for sake of contradiction).
     Let us consider an (infinite) suffix of the trace that doesn't have any (nu) or (mu) nodes.
@@ -745,7 +745,7 @@ Proof
         If $v = w$ then we choose the corresponding instantiation.
         If $v \neq w$ then choose the child the $v$ on the path to $w$.
 
-    * (dapp): Similar to (forall).
+    * (\dapp): Similar to (forall).
     * In the remaining cases there is no choice.
 
     We must show that the trace constructed above is winning for player $1$.
@@ -834,7 +834,7 @@ Let us take a look refutations through the lens of checking the validity of a pa
                                        { ...\proves \vmatches{e}{\phi[D/X]} } \\
                                 & \text{when $D := \nu X. \phi \in \deflist$ }
 \\
-\name{dapp} &
+\name{\dapp} &
     \vruleun{ \vmatches{e}{\bar\sigma(\bar \phi)} }
             { \mathrm{inst} \union \Gamma; 
               \vmatches{e}{\bar\sigma(\bar \phi)} } \\
@@ -1134,50 +1134,3 @@ Novelties:
 
 ---
 
-<!--
-
-*   > try to put rules in one figure, or many figures. and put the figures at the top.
-
-    Let's handle presentation later?
-    There's a lot of work to put in here, but I'd like focus on the content first. 
-
-*   > why some rules are blue/green? Try avoiding using colors at all.
-
-    The green lines correspond to nodes at which Player 0 has a choice in the parity game.
-    The blue  lines correspond to nodes at which Player 1 has a choice in the parity game.
-    Lets discuss this after we've reached the definition of the parity game.
-    I agree that using color is a bad idea and they should be visually distinct instead.
-    I was thinking something like:
-
-    ```
-            xxx                                        xxx
-    ------------------------------------⓪      ------------------------------------①
-            yyy                                        yyy
-    ```
-
-*   > the (ok) rule can be applied when (conflict) can be applied, which is unexpected and strange.
-
-    This is fine. The tableau is non-deterministic, and (ok) is not a leaf,
-    (conflict) will apply eventually. Note that $B$ may not have both an assertion and its negation.
-    I've added a proposition later that states this
-
-*   > "Leaf nodes must be labeled either with unsat or with a sequent where Γ = ∅." This should be a property right?
- 
-    It's not a property, but a condition.
-    I've made this explicit, and added a proposition that states that a tableau must exist for any guarded pattern.
-
-*   > I feel like it's a bit overkill to allow all these: ...
-
-    wrt `match(x, ph1 /\ ph2)` vs  `match(x, ph1) /\ match(x, ph2)`,
-    How do you feel about saying "we treat match(x, ph1 /\ ph2) as syntactic sugar for match(x, ph1) /\ match(x, ph2)`
-    and only incldue `(and-assertion)` and `(or-assertion)`
-
-    wrt `match(x, ph1) /\ match(x, ph2)` and `match(x, ph1), match(x, ph2), Gamma`.
-    This is a trade off between the complexity of the sequents and the complexity of the (app)
-    rule. (app) is already quite complex so I don't want complicate it further.
-    If we do not use this approach, we would need to do something similar to the (app-1)
-    and (app-2) rules you did in the previous tableau.
-
-    Let's discuss this again once we reach the parity game construction.
-
- -->
