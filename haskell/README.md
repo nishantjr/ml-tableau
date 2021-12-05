@@ -1,6 +1,31 @@
 ml-tableau: Decision procedure for guarded matching logic
 =========================================================
 
+See [the matching logic website][ml] for more details on matching logic.
+
+The `Main` module reads a _theory_ and a set of _statements_ from standard
+input and prints out the parsed theory and statements. (Eventually it will
+check and print satisfiability of each statement.)
+
+Given a _signature_ Σ mapping _symbols_ to _arities,_ a _theory_ is a set
+of _axioms_ constraining the _models_ (assignments of _interpretations_ to
+symbols) for the theory. Signatures are currently `symbols` lines listing
+pairs of symbols and their arities. Axioms are not yet supported.
+
+Statements follow the theory and consist of a _check_ followed by a
+_pattern._ Each statement will be checked in turn, once that's implemented.
+The three checks are
+- `sat` or satisfiable: we can show a model for this theory where this
+  pattern evaluates to a non-empty set, i.e. we can find a consistent
+  interpretation for all the symbols and _valuation_ (set of values or
+  _elements_ for the variables).
+- `unsat` or unsatisfiable: the negation of `sat`.
+- `valid` is the dual of `sat`: any interpretation for symbols and all
+  valuations of variables causes the pattern to evaluate to a non-empty
+  set.
+
+See the inputs and expected outputs under `ftest/` for examples.
+
 
 Building and Testing
 --------------------
@@ -38,3 +63,4 @@ them, the usual Stack commands for development are:
 [htf cmd]: https://hackage.haskell.org/package/HTF-0.14.0.3/docs/Test-Framework-CmdlineOptions.html
 [st manual]: https://docs.haskellstack.org/en/stable/install_and_upgrade/#linux
 [stack]: https://docs.haskellstack.org/en/stable/README/
+[ml]: http://www.matching-logic.org/
