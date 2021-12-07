@@ -29,15 +29,14 @@ Definition (Guarded pattern)
        Note that the pattern $x$ is equivalent to $x \land \top$
        and we consider that as matching this criteria.
 
-    3. Each fixedpoint sub-pattern $\mu X \ldotp \phi$ and $\nu X \ldotp \phi$ has no free element variables.
+    3.  \label{item:fixedpoint-no-elements}
+        Each fixedpoint sub-pattern $\mu X \ldotp \phi$ and $\nu X \ldotp \phi$ has no free element variables.
 
 Example
 
 : The pattern $\exists x. c$ is a guarded pattern where $c$ is a nullary symbol.
   Here the guard is the empty conjunction. Since $c$ has no free variables, Condition (\ref{gp:xxx})
   becomes true trivially.
-
-\newpage
 
 # Tableau, Games & Strategies
 
@@ -100,8 +99,10 @@ Definition (Fixedpoint marker)
     be used whereever set variables may be used -- in particular, they may not
     appear negated in positive-form patterns. We define the evaluation of fixedpoint
     makers as the evaluation of their corresponding fixedpoint pattern:
-    $$\evaluation{\deflist^\phi_X}_{M,\rho} = \evaluation{\deflist^\phi(X)}_{M,\rho}$$
+    $$\evaluation{\deflist^\phi_X}^\deflist_{M,\rho} = \evaluation{\deflist^\phi(X)}_{M,\rho}$$
 
+    Since the evaluation of a pattern now also depends on its dependency list,
+    we make the dependency list used explicit by adding it as a superscript as in $\evaluation{\phi}^\deflist_{M,\rho}$.
 
 \newcommand {\dependson}{\prec^\phi}
 
@@ -421,23 +422,28 @@ Definition (Pre-models & Refutations)
     We call a winning strategy for player $0$ a pre-model,
     and a winning strategy for player $1$ a refutation.
 
-In the next sections we prove some important theorems:
+In the next section we prove some important theorems:
 
 Theorem
 
 :   If a guarded pattern has a tableau with a pre-model, then it is satisfiable.
 
-
 Theorem
 
-:   If a guarded pattern has a tableau with a refutation, then it is unsatisfiable.
+:   \label{theorem:validity}
+    If a guarded pattern has a tableau with a refutation, then it is unsatisfiable
+    and its negation is valid.
 
-\newpage
+\hl{Note: The following sections may go in the appendix.}
 
-# Soundness & Completeness
+# Correctness
 
 Below, we define concepts that will be used later for proving the
-soundness and completeness of the procedure.
+above two theorems.
+
+If a pattern is satisfiable in a model, it is satisfiable with finite unfoldings
+of its least fixedpoint patterns.
+We codify this using *approximations* of fixedpoints. 
 
 Definition (Approximations)
 
@@ -450,80 +456,89 @@ Definition (Approximations)
     * $\evaluation{\kappa^{\tau + 1} X\ldotp \alpha(X)}_{M,\rho}
       = \evaluation{\alpha(X)}_{M,\rho[{\kappa^{\tau + 1} X\ldotp \alpha(X)}/X]}$
       where $\kappa$ is either $\mu$ or $\nu$.
-
-    Then we have
-    $\evaluation{\mu X\ldotp \alpha(X)}_{M,\rho} = \Union_{\tau'} \evaluation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$
-    and $\evaluation{\nu X\ldotp \alpha(X)}_{M,\rho} = \Intersection_{\tau'} \evaluation{\mu^0 X\ldotp \alpha(X)}_{M,\rho}$.
-    TODO: We need to prove this.
-
     We extend the notion of definition lists by allowing mappings of the form
-    $D \mapsto \mu^\tau X \ldotp \alpha$
-    and
+    $D \mapsto \mu^\tau X \ldotp \alpha$ and
     $D \mapsto \nu^\tau X \ldotp \alpha$.
+
+A $\mu$-measure of a pattern in a satisfying model encodes the minimum number of unfoldings
+of fixedpoints corresponding to each $\mu$-marker needed for the pattern to be satisfiable.
 
 Definition ($\mu$-measure -- $\umeasure$)
 
-:   For an assertion $\alpha = \matches{e}{\phi}$, a dependency order $\deflist$,
-    a model $M$ and valuation $\rho$ such that $\rho{e} \in \evaluation{alpha}_{M,\rho}$.
-
-    Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-constants occuring in $\deflist$.
-    We define the *$\mu$-measure* of $\alpha$ in $M$ for $\rho$ (or just *measure* for short), $\umeasure(\alpha)_{M,\rho}$
+:   Fix definition list $\deflist$, a dependency order $\dependson$, a model $M$, an evaluation $\rho$ and an assertion $\alpha$.
+    Let $U_{k_1}, U_{k_2}, \ldots, U_{k_n}$ be the $\mu$-markers occuring in $\deflist$
+    ordered by $\dependson$.
+    For $\alpha = \matches{x}{\phi}$ with $\rho(x) \in \evaluation{\phi}^\deflist_{M,\rho}$,
+    we define the *$\mu$-measure* of $\alpha$ in $M$ for $\rho$, $\umeasure_{M,\rho}(\alpha)$,
     to be the least tuple $(\tau_1,\ldots,\tau_n)$
-    such that $\rho(e) \in \evaluation{alpha}_{M,\rho}$
-    where $\deflist'$ is obtained by replacing each $\mu$-constant $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
+    such that $\rho(x) \in \evaluation{\phi_\deflist}^{\deflist'}_{M,\rho}$
+    where $\phi_\deflist$ is the pattern constructed by replacing
+    each fixedpoint pattern in $\phi$ with its marker in $\deflist$,
+    and $\deflist'$ is obtained by replacing each $\mu$-marker $(U_{k_i} \mapsto \mu X\ldotp \alpha_{k_i}(X))$
     with $(U_{k_i} \mapsto \mu^{\tau_i} X\ldotp \alpha_{k_i}(X))$.
+    The $\mu$-measures for conjunctions (resp. disjunctions) of assertions
+    is defined in the obvious way -- it is the least tuple such that every sub-assertion (resp. any sub-assertion)
+    is matched in the model.
 
-## Satisfiability implies a pre-model
+Remark
 
-Lemma
+:   Observe that
+    if an assertion is not satisfied by a model then its measure is not defined,
+    and the measure of an assertion $\phi$ is $0$ in all positions corresponding to a $\nu$-marker$. 
 
-:   Given a tableau there is a pre-model or a refutation, but not both.
 
-Lemma ($\mu$-measures are (non-strictly) decreasing over children in a pre-model)
+Lemma ($\mu$-measures are (non-strictly) decreasing over edges in a pre-model)
 
 :   \label{lemma:measures-decreasing}
     The following facts hold about signatures under a model $M$ and interpretation $\rho$:
 
-    a. If $\matches{e}{\phi\lor\psi}$ has measure $\bar \tau$, then
-       either $\matches{e}{\phi\psi}$ or $\matches{e}{\phi\psi}$
-       has measure $\bar \tau$.
+    a. If $\matches{x}{\phi}\lor\matches{y}{\psi}$ has $\mu$-measure $\bar \tau$, then
+       either $\matches{x}{\phi}$ or $\matches{y}{\psi}$
+       has $\mu$-measure $\bar \tau$.
 
-    b. If $\matches{e}{\exists \bar x \ldotp \phi}$ has measure $\bar \tau$, then
-       there is a tuple $\bar m \subset M$
-       with measure of $\matches{e}{\phi}$ equal to $\bar \tau$
-       for interpretation $\rho[\bar m/\bar x]$.
+    b. If $\matches{x}{\phi}\land\matches{y}{\psi}$ has $\mu$-measure $\bar \tau$, then
+       both $\matches{x}{\phi}$ and $\matches{y}{\psi}$
+       have $\mu$-measure not larger than $\bar \tau$.
 
-    c. If $\matches{e}{\sigma(\bar \phi)}$ has measure $\bar \tau$, then
-       there is a tuple $\bar m \subset M$
-       such that for each $i$,
-       the measure of $\matches{e}{\sigma(\bar x)}\land \matches{x_i}{\phi_i}$ is not bigger than $\bar \tau$
-       for interpretation $\rho[\bar m/\bar x]$.
-
-    d. If $\matches{e}{\phi\land\psi}$ has measure $\bar \tau$, then
-       both $\matches{e}{\phi\psi}$ and $\matches{e}{\phi\psi}$
-       have measure not larger than $\bar \tau$.
-
-    e. If $\matches{e}{\forall \bar x \ldotp \phi}$ has measure $\bar \tau$, then
+    c. If $\matches{x}{\bar\sigma(\bar\phi)}$ has $\mu$-measure $\bar \tau$, then
        for every tuple $\bar m \subset M$
-       we have measure of $\matches{e}{\phi}$ is not larger than $\bar \tau$
+       we have $\mu$-measure of $\matches{x}{\fnot{\sigma(\bar y)}}\lor\lOr_i\matches{x_i}{\phi_i}$ is not larger than $\bar \tau$
        for interpretation $\rho[\bar m/\bar x]$.
 
-    f. If $\matches{e}{\kappa X\ldotp \phi}$ has measure $\bar \tau$,
-       and $\deflist(D_i) = \kappa X\ldotp \phi$ then
-       $\matches{e}{D_i}$ also has measure $\bar \tau$.
+    d. If $\matches{x}{\forall \bar x \ldotp \phi}$ has $\mu$-measure $\bar \tau$, then
+       for every tuple $\bar m \subset M$
+       we have $\mu$-measure of $\matches{x}{\phi}$ is not larger than $\bar \tau$
+       for interpretation $\rho[\bar m/\bar x]$.
 
-    g. If $\matches{e}{D_i}$ has measure $\bar \tau$,
+    e. If $\matches{x}{\sigma(\bar \phi)}$ has $\mu$-measure $\bar \tau$, then
+       there is a tuple $\bar m \subset M$
+       such that
+       the $\mu$-measure of $\matches{x}{\sigma(\bar x)}\land\lAnd_i\matches{x_i}{\phi_i}$ is equal to $\bar \tau$
+       for interpretation $\rho[\bar m/\bar x]$.
+
+    f. If $\matches{x}{\exists \bar y \ldotp \phi}$ has $\mu$-measure $\bar \tau$, then
+       there is a tuple $\bar m \subset M$
+       with $\mu$-measure of $\matches{x}{\phi}$ equal to $\bar \tau$
+       for interpretation $\rho[\bar m/\bar y]$.
+
+    g. If $\matches{x}{\kappa X\ldotp \phi}$ has $\mu$-measure $\bar \tau$,
+       and $\deflist(D_i) = \kappa X\ldotp \phi$ then
+       $\matches{x}{D_i}$ also has $\mu$-measure $\bar \tau$.
+
+    h. If $\matches{x}{D_i}$ has $\mu$-measure $\bar \tau$,
        and $\deflist(D_i) = \mu X\ldotp \phi$ then
-       $\matches{e}{\phi[D_i/X]}$ has measure identical on the first $i - 1$ positions,
+       $\matches{x}{\phi[D_i/X]}$ has $\mu$-measure identical on the first $i - 1$ positions,
        with the $i$th strictly less.
 
-    h. If $\matches{e}{D_i}$ has measure $\bar \tau$,
+    i. If $\matches{x}{D_i}$ has $\mu$-measure $\bar \tau$,
        and $\deflist(D_i) = \nu X\ldotp \phi$ then
-       $\matches{e}{\phi[D_i/X]}$ also has measure $\bar \tau$.
+       $\matches{x}{\phi[D_i/X]}$ also has $\mu$-measure $\bar \tau$.
 
 Proof
 
 :   Same as for guarded fixedpoint logic
+
+## Satisfiability implies a pre-model
 
 Lemma (Satisfiable patterns have pre-models)
 
@@ -533,52 +548,58 @@ $\mathcal G(\mathcal T)$ contains a pre-model.
 
 Proof
 
-:   We will build a strategy for the game by associating each constant in each
-    position $p$ in the constructed strategy with an element in the model
-    through a function $\rho_p$, while maintaining two invariants:
+:   We will build a strategy for the game
+    by selecting positions from the game
+    and associating each free element variable in each position $p = (\alpha, v)$
+    in the selected subtree with an element in the model
+    through a valuation $\rho_p$, while maintaining three invariants:
 
-    1. Under this interpretation the atoms in the sequent are satisfied.
-    2. Every element in a sequent has distinct interpretations.
-    3. The measure does not increase between any parent and child.
+    1. Under this valuation, the assertions in $\Basic(v)$ are satisfied.
+    2. Every free element variable in a sequent has distinct interpretations.
+    3. The measure does not increase between along any edge.
 
     We will then show
-    that the strategy must be a pre-model -- i.e. winning for player 0.
+    that the strategy must be a pre-model -- i.e. it is winning for player $0$.
 
     The root position of the game is labeled with
-    $\mathrm{root} = (\matches{e}{\phi}, \sequent{\matches{e}{\phi}\, \{\}, \{\}, \{e\}})$.
-    Define $\rho_\mathrm{root} := e \mapsto m$
-    and select the root node as part of the strategy.
+    $\mathrm{root} = (\matches{x}{\phi}, \sequent{\matches{x}{\phi}, \emptyset, \emptyset, \{x\}})$.
+    The invariants hold for the root position.
+    Define $\rho_\mathrm{root}(x) = m$
+    and select the root position as part of the strategy.
 
     Consider a selected position $p$:
 
     * Suppose the (resolve) rule was applied at that position
-      on the assertion $\matches{e_0, \sigma(e_1,\ldots,e_n)}$.
-      Then if $\rho_p(c_0) \in \evaluation{\sigma(e_1,\ldots,e_n)}_{\rho_p}$
+      on the assertion $\matches{x_0}{\sigma(x_1,\ldots,x_n)}$.
+      Then if $\rho_p(x_0) \in \evaluation{\sigma(x_1,\ldots,x_n)}_{M,\rho_p}$
       we select the left child position, $l$,
-      (that has $\matches{c_0}{\sigma(e_1,\ldots,e_n)} \in \Basic$).
+      (that has $\matches{x_0}{\sigma(x_1,\ldots,x_n)} \in \Basic$)
+      and define $\rho_l = \rho_p$.
       Otherwise, we select the right child position, $r$,
-      (that has $\matches{c_0}{\bar\sigma(\lnot e_1,\ldots,\lnot e_n)} \in \Basic$).
-      We define $\rho_l = \rho_r = \rho_p$.
+      (that has $\matches{x_0}{\bar\sigma(\lnot x_1,\ldots,\lnot x_n)} \in \Basic$).
+      and define  $\rho_r = \rho_p$. The measure $\tau$ remains the same.
 
-    * If the (or) rule was applied to assertion $\matches{e}{\psi_1 \lor \psi_2}$
-      we select the child with $\matches{e}{\psi_1}$
-      if $\umeasure(\matches{e}{\psi_1}) \le \umeasure(\matches{e}{\psi_2})$.
-      Otherwise, we select the child with $\matches{e}{\psi_2}$.
+    * If the (or) rule was applied to assertion $\matches{x}{\psi_1} \lor \matches{y}{\psi_2}$
+      we select the child with $\matches{x}{\psi_1}$
+      if $\umeasure(\matches{x}{\psi_1}) \le \umeasure(\matches{y}{\psi_2})$.
+      Otherwise, we select the child with $\matches{y}{\psi_2}$.
+      As per Lemma \ref{lemma:measures-decreasing}, the signature remains the same.
 
-    * Suppose the (app) rule was applied to assertion $\matches{c}{\sigma(\phi_1,\ldots,\phi_n)}$.
-      We know that $\rho_p(c) \in \evaluation{\sigma(\phi_1,\ldots,\phi_n)}_{M,\rho_p}$.
+    * Suppose the (app) rule was applied to assertion $\matches{x}{\sigma(\psi_1,\ldots,\psi_n)}$.
+      From our invariants, we know that $\rho_p(x) \in \evaluation{\sigma(\psi_1,\ldots,\psi_n)}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
-      such that $m_i \in \evaluation{\phi_i}_{M,\rho_p}$.
+      such that $\rho_p(x) \in \sigma_M(\bar m)$ and $m_i \in \evaluation{\psi_i}_{M,\rho_p}$.
 
-      Select a child of $p$,\newline
-      say $p' = \sequent{\matches{e}{\sigma(\bar k)} \land \matches{k_i}{\phi_i}; \Basic'; \Universals'; \Elements'}$,
+      Select a child of $p$,
+      say $p' = \sequent{\matches{x}{\sigma(\bar y)} \land \matches{y_i}{\psi_i}; \Basic'; \Universals'; \Elements'}$,
       such that:
-      * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free{\phi_i}$, and
-      * if for some $i$, $m_i = \rho_p(e)$ where $e \in \Elements$ then $k'_i = e$.
-      * if $m_i = m_j$, then $k_i = k_j$.
+      *   $\Elements' := \{ y_1,\ldots,y_n \} \union \{ x \} \union \Union_i \free{\psi_i}$, and
+      *   if for some $i$, $m_i = \rho_p(x)$ where $x \in \Elements$ then $y_i = x$.
+      *   if $m_i = m_j$, then $y_i = y_j$.
 
-      Define: $\rho_{p'} = \begin{cases}e   \mapsto \rho_p(e) & \text{when $e \in \Elements$} \\
-                                        k_i \mapsto  m'_i \\ \end{cases}$
+      Define: $\rho_{p'} = \begin{cases}x   \mapsto \rho_p(x) & \text{when $x \in \Elements$} \\
+                                       y_i \mapsto  m'_i \\ \end{cases}$  
+      As per Lemma \ref{lemma:measures-decreasing}, the signature remains the same.
 
     * Suppose the (exists) rule was applied to assertion
       $\matches{c}{\exists \bar x \ldotp \phi}$.
@@ -615,16 +636,42 @@ Proof
     some other node of lower parity must also occur infinitely often.
     Consider the lowest priority node that occurs inifinitely often.
     If it is a (nu), (\dapp), or (forall), then player $1$ wins.
-    It cannot be a (mu) node since (mu) nodes strictly decrease the measure, a well-founded measure.
+    It cannot be a (mu) node since (mu) nodes strictly decrease the $\umeasure$,
+    a well-founded measure.
     Suppose it is a (exists) or (app)-node (for sake of contradiction).
     Let us consider an (infinite) suffix of the trace that doesn't have any (nu) or (mu) nodes.
     This must exist, otherwise (mu) or (nu), with lower priority would repeat infinitely.
     Now, every the remaining rules (i.e. excluding (mu) and (nu)) reduce the depth of the pattern.
-    So, (exists) or (app) cannot infinitely occur without a (mu) or (nu) rule appearing infinitely often as well.
+    So, (exists) or (app) cannot infinitely occur without a (mu) or (nu) rule also appearing infinitely often.
 
-Notice that this proof does not in anyway rely on the properties of guarded patterns.
-Thus, if it is shown that no pre-model exists for any tableau the pattern is not
-satisfiable.
+
+From the definition of parity games and winning strategies,
+it is clear that a tableau may not contain both a pre-model and a refutation.
+It is less clear that either one must exists.
+This follows from determinacy of the more general Borel Games, as shown in [@martin75-borel-determinacy], giving us:
+
+Lemma (Either pre-model or refutation)
+
+: For a game $\mathcal G(\mathcal T)$ either a pre-model or a refutation exists (but not both).
+
+From this two lemma, one of our two main theorems, Theorem \ref{theorem:validity} follows.
+Restated:
+
+\todo{fix theorem number}
+Theorem
+
+:   \label{theorem:validity}
+    If a guarded pattern has a tableau with a refutation, then it is unsatisfiable
+    and its negation is valid.
+
+Remark
+
+:   Notice that this proof only relies on Property \ref{item:fixedpoint-no-elements} of guarded patterns.
+    Therefore, this result holds for any pattern
+    (guarded or not) that meets just this condition.
+
+\newpage
+
 
 ## Pre-models imply satisfiability
 
@@ -650,16 +697,16 @@ and their corresponding $c$-equivalence classes.
 For $m_i = (e_i, v_i) \in M$, and symbol $\sigma$,
 we define $\sigma_{S(M)}$ as follows:
 
-* $m_0 \in \sigma_M(m_1,\ldots,m_n)$
-  if $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$
-  is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
-* $m_0 \not\in \sigma_M(m_1,\ldots,m_n)$
-  if $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
-  is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
-* otherwise, it is not important which one holds.
-  Arbitarily, we choose $m_0 \in \sigma_M(m_1,\ldots,m_n)$
-  if neither $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$ nor $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
-  are in any of the nodes.
+*   $m_0 \in \sigma_M(m_1,\ldots,m_n)$
+    if $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$
+    is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
+*   $m_0 \not\in \sigma_M(m_1,\ldots,m_n)$
+    if $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
+    is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
+*   otherwise, it is not important which one holds.
+    Arbitarily, we choose $m_0 \in \sigma_M(m_1,\ldots,m_n)$
+    if neither $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$ nor $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
+    are in any of the nodes.
 
 This is well-defined since whenever a new element is created in the tableau (resolve) is applied immediately.
 Further, a pre-model may only include one child of the (resolve) node.
@@ -755,10 +802,6 @@ Proof
     there is a finite path to a node with an instatiation that contradicts the quantifier.
     $\mu$ patterns are winning for player $1$ while $\nu$ patterns decrease the $\nu$-measure.
     So, the trace must be winning for player $1$ and the pattern is satisfiable.
-
-\fbox{\parbox{\textwidth}{
-\color{red}{Xiaohong: Review upto here.}
-}}
 
 ## Refutations as proofs
 
