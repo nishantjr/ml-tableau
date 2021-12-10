@@ -207,14 +207,18 @@ class Membership:
 
     owning_sequent: Optional['Sequent']
 
+Sequent = Union['BasicSequent', 'UnsatSequent', 'ChooseExistentialSeqeunt']
+class Sat:
+    pass
+
 class BasicSequent:
     gamma          : List[Assertion]
     basics         : List[Membership]
     universals     : List[ForallAssertion]
 
-    children       : List['Sequent']            = []
+    children       : List[Sequent] = []
     game_edges     : List[Tuple[ Assertion      # Parent assertion
-                               , 'Sequent'
+                               , Union[Sequent, Sat]
                                , Assertion      # Child assertion
                          ]     ] \
                    = []
@@ -239,7 +243,7 @@ class BasicSequent:
                                            ) ]
 
     def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
-        non_existential = filterfalse(is_existential, self.gamma)
+        non_existential = list(filterfalse(is_existential, self.gamma))
         if non_existential:
             alpha, *_ = self.gamma
             return self.apply_nonexistential_rule()
@@ -254,17 +258,22 @@ class BasicSequent:
 
     def apply_nonexistential_rule(self) -> Tuple[Optional[Membership], List[Sequent]]:
         assertion, *rest = self.gamma
+        child : Sequent
         if isinstance(assertion, Matches):
             p = assertion.pattern
             if   isinstance(p, (Bottom)):
-                self.children = [ UnsatSequent() ]
-                return (None, [])
+                child = UnsatSequent()
+                self.children = [ child ]
+                self.game_edges = [(assertion, child, assertion)]
             elif isinstance(p, (Top)):
-                self.children = [BasicSequent(gamma = rest, basics = self.basics, universals = self.universals)]
+                child = BasicSequent(gamma = rest, basics = self.basics, universals = self.universals)
+                self.children = [child]
+                self.game_edges = [(assertion, child, assertion)]
                 return (None, self.children)
             assert False
         return (None, [])
 
+@dataclass(frozen=True)
 class UnsatSequent:
     def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
         return (None, [])
@@ -284,15 +293,10 @@ class ChooseExistentialSeqeunt:
         assert False
         return []
 
-Sequent = Union[BasicSequent, UnsatSequent, ChooseExistentialSeqeunt]
-
+@dataclass(frozen=True)
 class BasicGameNode:
     assertion:  Assertion
     sequent:    Sequent
-
-    def __init__(self, assertion: Assertion, sequent: Sequent) -> None:
-        self.assertion = assertion
-        self.sequent = sequent
 
     def priority(self, def_list: DefList) -> int: 
         if isinstance(self.sequent, UnsatSequent):
@@ -357,10 +361,16 @@ class BasicGameNode:
         else:
             return self.assertion.to_utf()
 
-
-    def get_children(self) -> List[GameNode]:
-        assert False
-        pass
+    def get_pg_children(self) -> List[GameNode]:
+        ret : List[GameNode] = []
+        for child_sequent in self.sequent.get_children():
+            if isinstance(child_sequent, BasicSequent):
+                assert False
+            if isinstance(child_sequent, UnsatSequent):
+                ret += [BasicGameNode(self.assertion, child_sequent)]
+            if isinstance(child_sequent, ChooseExistentialSeqeunt):
+                assert False
+        return ret
 
 @dataclass
 class ResolveGameNode:
@@ -374,7 +384,7 @@ class ResolveGameNode:
     def player(self) -> int:
         return 0
 
-    def get_children(self) -> List[GameNode]:
+    def get_pg_children(self) -> List[GameNode]:
         assert False
         pass
 
@@ -413,9 +423,10 @@ class Tableau:
         def ident(node: GameNode) -> int:
             if node not in serialized_nodes:
                 serialized_nodes[node] = len(serialized_nodes)
-            return 1 + serialized_nodes[node]
+            return serialized_nodes[node]
 
         def pgsolver_priority(node: GameNode) -> int:
+            # PGSolver the *highest* infinitely recurring priority determines the winner.
             # While in our paper, we define the lowest priority infinitly recurring sequent
             # to be the deciding priority, PGSolver considers the highest priority infinitly recurring sequent.
 
@@ -423,18 +434,25 @@ class Tableau:
             max_priority = 2 * len(self.def_list) + 2
             return max_priority - node.priority(self.def_list)
 
-        sequent_queue : List[GameNode] = [BasicGameNode(self.root.gamma[0], self.root)]
-        while sequent_queue:
-            parent, *sequent_queue = sequent_queue
-            if parent in serialized_nodes:
+        node_queue : List[GameNode] = [BasicGameNode(self.root.gamma[0], self.root)]
+        processed_nodes : FrozenSet[GameNode] = frozenset()
+        i = 0
+        while node_queue:
+            i = i+1
+            assert i < 4
+            parent, *node_queue = node_queue
+            print('parent', parent)
+            if parent in processed_nodes:
                 continue
+            processed_nodes = processed_nodes.union([parent])
+            print('x')
             ret += [(ident(parent),
                      pgsolver_priority(parent),
                      parent.player(),
-                     sorted(list(map(ident, parent.get_children()))),
+                     sorted(list(map(ident, parent.get_pg_children()))),
                      parent.label()
                     )]
-            sequent_queue = parent.get_children() + sequent_queue
+            node_queue = parent.get_pg_children() + node_queue
         return ret
 
     """
@@ -712,6 +730,7 @@ def is_sat(pattern: Pattern, K: List[EVar], sig: Signature) -> bool:
     print('---- is_sat')
     pattern = pattern.to_positive_normal_form()
     tableau = Tableau(pattern, sig, K)
+    print('tableau', tableau)
     serialized = tableau.serialize_game()
     if run_pgsolver(serialized):
         return True
