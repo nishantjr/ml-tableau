@@ -15,8 +15,8 @@ Definition (Guarded pattern)
        where:
 
        a)   $\alpha = \lAnd_i \sigma_i(\bar {z_i})$ is a conjunction of application patterns where each argument is an element variable,
-       b)   for each pair of variables $x \in \bar x$
-            and $y \in \free{\phi} \setminus \bar x$
+       b)   every variable $x \in \bar x$ appears in some application,
+       c)   for each pair of variables $x \in \bar x$ and $y \in \free{\phi}$
             there is some application $\sigma_i(\bar {z_i})$ in $\alpha$ where $x, y \in \bar {z_i}$.
             \label{gp:xxx}
 
@@ -366,23 +366,41 @@ From a tableau, $\mathcal T$, we now define a parity game $\mathcal G(\mathcal T
 In this game, player $0$ may be thought of as trying to prove the satisfiablity of the pattern,
 and player $1$ as trying to prove it unsatisfiable.
 
-Each position in the game is a pair $(a, v)$ where $a$ is an assertion.
+Each position in the game is a pair $(a, v)$ where $a$ is an assertion
+and $v$ is either a sequent or $\sat$.
 If $v = \unsat$, then $a$ is of the form $\matches{x}{\bot}$.
 If $\Gamma = \emptyset$, then $a$ is of the form $\matches{x}{\top}$.
 Otherwise, $a \in \Gamma$.
 
-If $v_1$ is a child of $v_0$
-there is an edge from $(a_0, v_0)$ to $(a_1, v_1)$ in $E$ with if:
+There is an edge from a position $(a_0, v_0)$ to $(a_1, v_2)$ if:
 
-* $v_1$ is constructed by some rule that does not modify the assertion $a_0$
-  and $a_0 = a_1$, or
-* $v_1$ is constructed by some rule that modifies the assertion $a_0 \in \Gamma$
-  and $a_1$ is a newly created assertion, or
-* $a_0 = a_1$ is an assertion $\Universals(v_1)$, or
-* $v_1$ is constructed by an application of one of the (conflict-*) rules
-  and $a_1$ is $\matches{x}{\bot}$ where $x$ is the element variable of the assertion $a_0$, or
-* $v_1$ is constructed by an application of one of the (ok-*) rules,
-  $a_0$ is removed from $\Gamma$ by the rule, and $a_1$ is $\matches{e}{\top}$ where $e$ is the element marker of the assertion $a_0$.
+a)  (child constructed by the (conflict) rule):
+
+    $v_1 = \unsat$ is a child constructed through (conflict)
+    and (conflict-el), $a_0 = a_1$. (same as above)
+
+b)  (assertion matched by other tableau rule):
+
+    1.  $v_1$ is constructed from $v_0$
+        using the (and), (or), (def), (mu), (nu), (\dapp) or (forall) rules
+        and $a_0$ was modified by this rule,
+        and $a_1$ is one of the newly created assertions.
+    2.  $v_0$'s child is created using (ok) or (ok-el)
+        and $a_0 = a_1$ and $v_1 = \sat$.
+    3.  $v_1$ is constructed from $v_0$
+        using (choose-existential)
+        and $a_0 = a_1 = \alpha$ is the matched existential.
+    4.  $v_1$ is constructed from $v_0$
+        using (app) or (exists)
+        and $a_0 = \alpha$ and $a_1$ is the an instantiation from $\inst$.
+
+c)  (unmatched by a tableau rule):
+
+    $v_1$ is a child constructed through any rule besides (conflict)
+    and (conflict-el),
+    $a_0 = a_1$ is in $\Gamma(v_0) \union \Universals(v_0)$
+    and $\Gamma(v_1) \union \Universals(v_1)$.
+    and $v_1 = v_0$
 
 \newcommand{\green}[1]{{\color{green}#1}}
 \newcommand{\blue}[1]{{\color{blue}#1}}
@@ -397,7 +415,7 @@ A position $p = (a, v)$ is in $\Pos_1$ by rules with a \blue{blue} rule. That is
 
   1. $v$'s children were built using (and), (\dapp), (forall), or (choose-existential) rules
      and $a$ was the assertion matched on by that rule;
-  2. $v$ has $\Gamma = \emptyset$.
+  2. $v = \sat$
 
 All other positions do not offer a choice, and so are arbitrarily assigned to $\Pos_1$.
 
@@ -676,40 +694,85 @@ Remark
 ## Pre-models imply satisfiability
 
 Next we want to show that for any guarded pattern,
-if player $1$ wins, then the pattern is indeed satisfiable
+if player $0$ wins, then the pattern is indeed satisfiable
 -- i.e. for every pre-model, there is a satisfying model.
 To do so, we will construct a model from the pre-model.
 
-Let $S$ be a pre-model for a tableau $\mathcal T = \langle N , L : N \to \Sequent \rangle$.
-For a constant $c \in K$, we say that two nodes $v, w \in N$ are $c$-equivalent if
-$c$ is in the elements of each node in the path from $v$ to $w$, inclusive.
+Let $\mathcal T$ be a tableau
+where $V$ is the set of vertices and $L : V \to \Sequent$ is its labeling function.
+Let $S$ be a pre-model for the game $\mathcal G(\mathcal T)$.
+For an element variable $x$, we say that two nodes $v, w \in V$ are $x$-equivalent if
+$x$ is free in some assertion in each node (i.e. $x \in \free{\Gamma \union \Universals \union \Basic}$) in the path from $v$ to $w$, inclusive.
 This relation defines an equivalence class.
 Notice that each equivalence class is a subtree of the tableau.
 
-From our pre-model $S$, we define a model $M(S)$.
-Let $T_{\equiv_c}$ be the set of equivalence classes in $T$ for a constant $c$
-and $T_{\equiv_K} = \Union_{c\in K} T_{\equiv_c}$.
+\newcommand{\var}  {\mathsf{var}}
+\newcommand{\nodes}{\mathsf{nodes}}
 
-Let the carrier set $M \subset K \times T_{\equiv_K}$ of the constructed model
-be the pairs of elements in the sequents of nodes used by the winning strategy
-and their corresponding $c$-equivalence classes.
+From a pre-model $S$, we define a model $M(S)$.
+Let $V_{\equiv_x}$ be the set of equivalence classes in $T$ for a constant $x$.
+Let $M = \{ (x, v) \mid \text{ where $v \in V_{\equiv_x}$ and some node in $v$ is part of the pre-model }\}$
+be the universe of the constructed model.
+For an element $e = (x, v) \in M$ we define $\var(e) = x$ and $\nodes(e) = v$.
 
-For $m_i = (e_i, v_i) \in M$, and symbol $\sigma$,
-we define $\sigma_{S(M)}$ as follows:
+We define the interpretation of each symbol, $\sigma_{S(M)}$,as follows:
 
-*   $m_0 \in \sigma_M(m_1,\ldots,m_n)$
-    if $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$
-    is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
-*   $m_0 \not\in \sigma_M(m_1,\ldots,m_n)$
-    if $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
-    is an assertion in a sequent of $\Intersection_{0\leq i \leq n} v_i$.
+*   $e_0 \in \sigma_M(e_1,\ldots,e_n)$
+    if $\matches{\var(e_0)}{\sigma(\var(e_1),\ldots,\var(e_n))}$
+    is in the basic assertions $\Basic$ for some vertex in $\Intersection_{0\leq i \leq n} \nodes(x_i)$.
+*   $e_0 \not\in \sigma_M(e_1,\ldots,e_n)$
+    if $\matches{\var(e_0)}{\fnot{\sigma(\var(e_1),\ldots,\var(e_n))}}$
+    is in the basic assertions $\Basic$ for some vertex in $\Intersection_{0\leq i \leq n} \nodes(x_i)$.
 *   otherwise, it is not important which one holds.
-    Arbitarily, we choose $m_0 \in \sigma_M(m_1,\ldots,m_n)$
-    if neither $\matches{e_0}{\sigma(e_1,\ldots,e_n)}$ nor $\matches{e_0}{\lnot\sigma(e_1,\ldots,e_n)}$
-    are in any of the nodes.
+    Arbitarily, we choose $m_0 \not\in \sigma_M(m_1,\ldots,m_n)$
+    if neither of the above hold.
 
 This is well-defined since whenever a new element is created in the tableau (resolve) is applied immediately.
-Further, a pre-model may only include one child of the (resolve) node.
+Further, a pre-model may only include one child of each (resolve) node.
+From this definition we immediately get the following lemma:
+
+Lemma
+
+:   Let $m_0, m_1, \ldots, m_n \in M$.
+    If $m_0 \in \sigma_M(m_1, \ldots, m_n)$ then,
+    for every vertex $v \in \Intersection_{0\le i\le n} \nodes(m_i)$
+    besides an initial linear prefix of (resolve) applications
+    we have $\matches{\var(m_0)}{\sigma(\var(m_1), \ldots, \var(m_n)}$ in the label of $v$.
+
+Lemma
+
+:   \label{lemma:guards}
+    Let $\alpha = \matches{y_0}{\phi}$, where $\phi$ is the guard of some existential pattern.
+    That is, let $\bar x \subset \free{\phi}$, and:
+
+    a) $\phi = \phi_1 \land \cdots \land \phi_n$ where each $\phi_i$ is an application of the form $\sigma(\bar w)$ where $\bar w$ are element variables.
+    b) every $x \in \bar x$ appears in some $\phi_i$
+    c) for every pair $x \in \bar x$ and $z \in \free{\phi}$ we have $x$ coexists with $z$ in some $\phi_i$.
+
+    Then, if there is a valuation
+    $\rho: \{y_0\} \union \free{\phi} \to M(S)$ such that
+    $\rho(y_0) \in \evaluation{\alpha}_{M(S),\rho}$ and
+    $\Intersection_{y\in\{y_0\}\union \bar y} \nodes(\rho(y)) \neq \emptyset$
+    we have $\Intersection_{z\in\{y_0\}\union\free{\phi}}\nodes(\rho(z)) \neq \emptyset$.
+
+Proof
+
+:   By definition, each element $m$ in $M(S)$, $\nodes(m)$ is a subtree of $S$.
+    The element is introduced by either the root node or some (exists) or (app) node followed by
+    a linear sequence of (resolve) nodes.
+    As we decend the tree the asssertions in $\Basic$ that mention the $\var(m)$
+    increase until the last (resolve) node in that sequence and then does not change.
+
+    Let $\bar y = \free{\phi} \setminus \bar x$.
+    We will show that for each pair of variables in $w_1, w_2 \in \{y_0\}\union\free{\phi}$,
+    we have $\nodes(w_1) \intersection \nodes(z_2) \ne \emptyset$.
+    Then, using a well-known graph theory result saying that any collection of pairwise intersection
+    subtrees of a tree share a common edge.
+
+    Suppose $w_1, w_2 \in \{ y_0 \} \union \bar y$. Then by assumption, they have a non empty intersection.
+    If $w_1 = y_0$ and $w_2 \in \bar x$ then by point (b) they must coexist in some assertion.
+    If $w_1 \in \free{\phi}$ and $w_2 \in \bar x$ then by point (c) they must coexist in some assertion.
+    By definition of $M(S)$ they must co-exist in some assertion.
 
 Definition ($\nu$-measure -- $\vmeasure$)
 
@@ -723,25 +786,10 @@ Lemma
 
 :   \label{lemma:vmeasure} For a $\nu$-measure, the dual of Lemma \ref{lemma:measures-decreasing} holds.
 
-Lemma
-
-:   \label{lemma:guards}
-    Let $\alpha = \matches{c}{\phi} = \matches{c}{\phi_1(\bar x, \bar y) \land \cdots \land \phi_n(\bar x, \bar y)}$
-    where each $\phi_i$ is of the form $\sigma(\bar x)$ where $\bar x$ is a tuple of element variables.
-    and   each variable in $\bar y$ co-exists with a variable in $\{c\} \union \bar x \union \bar y$
-          for some application $\phi_i$.
-    Then, if there is a valuation $\rho: \{c\} \union \bar x \union \bar y \to M(S)$ such that
-    $\rho(c) \in \evaluation{\alpha}_{M(S),\rho}$ and $\Intersection_{x\in\{c\}\bar x}\rho(x) \neq \emptyset$
-    taken as a set of vertices
-    then $\Intersection_{x\in\{c\}\bar x\union\bar y}\rho(x) \neq \emptyset$.
-
-Proof
-
-:   Same as Guarded Fixedpoint Logic.
 
 Lemma (Pre-model implies satisfiability)
 
-:   For a *guarded* pattern $\phi$ and a pre-model $S$, $M(S) \satisfies \phi$.
+:   For a *guarded* pattern $\phi$ and a pre-model $S$, we have $M(S) \satisfies \phi$.
 
 Proof
 
@@ -750,49 +798,72 @@ Proof
     -- i.e. $S$ is not a winning strategy for player 0, and therefore not a pre-model.
     Along this play we maintain these invariants:
 
-    * At each position $p = (\matches{e}{\phi}, s)$,
-      we define a evaluation $\rho_p$ such that $\rho_p(e) \not\in \evaluation{\phi}_{M,\rho_p}$.
+    * At each position $p = (\matches{x}{\phi}, s)$,
+      we define a evaluation $\rho_p$ such that $\rho_p(x) \not\in \evaluation{\phi}_{M,\rho_p}$.
     * The $\nu$-measure at each position is decreasing.
 
-    The root of the play is $(\matches{e}{\psi}, v = \sequent{\matches{e}{\phi}; ...; \{e\};})$.
+    The root of the play is $(\matches{x}{\psi}, \sequent{\matches{x}{\phi}; ...; \{x\};})$.
     By our assumptions, $\vmeasure(\psi)$ is defined.
-    We define $\rho_p(e)$ to be the $e$-equivalence defined by the root node.
+    We define $\rho_p(x)$ to be the $x$-equivalence defined by the root node.
 
-    Consider a paritally constructed play until position $p = (\matches{e}{\phi}, s)$:
+    Consider a paritally constructed play until position $p = (\matches{y}{\phi}, s)$:
 
     * (conflict)/(ok): $\phi$ cannot be a basic application or an element variable
-        by definition of $M(S)$ and by our invariants.
+        by definition of $M(S)$ and by our invariants and the definition of the model $M(S)$.
     * (resolve): Application of this rule does not affect the $\nu$-measure.
-        or the elements in the sequent. We use the same $\rho_p$ for the child node.
+        We use the same $\rho_p$ for the child node.
         Since it is player $1$'s turn, there is no choice to make.
     * (or): if $\phi = \zeta \lor \eta$ then by Lemma \ref{lemma:vmeasure},
-        $\vmeasure(\phi) \leq \vmeasure{\zeta}$ and $\vmeasure(\phi) \leq \vmeasure{\eta}$.
+        $\vmeasure(\phi) \leq \vmeasure(\zeta)$ and $\vmeasure(\phi) \leq \vmeasure(\eta)$.
         Since it is player $1$'s turn, there is no choice to make.
         We use the same $\rho_p$ for the child node.
     * (and): if $\phi = \zeta \land \eta$ then by Lemma \ref{lemma:vmeasure},
              for some $\theta \in \{\zeta, \eta\}$
-             we have $\vmeasure(\phi) = \vmeasure{\theta}$.
+             we have $\vmeasure(\phi) = \vmeasure(\theta)$.
              We select the child corresponding to $\theta$ as the next position in the play.
              We use the same $\rho_p$ for the child node.
     * (exists): if $\phi = \exists \bar x\ldotp \gamma$,
                 then by Lemma \ref{lemma:vmeasure}, the measure doesn't increase.
                 We extend $\rho_p$ to evaluate each constant to its corresponding equivalence class.
+                Since $\exists \bar x\ldotp \gamma$ is not satisfied by $\rho_p$, there is no evaluation
+                extension that satisfies $\gamma$.
     * (app):    Similar to (exists).
-    * (forall): if $\phi = \forall \bar x\ldotp \alpha(\bar x, \bar y) \limplies \phi(\bar x, \bar y)$
-        then we may choose between an immediate instantiation, or postponing instantiation
-        until until after application of (exists) or (app).
+    * (forall): if $\phi = \forall \bar x\ldotp \alpha \limplies \xi$
+        then we may choose between an immediate instantiation,
+        or postponing instantiation and keeping $\phi$ the same
+        until after the application of (exists) or (app) introduces additional elements that we use in the instantiation.
 
-        Since $\rho_p(e) \not\in \evaluation{\phi}_{M,\rho_p}$
-        we know that there is some extension $\rho'$ to $\rho_p$ such that
-        $\rho'(e) \in \alpha(\bar x, \bar y) \land \lnot \phi(\bar x, \bar y)$
+        Since $\rho_p(y) \not\in \evaluation{\phi}_{M,\rho_p}$
+        we know that there is some extension $\rho'$ of $\rho_p$ such that
+        $\rho'(y) \in \alpha \land \lnot \xi$
         and by Lemma \ref{lemma:vmeasure} that $\nu$-measure
         of the corresponding assertion is not larger than the current $\nu$-measure.
 
-        By Lemma \ref{lemma:guards}, there is a position $w \in \Intersection_{x\in\{c\}\bar x\union\bar y}\rho'(x)$.
-        If $v = w$ then we choose the corresponding instantiation.
-        If $v \neq w$ then choose the child the $v$ on the path to $w$.
+        Since $\alpha$ is a guard, by Lemma \ref{lemma:guards},
+        there is a position $q \in \Intersection_{z\in\{y\}\union\free{\xi}}\rho'(x)$.
+        If $p = q$ then we choose the corresponding instantiation.
+        If $p \neq q$ then choose the child the $p$ on the path to $q$.
 
-    * (\dapp): Similar to (forall).
+    * (\dapp):
+        \todo{This still needs work. Please review later}
+        <!--
+        if $\phi = \bar \sigma(\phi_1, \ldots, \phi_n)$, again, 
+        then we may choose between an immediate instantiation,
+        or postponing instantiation and keeping $\phi$ the same
+        until after the application of (exists) or (app) introduces additional elements that we use in the instantiation.
+
+        Since $\rho_p(y) \not\in \evaluation{\phi}_{M,\rho_p}$
+        we know that there is some extension $\rho'$ of $\rho_p$ to include fresh variables $\bar x$ in the domain
+        such that
+        $\rho'(y) \in \evaluation{\sigma(\bar x)}$ and $\rho'(x_i) \in \evaluation{\phi_i}$
+        and by Lemma \ref{lemma:vmeasure} that $\nu$-measure
+        of the corresponding assertion is not larger than the current $\nu$-measure.
+
+        There are two cases:
+
+        \todo{we need two more lemmas here.}
+        -->
+
     * In the remaining cases there is no choice.
 
     We must show that the trace constructed above is winning for player $1$.
@@ -801,8 +872,9 @@ Proof
     If cannot be a universal, because of the way we build the trace -- we know that
     there is a finite path to a node with an instatiation that contradicts the quantifier.
     $\mu$ patterns are winning for player $1$ while $\nu$ patterns decrease the $\nu$-measure.
-    So, the trace must be winning for player $1$ and the pattern is satisfiable.
+    So, the trace must be winning for player $1$ constradicting that $S$ is a pre-model and the pattern is satisfiable.
 
+\newpage
 ## Refutations as proofs
 
 Let us take a look refutations through the lens of checking the validity of a pattern.
