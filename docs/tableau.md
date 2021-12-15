@@ -202,24 +202,23 @@ Definition (Restriction)
 Definition (Sequent)
 :   A *sequent* is:
 
-    1. a tuple, $\sequent{\Gamma; \Basic; \Universals; \Elements}$,
+    1. a tuple, $\sequent{\Gamma; \Basic; \Universals}$,
        where $\Gamma$       is a set of assertions,
              $\Basic$       is a set of basic assertions,
              $\Universals$  is a set of assertions whose pattern is of the form $\bar\sigma(...)$ or $\forall \bar x\ldotp ...$,
          and $\Elements$    is a set of element variables.
-    2. $\alpha \leadsto \sequent{\Gamma; \Basic; \Universals; \Elements}$ where $\alpha$ is an assertion
-       and $\Gamma, \Basic, \Universals, \Elements$ are as above.
+    2. $\alpha \leadsto \sequent{\Gamma; \Basic; \Universals}$ where $\alpha$ is an assertion
+       and $\Gamma, \Basic, \Universals$ are as above.
     3. $\unsat$
 
-    For a sequent $v$ of the first two forms, we use $\Gamma(v), \Basic(v), \Universals(v)$ and $\Elements(v)$
+    For a sequent $v$ of the first two forms, we use $\Gamma(v), \Basic(v)$ and $\Universals(v)$
     to denote the corresponding component of the sequent.
 
 Informally,
 $\Gamma$ represents the set of assertions whose combined satisfiability we are checking.
-$\Basic$ and $\Universals$ represent assertions we have deemed must hold for the variables in $\Elements$.
-Each variable in $\Elements$ corresponds (roughly) to a distinct element in the
-model we are building (if one exists).
-We will go into more details about this later.
+$\Basic$ and $\Universals$ represent assertions we have deemed must hold.
+Each free element variable in these assertions corresponds (roughly) to a distinct element in the
+model we are building (if one exists). We will go into more details about this later.
 
 Definition (Tableau)
 
@@ -242,45 +241,45 @@ Definition (Tableau)
 \begin{figure*}
 \begin{align*}
 \makealign
-\name{conflict}                 & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \fnot{\alpha} \} \union \Basic; \Universals; \Elements}}
+\name{conflict}                 & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \fnot{\alpha} \} \union \Basic; \Universals}}
                                           { \unsat }
 &\qquad
-                                  \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \alpha \} \union \Basic; \Universals; \Elements}}
-                                    {\sequent{        \Gamma; \Basic; \Universals; \Elements}} &
+                                  \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \alpha \} \union \Basic; \Universals}}
+                                    {\sequent{        \Gamma; \Basic; \Universals}} &
 \quad\name{ok} \\
                                 & \quad\text{ when $\alpha$ is a basic assertion.}
                                 & \quad\text{ when $\alpha$ is a basic assertion.}
 \\
-\name{conflict-el}              & \pruleun{\sequent{\matches{x}{y}, \Gamma; \Basic; \Universals; \Elements}}
+\name{conflict-el}              & \pruleun{\sequent{\matches{x}{y}, \Gamma; \Basic; \Universals}}
                                           { \unsat }
                             \quad \text{when $x \neq y$.}
                             &
- \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals; \Elements}}
-                                          {\sequent{                \Gamma; \Basic; \Universals; \Elements}}
+ \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals}}
+                                          {\sequent{                \Gamma; \Basic; \Universals}}
 &\quad\name{ok-el}
 \end{align*}
 \begin{align*}
 \makealign
 \name{and} &
-                                  \unsatruleun{\sequent{ \matches{z}{\phi} \land \matches{w}{\psi},   \Gamma; \Basic; \Universals; \Elements}}
-                                              {\sequent{ \matches{z}{\phi}, \matches{w}{\psi},  \Gamma; \Basic; \Universals; \Elements}}
+                                  \unsatruleun{\sequent{ \matches{z}{\phi} \land \matches{w}{\psi},   \Gamma; \Basic; \Universals}}
+                                              {\sequent{ \matches{z}{\phi}, \matches{w}{\psi},  \Gamma; \Basic; \Universals}}
 \\
 \name{or} &
-                                  \satrulebin{\sequent{ \matches{z}{\phi} \lor \matches{w}{\psi}, \Gamma; \Basic; \Universals; \Elements }}
-                                             {\sequent{ \matches{z}{\phi}, \Gamma; \Basic; \Universals; \Elements }}
-                                             {\sequent{ \matches{w}{\psi}, \Gamma; \Basic; \Universals; \Elements }}
+                                  \satrulebin{\sequent{ \matches{z}{\phi} \lor \matches{w}{\psi}, \Gamma; \Basic; \Universals}}
+                                             {\sequent{ \matches{z}{\phi}, \Gamma; \Basic; \Universals}}
+                                             {\sequent{ \matches{w}{\psi}, \Gamma; \Basic; \Universals}}
 \\
-\name{def}                      & \pruleun{\sequent{ \matches{z}{\kappa X . \phi(X)}, \Gamma; \Basic; \Universals; \Elements }}
-                                  {\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }} \\
+\name{def}                      & \pruleun{\sequent{ \matches{z}{\kappa X . \phi(X)}, \Gamma; \Basic; \Universals}}
+                                  {\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals}} \\
                                 & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
 \end{align*}
 \begin{align*}
 \makealign
-\name{mu}                    & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
-                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }}
+\name{mu}                    & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals}}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals}}
 &\qquad
- \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
-                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }}
+ \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals }}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals}}
 &\quad\name{nu}                    &\\
                                 & \text{when $D := \nu X. \phi \in \deflist$ }
                                 & \text{when $D := \mu X. \phi \in \deflist$ }
@@ -288,7 +287,7 @@ Definition (Tableau)
 \begin{align*}
 \makealign
 \name{\dapp} &
-\unsatruleun{\sequent{ \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Gamma; \Basic; \Universals; \Elements}}
+\unsatruleun{\sequent{ \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Gamma; \Basic; \Universals}}
             { \sequent{ \mathrm{inst} \union \Gamma;
                         \Basic;
                         \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Universals;
@@ -297,11 +296,10 @@ Definition (Tableau)
   & \text{where $\mathrm{inst} = \left\{ \matches{z}{\fnot{\sigma(\bar y)}} \lor \lOr_i \matches{y_i}{\phi_i}
                                     \mid \bar y \subset \Elements \right\}$} \\
 \\
-\name{forall}                   & \unsatruleun { \sequent{ \matches{z}{\forall \bar x \ldotp \phi}, \Gamma; \Basic; \Universals; \Elements} }
+\name{forall}                   & \unsatruleun { \sequent{ \matches{z}{\forall \bar x \ldotp \phi}, \Gamma; \Basic; \Universals} }
                                                { \sequent{ \mathrm{inst} \union \Gamma
                                                          ; \Basic
                                                          ; \matches{z}{\forall \bar x \ldotp \phi}, \Universals
-                                                         ; \Elements
                                                          } } \\
                                 & \text{where $\mathrm{inst} = \{ \matches{z}{ \phi[\bar y / \bar x]} \mid \bar y \subset \Elements \}$}
 \end{align*}
@@ -311,12 +309,12 @@ Definition (Tableau)
 \intertext{The following rules may only apply when none of the above rules apply -- i.e. when all assertions in $\alpha$
 are either existentials or applications}
 \name{choose-existential} &
-\unsatruleun {\sequent{ \Gamma; \Basic; \Universals; \Elements }}
-             {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals; \Elements } \mid \text{for each $\alpha \in \Gamma$}\}}
+\unsatruleun {\sequent{ \Gamma; \Basic; \Universals }}
+             {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals } \mid \text{for each $\alpha \in \Gamma$}\}}
    \\ 
 \name{app} &
-  \satruleun { \matches{z}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Universals ; \Elements } }
-             { \{ \sequent{ \matches{z}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \} ; \Elements'  } \} } \\
+  \satruleun { \matches{z}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Universals  } }
+             { \{ \sequent{ \matches{z}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \}  } \} } \\
   & \text{for each $\bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements)$} \\
   & \text{where} \\
   & \text{\qquad $\Elements' = \bar k \union \{ z \} \union  \free{\bar \phi}$} \\
@@ -325,8 +323,8 @@ are either existentials or applications}
     \text{and    $\Universals' = \Universals|_{\Elements'}$} \\
 \\
 \name{exists} &
-  \satruleun { \matches{z}{\exists \bar x \ldotp \phi} \leadsto \sequent{ \Gamma; \Basic; \Universals; \Elements } }
-             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \}; \Elements' } \}
+  \satruleun { \matches{z}{\exists \bar x \ldotp \phi} \leadsto \sequent{ \Gamma; \Basic; \Universals } }
+             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \} } \}
              } \\
   & \text{for each $\alpha \in \{ \matches{z}{\phi[\bar k/\bar x]} \mid \bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements) \}$} \\
   & \text{where} \\
@@ -338,9 +336,9 @@ are either existentials or applications}
 \cline{1-3}
 \intertext{This rule may only apply (as many times as needed) immediately after the (exists)/(app) rules or on the root node.
 $\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
-\name{resolve} & \satrulebin{\sequent{ \Gamma; \Basic; \Universals; \Elements}}
-                            {\sequent{ \Gamma; \matches{x_0}{\sigma(x_1,\ldots,x_n)}      \union \Basic; \Universals; \Elements}}
-                            {\sequent{ \Gamma; \matches{x_0}{\lnot\sigma(x_1,\ldots,x_n)} \union \Basic; \Universals; \Elements}} \\
+\name{resolve} & \satrulebin{\sequent{ \Gamma; \Basic; \Universals}}
+                            {\sequent{ \Gamma; \matches{x_0}{\sigma(x_1,\ldots,x_n)}      \union \Basic; \Universals}}
+                            {\sequent{ \Gamma; \matches{x_0}{\lnot\sigma(x_1,\ldots,x_n)} \union \Basic; \Universals}} \\
                & \text{when neither $\matches{x}{{\sigma(x_1,\ldots,x_n)}}$ nor $\matches{x}{\fnot{\sigma(x_1,\ldots,x_n)}}$ are in $\Basic$} \\
                & \text{and  $\bar x \subset \Elements$ and $\bar x \intersection \mathsf{fresh} \neq \emptyset$.} \\
 \\
@@ -641,7 +639,7 @@ Proof
       such that $\rho_p(x) \in \sigma_M(\bar m)$ and $m_i \in \evaluation{\psi_i}_{M,\rho_p}$.
 
       Select a child of $p$,
-      say $p' = \sequent{\matches{x}{\sigma(\bar y)} \land \matches{y_i}{\psi_i}; \Basic'; \Universals'; \Elements'}$,
+      say $p' = \sequent{\matches{x}{\sigma(\bar y)} \land \matches{y_i}{\psi_i}; \Basic'; \Universals'}$,
       such that:
       *   $\Elements' := \{ y_1,\ldots,y_n \} \union \{ x \} \union \Union_i \free{\psi_i}$, and
       *   if for some $i$, $m_i = \rho_p(x)$ where $x \in \Elements$ then $y_i = x$.
@@ -659,7 +657,7 @@ Proof
       with measure $\tau$.
 
       Select a child of $p$,\newline
-      say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Basic'; \Universals'; \Elements'}$,
+      say $p' = \sequent{\matches{e}{\phi[\bar k/\bar x]}; \Basic'; \Universals'}$,
       such that:
 
       * $\Elements' := \{ k_1,\ldots,k_n \} \union \{ e \} \union \Union_i \free{\phi_i}$, and
