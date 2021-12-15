@@ -27,7 +27,7 @@ Definition (Guarded pattern)
        We call $\alpha$ a guard.
 
     2.  If $\sigma(\phi_i)$ is an application, then
-        each $\phi_i$ is a conjunction of the form $\lAnd_{y \in \bar y} y \land \xi$
+        each $\phi_i$ is a conjunction of the form $\xi \land \lAnd_{y \in \bar y} y$
         where $\bar y$ is a (possibly empty) set of element variables and $\xi$ is a pattern,
         and every element variable in $\free{\sigma(\phi_i)}$
         is in $\bar y$ for some $\phi_i$.
@@ -739,7 +739,8 @@ Notice that each equivalence class is a subtree of the tableau.
 
 From a pre-model $S$, we define a model $M(S)$.
 Let $V_{\equiv_x}$ be the set of equivalence classes in $T$ for a constant $x$.
-Let $M = \{ (x, v) \mid \text{ where $v \in V_{\equiv_x}$ and some node in $v$ is part of the pre-model }\}$
+Let $M = \{ (x, v) \mid
+\text{ where $v \in V_{\equiv_x}$ and $v \intersection S \ne \emptyset$ }\}$
 be the universe of the constructed model.
 For an element $e = (x, v) \in M$ we define $\var(e) = x$ and $\nodes(e) = v$.
 
