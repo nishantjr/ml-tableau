@@ -1,4 +1,8 @@
-# Guarded Matching Logic
+---
+title: Guarded Matching Logic
+---
+
+\emergencystretch 5em
 
 Remark
 
@@ -22,12 +26,11 @@ Definition (Guarded pattern)
 
        We call $\alpha$ a guard.
 
-    2. Each application sub-pattern is either quantifier-free (i.e. has no universal or existential quantifiers as sub-patterns),
-       or
-       has arguments of the form $x \land \phi$
-       where $x$ is an element variable.  
-       Note that the pattern $x$ is equivalent to $x \land \top$
-       and we consider that as matching this criteria.
+    2.  If $\sigma(\phi_i)$ is an application, then
+        each $\phi_i$ is a conjunction of the form $\lAnd_{y \in \bar y} y \land \xi$
+        where $\bar y$ is a (possibly empty) set of element variables and $\xi$ is a pattern,
+        and every element variable in $\free{\sigma(\phi_i)}$
+        is in $\bar y$ for some $\phi_i$.
 
     3.  \label{item:fixedpoint-no-elements}
         Each fixedpoint sub-pattern $\mu X \ldotp \phi$ and $\nu X \ldotp \phi$ has no free element variables.
@@ -37,6 +40,8 @@ Example
 : The pattern $\exists x. c$ is a guarded pattern where $c$ is a nullary symbol.
   Here the guard is the empty conjunction. Since $c$ has no free variables, Condition (\ref{gp:xxx})
   becomes true trivially.
+
+TODO: Give examples that violate each of these conditions.
 
 # Tableau, Games & Strategies
 
@@ -70,6 +75,13 @@ Remark
 : We allow negation of element variables, but not set variables.
   This ensures that set variables may only occur positively in their binding fixedpoint.
 
+By definition, all patterns have some equivalent positive-form pattern.
+For convenience, the derived semantics of $\bar\sigma(\bar \phi)$ is:
+\begin{align*}
+\evaluation{\bar\sigma(\phi_1,\ldots,\phi_n)} &= \{a \in M \mid 
+                            \forall a_1,\ldots,a_n \text{ s.t. } a \in \sigma_M(a_1,\ldots,a_n)
+\\&\qquad\qquad\limplies \exists i, 0 < i < n, \text{ s.t. } a_i \in \evaluation{\phi_i} \}
+\end{align*}
 Further, we restrict ourselves to "well-named" patterns
 -- patterns where each set and element variable is uniquely named.
 Through alpha-renaming, all patterns are equivalent to some well-named pattern
@@ -223,25 +235,32 @@ Definition (Tableau)
     or with a sequent where $\Gamma = \emptyset$.
     -- i.e. it is not a valid tableau when some leaf node does not meet this condition.
 
-\allowdisplaybreaks
+
+\newcommand{\makealign}{ \phantom{\name{choose-existential}}
+                       & \phantom{\hskip 40ex}
+                         \\ \vspace{-1em}}
+\begin{figure*}
 \begin{align*}
-\cline{1-3}
+\makealign
 \name{conflict}                 & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \fnot{\alpha} \} \union \Basic; \Universals; \Elements}}
                                           { \unsat }
-                           \qquad \text{when $\alpha$ is a basic assertion.}
-\\
-\name{ok}                       & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \alpha \} \union \Basic; \Universals; \Elements}}
-                                    {\sequent{        \Gamma; \Basic; \Universals; \Elements}}
-                           \quad \text{when $\alpha$ is a basic assertion.}
+&\qquad
+                                  \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \alpha \} \union \Basic; \Universals; \Elements}}
+                                    {\sequent{        \Gamma; \Basic; \Universals; \Elements}} &
+\quad\name{ok} \\
+                                & \quad\text{ when $\alpha$ is a basic assertion.}
+                                & \quad\text{ when $\alpha$ is a basic assertion.}
 \\
 \name{conflict-el}              & \pruleun{\sequent{\matches{x}{y}, \Gamma; \Basic; \Universals; \Elements}}
                                           { \unsat }
-                            \quad \text{when $x$ and $y$ are distinct.}
-\\
-\name{ok-el}                    & \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals; \Elements}}
-                                          {\sequent{                \Gamma; \Basic; \Universals; \Elements}} \\
-\\
-\cline{1-3}
+                            \quad \text{when $x \neq y$.}
+                            &
+ \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals; \Elements}}
+                                          {\sequent{                \Gamma; \Basic; \Universals; \Elements}}
+&\quad\name{ok-el}
+\end{align*}
+\begin{align*}
+\makealign
 \name{and} &
                                   \unsatruleun{\sequent{ \matches{z}{\phi} \land \matches{w}{\psi},   \Gamma; \Basic; \Universals; \Elements}}
                                               {\sequent{ \matches{z}{\phi}, \matches{w}{\psi},  \Gamma; \Basic; \Universals; \Elements}}
@@ -254,15 +273,20 @@ Definition (Tableau)
 \name{def}                      & \pruleun{\sequent{ \matches{z}{\kappa X . \phi(X)}, \Gamma; \Basic; \Universals; \Elements }}
                                   {\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }} \\
                                 & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
-\\
+\end{align*}
+\begin{align*}
+\makealign
 \name{mu}                    & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
-                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }} \\
-                                & \text{when $D := \mu X. \phi \in \deflist$ }
-\\
-\name{nu}                    & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
-                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }} \\
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }}
+&\qquad
+ \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals; \Elements }}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals; \Elements }}
+&\quad\name{nu}                    &\\
                                 & \text{when $D := \nu X. \phi \in \deflist$ }
-\\
+                                & \text{when $D := \mu X. \phi \in \deflist$ }
+\end{align*}
+\begin{align*}
+\makealign
 \name{\dapp} &
 \unsatruleun{\sequent{ \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Gamma; \Basic; \Universals; \Elements}}
             { \sequent{ \mathrm{inst} \union \Gamma;
@@ -280,8 +304,10 @@ Definition (Tableau)
                                                          ; \Elements
                                                          } } \\
                                 & \text{where $\mathrm{inst} = \{ \matches{z}{ \phi[\bar y / \bar x]} \mid \bar y \subset \Elements \}$}
-\\
-\cline{1-3}
+\end{align*}
+\end{figure*}
+\begin{figure*}
+\begin{align*}
 \intertext{The following rules may only apply when none of the above rules apply -- i.e. when all assertions in $\alpha$
 are either existentials or applications}
 \name{choose-existential} &
@@ -320,6 +346,7 @@ $\mathsf{fresh}$ denotes the fresh variables introduced by the last application 
 \\
 \cline{1-3}
 \end{align*}
+\end{figure*}
 
 Proposition
 :   For any sequent built using these rules, we cannot have both $\matches{x}{\phi}$ and $\matches{x}{\fnot\phi}$ in $\Basic$
@@ -346,10 +373,14 @@ Now that we have defined how a tableau is built,
 we define how we may build a parity game from this.
 But first, we must define what a parity game is.
 
+(cite: Infinite games on finitely coloured graphs with applicatiosn to automata on infinite trees)
+(cite: Tree automata, mu-calculus and determinacy)
+
 Definition (Parity game)
 
-:   A parity game is a tuple $(\Pos_0, \Pos_1, E, \Omega)$
-    where $\Pos = \Pos_0 \union \Pos_1$ is a possibly infinite set of positions;
+:   A *parity game* is a tuple $(\Pos_0, \Pos_1, E, \Omega)$
+    where $\Pos = \Pos_0 \disjointunion \Pos_1$ is a possibly infinite set of positions;
+    Each $\Pos_i$ is called the *winning set* for player $i$.
     $E : \Pos \times \Pos$ is a transition relation;
     and $\Omega : \Pos \to \N$ defines the *parity winning condition*.
     The game is played between two players, player $0$ and player $1$.
@@ -579,8 +610,8 @@ Proof
     We will then show
     that the strategy must be a pre-model -- i.e. it is winning for player $0$.
 
-    The root position of the game is labeled with
-    $\mathrm{root} = (\matches{x}{\phi}, \sequent{\matches{x}{\phi}, \emptyset, \emptyset, \{x\}})$.
+    The root position of the game is labeled with  
+    $(\matches{x}{\phi}, \sequent{\matches{x}{\phi}, \emptyset, \emptyset, \{x\}})$.
     The invariants hold for the root position.
     Define $\rho_\mathrm{root}(x) = m$
     and select the root position as part of the strategy.
@@ -603,7 +634,8 @@ Proof
       Otherwise, we select the child with $\matches{y}{\psi_2}$.
       As per Lemma \ref{lemma:measures-decreasing}, the signature remains the same.
 
-    * Suppose the (app) rule was applied to assertion $\matches{x}{\sigma(\psi_1,\ldots,\psi_n)}$.
+    * Suppose the (app) rule was applied to assertion
+      $\matches{x}{\sigma(\psi_1,\ldots,\psi_n)}$.
       From our invariants, we know that $\rho_p(x) \in \evaluation{\sigma(\psi_1,\ldots,\psi_n)}_{M,\rho_p}$.
       Therefore there must be some $m_1,\ldots,m_n \in M$
       such that $\rho_p(x) \in \sigma_M(\bar m)$ and $m_i \in \evaluation{\psi_i}_{M,\rho_p}$.
@@ -636,7 +668,6 @@ Proof
 
       Define: $\rho_{p'} = \begin{cases}e_{\phantom{i}}   \mapsto \rho_p(e) & \text{when $e \in \Elements$} \\
                                         k_i \mapsto  m'_i \\ \end{cases}$
-
 
     * For all other rules, it is player $1$'s turn.
       We must select all children as part of the strategy.
@@ -687,9 +718,6 @@ Remark
 :   Notice that this proof only relies on Property \ref{item:fixedpoint-no-elements} of guarded patterns.
     Therefore, this result holds for any pattern
     (guarded or not) that meets just this condition.
-
-\newpage
-
 
 ## Pre-models imply satisfiability
 
@@ -774,6 +802,13 @@ Proof
     If $w_1 \in \free{\phi}$ and $w_2 \in \bar x$ then by point (c) they must coexist in some assertion.
     By definition of $M(S)$ they must co-exist in some assertion.
 
+Lemma
+
+:   \label{lemma:app-guards}
+    Let $\alpha = \matches{y_0}{\sigma(\phi)}$, where $\phi$ is the guard of some existential pattern.
+    That is, let $\bar x \subset \free{\phi}$, and:
+
+
 Definition ($\nu$-measure -- $\vmeasure$)
 
 :   Suppose, $\rho(m) \not\in \evaluation{\phi}_{M,\rho}$.
@@ -828,49 +863,74 @@ Proof
                 Since $\exists \bar x\ldotp \gamma$ is not satisfied by $\rho_p$, there is no evaluation
                 extension that satisfies $\gamma$.
     * (app):    Similar to (exists).
+
     * (forall): if $\phi = \forall \bar x\ldotp \alpha \limplies \xi$
-        then we may choose between an immediate instantiation,
+        then, to continue the play, we may choose between an immediate instantiation,
         or postponing instantiation and keeping $\phi$ the same
         until after the application of (exists) or (app) introduces additional elements that we use in the instantiation.
 
         Since $\rho_p(y) \not\in \evaluation{\phi}_{M,\rho_p}$
-        we know that there is some extension $\rho'$ of $\rho_p$ such that
-        $\rho'(y) \in \alpha \land \lnot \xi$
+        we know that there is some extension $\rho'$ of $\rho_p$ for variables $\bar x$
+        such that $\rho'(y) \in \evaluation{\alpha}_{M,\rho'}$
+        but       $\rho'(y) \not\in \evaluation{\xi}_{M,\rho'}$
         and by Lemma \ref{lemma:vmeasure} that $\nu$-measure
         of the corresponding assertion is not larger than the current $\nu$-measure.
 
-        Since $\alpha$ is a guard, by Lemma \ref{lemma:guards},
-        there is a position $q \in \Intersection_{z\in\{y\}\union\free{\xi}}\rho'(x)$.
+        Since $\alpha$ is a guard satisfied by $M,\rho'$, by Lemma \ref{lemma:guards},
+        there is a position $q$ in the intersection of equivalence classes
+        corresponding to each of the variables in $\free{\xi} \union \{ y \}$.
+        That is $q \in \Intersection_{z\in\{y\}\union\free{\xi}}\nodes{\rho'(z)}$.
         If $p = q$ then we choose the corresponding instantiation.
         If $p \neq q$ then choose the child the $p$ on the path to $q$.
 
-    * (\dapp):
-        \todo{This still needs work. Please review later}
-        <!--
-        if $\phi = \bar \sigma(\phi_1, \ldots, \phi_n)$, again, 
-        then we may choose between an immediate instantiation,
-        or postponing instantiation and keeping $\phi$ the same
-        until after the application of (exists) or (app) introduces additional elements that we use in the instantiation.
+    * (\dapp): if $\phi = \bar\sigma(\bar \xi)$, then,
+        again, to continue the play, we may choose between in immediate instantiation, or
+        postpone instantiation until some (app) or (exists) introduces additional elements
+        that we may use in the instantiation.
+        Once an instantiation is chosen,
+        the strategy $S$ may choose any one branch from the subsequent (or) nodes
+        corresponding to the assertion $\matches{z}{\fnot{\sigma(\bar x)}} \lor \lOr_i \matches{x_i}{\xi_i}$.
 
         Since $\rho_p(y) \not\in \evaluation{\phi}_{M,\rho_p}$
-        we know that there is some extension $\rho'$ of $\rho_p$ to include fresh variables $\bar x$ in the domain
-        such that
-        $\rho'(y) \in \evaluation{\sigma(\bar x)}$ and $\rho'(x_i) \in \evaluation{\phi_i}$
-        and by Lemma \ref{lemma:vmeasure} that $\nu$-measure
+        we know that there is some extension $\rho'$ of $\rho_p$ to include some fresh variables $\bar x$,
+        such that $\rho'(y) \in \evaluation{\sigma(\bar x)}_{M,\rho'}$
+        and for all  $i$, $\rho'(x_i) \not\in \evaluation{\xi_i}$.
+
+        Since $\phi$ is part of a guarded pattern, each $\xi_i$
+        of the form $\fnot{\lAnd_{y \in \bar y} y \land \xi'_i}$,
+        -- i.e. of the form: $\lOr_{y \in \bar y} \lnot y \lor \xi'_i$
+        where $\bar y$ is a tuple of free element variables
+        and all free variables of each $\xi_i$ are in some $\bar y$.
+
+        Suppose $\bar y$ has two or more distinct element variables for some argument.
+        For $w$ and $z$ with distinct evaluations,
+        we have $\lnot w \lor \lnot z$ is always satisfiable.
+        This contradicts with the invariant that $\rho_p(y) \not\in \evaluation{\phi}_{M,\rho}$.
+        This is means that $w$ and $z$ must therefore have the same evaluation
+        and so $\phi$ and $\phi[w/z]$ are equisatisfiable.
+        We may thus assume the each $\bar y$ has size zero or one.
+
+        Consider the case where the tuple has size one.
+        Since $\rho'(x_i)\not\in\evaluation{\xi_i}$
+        so for $\xi_i \equiv \lnot y \lor \xi'$, then we must have $\rho'(x_i) = \rho'(y)$.
+        This means that we must choose an instantiation where $x_i = y$.
+
+        The pattern $\sigma(\bar x_i)$ meets the criteria for  Lemma \ref{lemma:guards}
+        and every free variable in $\phi$ either occurs in $x_i$ or has the same interpretation as one.
+        So, we know that there must be a position $q$ corresponding to this instantiation.
+        If $p = q$ then we choose the corresponding instantiation.
+        If $p \neq q$ then choose the child the $p$ on the path to $q$.
+
+        By Lemma \ref{lemma:vmeasure} that $\nu$-measure
         of the corresponding assertion is not larger than the current $\nu$-measure.
 
-        There are two cases:
-
-        \todo{we need two more lemmas here.}
-        -->
-
-    * In the remaining cases there is no choice.
+    *   In the remaining cases there is no choice, and the invariants are maintained.
 
     We must show that the trace constructed above is winning for player $1$.
     First, note that the above trace is infinite.
     If the node with least parity occuring infinitely often is an existential, then player $1$ wins.
     If cannot be a universal, because of the way we build the trace -- we know that
-    there is a finite path to a node with an instatiation that contradicts the quantifier.
+    there is a finite path to a node with an instantiation that contradicts the quantifier.
     $\mu$ patterns are winning for player $1$ while $\nu$ patterns decrease the $\nu$-measure.
     So, the trace must be winning for player $1$ constradicting that $S$ is a pre-model and the pattern is satisfiable.
 
@@ -906,105 +966,6 @@ Let us take a look refutations through the lens of checking the validity of a pa
 3. Sequents and assertions are presented differently.
 4. Display them as proof rules rather than tableaux rules.
 
-\begin{align*}
-\cline{1-3}
-\name{conflict}                 & \vruleun{ \Basic, ... \proves \alpha \limplies \bot }
-                                          { \valid } \\
-                                & \text{when $\alpha$ is a basic assertion, with its negation  in $\Basic$.}
-\\
-\name{conflict-el}              & \vruleun{ \Basic, ... \proves \vmatches{e}{e'} }
-                                          { \valid } \\
-                                & \text{when $e' \neq e$ is an element in $\Elements$.}
-\\
-\cline{1-3}
-\name{and}                      & \vruleun{ ... \proves \vmatches{e}{\phi \land \psi} }
-                                           { ... \proves \vmatches{e}{\phi} }
-\qquad
-                                  \vruleun{ \vmatches{e}{\phi} \land \vmatches{f}{\psi}}
-                                           { ... \proves \vmatches{e}{\phi} }
-\\
-                                & \vruleun{ ... \proves \vmatches{e}{\phi \land \psi} }
-                                           { ... \proves \vmatches{e}{\psi} }
-\qquad
-                                  \vruleun{ \vmatches{e}{\phi} \land \vmatches{f}{\psi}}
-                                           { ... \proves \vmatches{f}{\psi} }
-\\
-\name{or}                       & \vrulebin{...\proves \vmatches{e}{\phi \lor \psi} }
-                                           {...\proves \vmatches{e}{\phi}}
-                                           {...\proves \vmatches{e}{\psi}}
-\qquad
-                                  \vrulebin{...\proves \vmatches{e}{\phi} \lor \vmatches{f}{\psi} }
-                                           {...\proves \vmatches{e}{\phi}}
-                                           {...\proves \vmatches{e}{\psi}}
-\\
-\name{def}                      & \vruleun{...\proves \vmatches{e}{\kappa X . \phi(X)}}
-                                  {\vmatches{e}{D}} \\
-                                & \text{when $D := \kappa X. \phi(X) \in \deflist$ }
-\\
-\name{mu}                    & \vruleun{ ...\proves \vmatches{e}{D}}
-                                       { ...\proves \vmatches{e}{\phi[D/X]}} \\
-                                & \text{when $D := \mu X. \phi \in \deflist$ }
-\\
-\name{nu}                    & \vruleun{ ...\proves \vmatches{e}{D} }
-                                       { ...\proves \vmatches{e}{\phi[D/X]} } \\
-                                & \text{when $D := \nu X. \phi \in \deflist$ }
-\\
-\name{\dapp} &
-    \vruleun{ \vmatches{e}{\bar\sigma(\bar \phi)} }
-            { \mathrm{inst} \union \Gamma; 
-              \vmatches{e}{\bar\sigma(\bar \phi)} } \\
-  & \text{where $\mathrm{inst} = \left\{ \vmatches{e}{\sigma(\bar c)} \limplies \lOr_i \vmatches{c_i}{\phi_i}
-                                    \mid \text{ if } \bar c \subset \Elements \right\}$} \\
-  & \text{and $\matches{e}{\bar \sigma(\bar \phi)}$ is not a basic assertion.}
-\\
-\name{forall}                   & \unsatruleun { \sequent{ \matches{e}{\forall \bar x \ldotp \phi(\bar x)}, \Gamma; \Universals; \Elements; ... } }
-                                               { \sequent{ \mathrm{inst} \union \Gamma
-                                                         ; \matches{e}{\forall \bar x \ldotp \phi}, \Universals
-                                                         ; \Elements
-                                                         ; ... } } \\
-                                & \text{where $\mathrm{inst} = \{ e \in \phi[\bar c / \bar x] \mid c \subset \Elements \}$}
-\\
-\cline{1-3}
-\intertext{The following rules may only apply when none of the above rules apply -- i.e. when all assertions in $\alpha$
-are either existentials or applications}
-\name{choose-existential} &
-\unsatruleun {\sequent{ \Gamma; ... }}
-             {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals; \Elements }\}}
-    \qquad  \text{for each $\alpha \in \Gamma$}
-   \\ 
-\name{app} &
-  \satruleun { \matches{e}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Elements } }
-             { \{ \sequent{ \matches{e}{\sigma(\bar k)} \land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \} ; \Elements'  } \} } \\
-  & \text{for each $\bar k \subset K$} \\
-  & \text{where} \\
-  & \text{\qquad $\Elements' = \bar k \union \{ e \} \union  \free{\bar \phi}$} \\
-  & \text{\qquad $\Basic' = \{ a \mid a \in \Basic \text{ and } \free{a} \subset \Elements' \}$ \quad($\Basic$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Gamma' = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
-\\
-\name{exists} &
-  \satruleun { \matches{e}{\exists \bar x \ldotp \phi(\bar x)} \leadsto \sequent{ \Gamma; \Basic; \Universals; \Elements } }
-             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \}; \Elements' } \}
-             } \\
-  & \text{for each $\alpha \in \{ \matches{e}{\phi[\bar k/\bar x]} \mid \bar k \subset K \}$} \\
-  & \text{where} \\
-  & \text{\qquad $\Elements'   = \free{\alpha}$} \\
-  & \text{\qquad $\Basic'      = \{ a \mid a \in \Basic \text{ and } \free{a} \subset \Elements' \}$ \quad($\Basic$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Gamma'      = \{ \gamma \mid \gamma \in \Gamma \text{ and } \free{\gamma} \subset \Elements' \}$ \quad($\Gamma$ restricted to $\Elements'$)} \\
-  & \text{\qquad $\Universals' = \{ \alpha \mid \alpha \in \Universals \text{ and } \free{\alpha} \subset \Elements' \}$ \quad($\Universals$ restricted to $\Elements'$)} \\
-\\
-\cline{1-3}
-\intertext{This rule must apply only immediately after the (exists)/(app) rules or on the root node.
-$\mathsf{fresh}$ denotes the fresh variables introduced by the last application of either of those rules.}
-\name{resolve} & \satrulebin{\sequent{\Gamma; \Basic; \Universals; \Elements}}
-                            {\sequent{ \Gamma; \matches{e}{\sigma(\bar f)}, \Basic; \Universals; \Elements}}
-                            {\sequent{ \Gamma; \matches{e}{\lnot\sigma(\bar f)}, \Basic; \Universals; \Elements}} \\
-               & \text{when $\{e\}\union \bar f \subset \Elements$ and $(\{e\}\union \bar f)\intersection \mathsf{fresh} \neq \emptyset$.}
-\\
-\cline{1-3}
-\end{align*}
--->
-
 ----
 
 Lemma
@@ -1031,6 +992,7 @@ Proposition (Functional Axioms)
 
 This axiom is 
 
+\onecolumn
 # Pseudocode
 
 ```

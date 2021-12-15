@@ -9,9 +9,10 @@ cd "$DOC_DIR"
 
 mkdir -p "$BUILD_DIR"
 pandoc --standalone -t latex -o "$BUILD_DIR/tableau.pdf" \
+       --pdf-engine=xelatex \
+       --template="$DOC_DIR/template.tex" \
        --citeproc --bibliography "$DOC_DIR"/refs.bib \
        --table-of-contents \
        "$DOC_DIR"/preliminaries.md "$DOC_DIR"/tableau.md \
        -V header-includes="\include{prelude.tex}" \
-       -V template="$DOC_DIR/template.tex" \
        -F pandocfilters/defenv.py

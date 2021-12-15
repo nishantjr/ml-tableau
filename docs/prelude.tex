@@ -23,10 +23,11 @@
 % set operators
 % -------------
 
-\newcommand {\Intersection} {\bigcap}
-\newcommand {\Union} {\bigcup}
-\newcommand {\intersection} {\cap}
-\newcommand {\union} {\mathrel{\cup}}
+\newcommand {\Intersection}  {\bigcap}
+\newcommand {\Union}         {\bigcup}
+\newcommand {\intersection}  {\cap}
+\newcommand {\union}         {\mathrel{\cup}}
+\newcommand {\disjointunion} {\mathrel{\sqcup}}
 
 \newcommand {\powerset} {\mathcal P}
 \newcommand {\N} {\mathbb{N}}
@@ -126,7 +127,13 @@
 \newcommand{\name}[1]{(\text{#1})\quad}
 \newcommand{\dapp}   {$\overline{\mbox{app}}$}
 
-\newcommand{\pruleun}[2]{\frac{#1}{#2}}
+\newcommand{\pruleun}[2]{\tabcolsep=2pt\begin{array}{c}%
+ #1\\
+ \noalign{\vskip-7pt}
+ \hrulefill{{⓿}} \\
+ \noalign{\vskip-2pt}
+ #2\end{array}}
+
 \newcommand{\prulebin}[3]{\frac{#1}{#2\quad#3}}
 
 \newcommand{\satruleun}[2]
@@ -163,6 +170,8 @@
 
 \newcommand {\where}[1] {\quad\parbox[t]{0.5\textwidth}{where #1 }}
 \newcommand {\since}[1] {\quad\parbox[t]{0.5\textwidth}{since #1 }}
+
+\usepackage{multicol}
 
 % End of LaTeX Prelude
 % --------------------
