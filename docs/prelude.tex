@@ -122,6 +122,7 @@
 \newcommand{\valid}{\mathsf{valid}}
 \newcommand{\Basic}{\mathcal{B}}
 \newcommand{\Universals}{\mathcal{U}}
+\newcommand{\Elements}{\mathcal{E}}
 
 \newcommand{\name}[1]{(\text{#1})\quad}
 \newcommand{\dapp}   {$\overline{\mbox{app}}$}
@@ -134,6 +135,8 @@
  #2\end{array}}
 
 \newcommand{\prulebin}[3]{\frac{#1}{#2\quad#3}}
+
+\newcommand{\prftree}[3][YYY]{XXX \frac{#1}{#2\quad#3}}
 
 \newcommand{\satruleun}[2]
     {{\color{green}\pruleun{\color{black}#1}{\color{black}#2}}}
@@ -150,7 +153,38 @@
 \newcommand{\vruleun}[2]{\frac{#2}{#1}}
 \newcommand{\vrulebin}[3]{\frac{#2\quad#3}{#1}}
 
+% QF Tableau
+% ----------
 
+\newcommand{\wit}{\mathit{wit}}
+\newcommand{\Wit}{\mathit{Wit}}
+\newcommand{\SSS}{\mathcal{S}}
+\newcommand{\SSSmod}{\mathcal{S}_\mathrm{mod}}
+\newcommand{\appa}{(app$_1$)}
+\newcommand{\appb}{(app$_2$)}
+\newcommand{\appbb}{(app'$_2$)}
+\newcommand{\appc}{(app$_3$)}
+\newcommand{\rt}{\mathit{root}}
+\newcommand{\Nodes}{\mathit{Nodes}}
+\newcommand{\contr}[1]{[\!\rangle #1 \langle\!]}
+\newcommand{\expan}[1]{\langle\!] #1 [\!\rangle}
+\newcommand{\seq}{\mathit{seq}}
+\newcommand{\prule}[1]{\textsc{(#1)}}
+\newcommand{\Tr}{\mathit{Tr}}
+\newcommand{\Pattern}{\textsc{Pattern}}
+\newcommand{\wbar}{\overline}
+\newcommand{\SigD}{\umeasure}
+\newcommand{\SignD}{\mathsf{SignD}}
+\newcommand{\DD}{\deflist}
+\newcommand{\nDD}{\deflist^{\nu}}
+\newcommand{\alphab}{{\bar\alpha}}
+
+\newcommand{\pto}{\rightharpoonup}
+\newcommand{\dom}{\mathrm{dom}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\des}{\mathit{des}}
+\newcommand{\Aut}{\mathcal{A}}
 
 % Games
 % -----

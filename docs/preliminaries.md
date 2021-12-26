@@ -141,19 +141,42 @@ We say $\phi$ is satisfiable modulo theory $\Gamma$ if there is a model $M$
 such that each $\gamma$ in $\Gamma$ is valid and $M$ satisfies $\phi$.
 \end{definition}
 
-\subsection{Fragments and Meta-Properties}
+Remark (A note about variants of matching logic)
+
+:   In its original formulation, matching logic had a many-sorted flavor where each symbol and pattern had a fixed sort.
+    While it is convenient to define models that are also many-sorted,
+    in [@applicative-matching-logic] the authors point out that 
+    the many-sorted setting actually becomes an obstacle when it comes to 
+    more complex sort structures.
+    Therefore, they proposed a much simpler, unsorted variant of matching logic called applicative matching logic (AML),
+    where the many-sorted infrastructure is dropped and sorts are instead defined axiomatically.
+    This also treated multi-arity applications, as syntactic sugar for nested applications.
+    In this work, to maximize the expressivity of the fragment defined here
+    while still avoiding the complexity of multiple sorts,
+    we use a version of matching logic that sits between the two,
+    allowing multi-arity applications, but without sorts.
+    When we need to be explicit about this distinction, we will refer to this as \emph{polyadic matching logic}.
+    In Section~\ref{sec:examples}, we show that the results presented here also apply to the many-sorted variant,
+    and to AML as well.
+    For the rest of this document unless explicitly mentioned,
+    we will use pattern, model, etc, to refer to those concepts in polyadic matching logic
+    although the same terms may be used in other variants of matching logic.
+
+
+## Fragments and Meta-Properties
 
 In general, matching logic's power means that the logic as a whole does not have several desirable properties.
 For example, because it subsumes first-order logic, the satisfiability problem must be undecidable.
 Further, because we can precisely pin down the standard model of the natural
-numbers using the fixedpoint operator, by G\"odel's incompleteness theorem, it
+numbers using the fixedpoint operator, by `G\"odel`{=tex}'s incompleteness theorem, it
 must also be incomplete.
+
 When studying such properties in the context of matching logic, we must thus restrict ourselves to subsets of matching logic.
 In this section, we shall formally define what each of these properties mean within a subsets, or "fragment", of matching logic.
 
 \begin{definition}[Fragments of matching logic]
 A \emph{fragment of matching logic} is a pair $(\PP, \TT)$
-where $\PP$ is a set of patterns and $\PP$ is a set of theories.
+where $\PP$ is a set of patterns and $\TT$ is a set of theories.
 We say a pattern $P$ is in a fragment if $P \in \PP$,
 and a theory $\Gamma$ is in a fragment if $\Gamma \in \TT$
 \end{definition}
@@ -190,16 +213,18 @@ A fragment of matching logic, $(\PP, \TT)$, has the finite-model property iff fo
 if $P$ is $\Gamma$-satisfiable then, there is some model $M \satisfies \phi$ with finite size.
 \end{definition}
 
-The finite-model property and decidablity are independent in the sense that a fragment may have the finite model property and yet be undecidable,
-or be decidable despite being infinite.
-
-\subsection{The Status-Quo}\label{the-status-quo}
+The finite-model property and decidablity are independent in the sense that a
+fragment may have the finite model property and yet be undecidable, or be
+decidable despite being infinite.
 
 We will now define some important fragments and enumerate the know results about their meta-properties.
 
 \begin{definition}[The modal fragment]
-The \emph{modal fragment} of matching logic has \\$\PP = \{\text{ patterns built from \structure and \logic }\}$,
-and $\TT = \{\{\}\}$.
+The \emph{modal fragment} of matching logic has:
+\begin{align*}
+\PP &= \{\text{ patterns built from \structure{} and \logic{} }\} \\
+\TT &= \{\emptyset\}
+\end{align*}
 \end{definition}
 
 That is, the modal fragment of matching logic only allows quantifier- and fixedpoint-free patterns and the empty theory.
@@ -208,17 +233,22 @@ In Section~\ref{sec:decidable-modal-fragment}, we show that this fragment has th
 
 The quantifier free fragment is less restrictive, allowing fixedpoints in patterns as well:
 
-\begin{definition}[The quantifier-free fragment]
-The \emph{quantifier-free fragment} of matching logic has \\$\PP = \{\text{ patterns built from \structure, \logic and \fixedpoint }\}$,
-and $\TT = \{\{\}\}$.
-\end{definition}
+Definition (The quantifier-free fragment)
+
+:   The *quantifier-free fragment* of matching logic has:
+
+    \begin{align*}
+    \PP &= \{\text{ patterns built from \structure{}, } \\
+        & \qquad\qquad { \logic{} and \fixedpoint{} }\} \\
+    \TT &= \{\emptyset\}
+    \end{align*}
 
 This fragment also exhibits the small-model property as proved in Section~\ref{sec:decidable-qf-fragment}.
 
 We shall only define the next fragment, called guarded matching logic, informally here. We shall describe it in more depth in Section~\ref{sec:decidable-guarded-fragment}.
 This fragment allows both quantification and fixedpoints. However, quantifiers must be of the form:
 \begin{align*}
-\forall \bar x \ldotp \alpha(\bar x, \bar y) &\implies \phi(\bar x, \bar y) \\
+\forall \bar x \ldotp \alpha(\bar x, \bar y) &\limplies \phi(\bar x, \bar y) \\
 \exists \bar x \ldotp \alpha(\bar x, \bar y) &\land    \phi(\bar x, \bar y)
 \end{align*}
 where $\alpha$ is a conjunction of applications and every pair of free variables in $\phi$ are arguments of some application in $\alpha$.
@@ -310,24 +340,4 @@ Decidability  &  \xmark\cite{urquhart1981}                        & \xmark      
 }
 \label{table:status-quo}
 \end{table*}
-
-\subsection{A note about variants of matching logic}
-In its original formulation, matching logic had a many-sorted flavor where each symbol and pattern had a fixed sort.
-While it is convenient to define models
-that are also many-sorted, the authors of \cite{applicative-matching-logic} pointed out that 
-the many-sorted setting actually becomes an obstacle when it comes to 
-more complex sort structures.
-Therefore, they proposed a much simpler, unsorted variant of matching logic called applicative matching logic (AML),
-where the many-sorted infrastructure is dropped and sorts are instead defined axiomatically.
-This also treated multi-arity applications, as syntactic sugar for nested applications.
-In this work, to maximize the expressivity of the fragment defined here
-while still avoiding the complexity of multiple sorts,
-we use a version of matching logic that sits between the two,
-allowing multi-arity applications, but without sorts.
-When we need to be explicit about this distinction, we will refer to this as \emph{polyadic matching logic}.
-In Section~\ref{sec:examples}, we show that the results presented here also apply to the many-sorted variant,
-and to AML as well.
-For the rest of this document unless explicitly mentioned,
-we will use pattern, model, etc, to refer to those concepts in polyadic matching logic
-although the same terms may be used in other variants of matching logic.
 

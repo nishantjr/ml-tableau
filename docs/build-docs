@@ -9,10 +9,16 @@ cd "$DOC_DIR"
 
 mkdir -p "$BUILD_DIR"
 pandoc --standalone -t latex -o "$BUILD_DIR/tableau.pdf" \
+       "$DOC_DIR"/introduction.md \
+       "$DOC_DIR"/preliminaries.md \
+       "$DOC_DIR"/modal-matching-logic.md \
+       "$DOC_DIR"/game-preliminaries.md \
+       "$DOC_DIR"/qf-matching-logic.md \
+       "$DOC_DIR"/tableau.md \
+       "$DOC_DIR"/appendix.md \
        --pdf-engine=xelatex \
        --template="$DOC_DIR/template.tex" \
+       -F pandoc-crossref \
        --citeproc --bibliography "$DOC_DIR"/refs.bib \
        --table-of-contents \
-       "$DOC_DIR"/preliminaries.md "$DOC_DIR"/tableau.md \
-       -V header-includes="\include{prelude.tex}" \
        -F pandocfilters/defenv.py

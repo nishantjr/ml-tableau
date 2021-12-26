@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="139.10001mm"
+   height="200.3mm"
+   viewBox="0 0 139.10001 200.3"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="decidable-fragments.svg"
+   inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="in"
+     showgrid="false"
+     inkscape:zoom="1.5875"
+     inkscape:cx="152.75591"
+     inkscape:cy="182.04724"
+     inkscape:window-width="1876"
+     inkscape:window-height="993"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="decidable-fragments">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2540" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="decidable-fragments">
+      <rect
+         style="opacity:1;fill:none;fill-opacity:0.0487405;stroke:#000000;stroke-width:0.190927;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
+         id="rect55443"
+         width="134.56322"
+         height="85.296173"
+         x="1.9493703"
+         y="2.4695516"
+         rx="1"
+         ry="1" />
+      <rect
+         style="fill:#808080;fill-opacity:0.0487405;stroke:#000000;stroke-width:0.180934;stroke-miterlimit:4;stroke-dasharray:0.723737, 1.44748;stroke-dashoffset:0;stop-color:#000000"
+         id="rect31-367"
+         width="122.65176"
+         height="71.333878"
+         x="4.1065755"
+         y="5.1081653"
+         ry="1"
+         rx="1" />
+      <rect
+         style="fill:#808080;fill-opacity:0.0487405;stroke:#000000;stroke-width:0.177521;stroke-miterlimit:4;stroke-dasharray:0.710085, 1.42017;stroke-dashoffset:0;stop-color:#000000"
+         id="rect31-36"
+         width="101.65219"
+         height="59.053875"
+         x="4.0887604"
+         y="5.0887604"
+         ry="1"
+         rx="1" />
+      <rect
+         style="fill:#808080;fill-opacity:0.0487405;stroke:#000000;stroke-width:0.191452;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
+         id="rect1344"
+         width="96.27549"
+         height="34.049549"
+         x="6.1696849"
+         y="7.8272519"
+         ry="1"
+         rx="1" />
+      <rect
+         style="fill:#808080;fill-opacity:0.0487405;stroke:#000000;stroke-width:0.177892;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
+         id="rect31-3"
+         width="46.292942"
+         height="52.012985"
+         x="6.1629047"
+         y="7.8204718"
+         ry="1"
+         rx="1" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="102.45103"
+         y="40.42757"
+         id="text4002-5"><tspan
+           sodipodi:role="line"
+           id="tspan4000-3"
+           style="text-align:end;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="102.45103"
+           y="40.42757">\fragment{Non-nested guarded}</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="7.3638372"
+         y="71.555283"
+         id="text4002-5-3"><tspan
+           sodipodi:role="line"
+           id="tspan4000-3-6"
+           style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="7.3638372"
+           y="71.555283">•Guarded Separation logic</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:2.9559px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="60.954208"
+         y="14.263523"
+         id="text37142-9"><tspan
+           sodipodi:role="line"
+           id="tspan37140-1"
+           style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="60.954208"
+           y="14.263523">•Finite Trace LTL</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:2.9559px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="61.006447"
+         y="23.822802"
+         id="text37142-9-29"><tspan
+           sodipodi:role="line"
+           id="tspan37140-1-1"
+           style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="61.006447"
+           y="23.822802">•PDL</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:2.9559px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="60.832664"
+         y="19.317802"
+         id="text37142-9-2"><tspan
+           sodipodi:role="line"
+           id="tspan37140-1-7"
+           style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="60.832664"
+           y="19.317802">•Infinite Trace LTL</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="52.375954"
+         y="58.296333"
+         id="text4002-56"><tspan
+           sodipodi:role="line"
+           style="text-align:end;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="52.375954"
+           y="58.296333"
+           id="tspan9645">\fragment{Quantifier free}</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:2.9559px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="8.9980698"
+         y="48.811295"
+         id="text37142"><tspan
+           sodipodi:role="line"
+           id="tspan37140"
+           style="stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="8.9980698"
+           y="48.811295">•Modal $\mu$-calculus</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000"
+         x="105.82971"
+         y="62.687145"
+         id="text4002"><tspan
+           sodipodi:role="line"
+           id="tspan4000"
+           x="105.82971"
+           y="62.687145">\fragment{Loosely guarded}</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="110.6013"
+         y="86.004196"
+         id="text4002-0"><tspan
+           sodipodi:role="line"
+           id="tspan4000-6"
+           style="fill:#ffffff;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="110.6013"
+           y="86.004196">Matching logic</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="126.8488"
+         y="74.987556"
+         id="text4002-0-2"><tspan
+           sodipodi:role="line"
+           style="text-align:end;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="126.8488"
+           y="74.987556"
+           id="tspan36024">\fragment{Decidable}</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:3.28091px;line-height:1.25;font-family:sans-serif;text-align:end;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+         x="136.51816"
+         y="86.241722"
+         id="text4002-0-2-3"><tspan
+           sodipodi:role="line"
+           style="text-align:end;text-anchor:end;fill:#000000;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+           x="136.51816"
+           y="86.241722"
+           id="tspan10917-6">\fragment{Matching logic}</tspan></text>
+    </g>
+  </g>
+</svg>
