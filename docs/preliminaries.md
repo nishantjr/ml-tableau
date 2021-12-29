@@ -51,8 +51,8 @@ and allow the usual syntactic sugar:
 \end{align*}
 $\sigma(\phi_1, \dots, \phi_n)$ are called applications. 
 We will use $\sigma$ instead of $\sigma()$ for constants.
-\hypertarget{semantics-of-polyadic-matching-logic}{%
-\subsection{Semantics of Matching Logic}\label{semantics-of-matching-logic}}
+
+## Semantics of Matching Logic {#sec:semantics-of-matching-logic}
 
 Unlike in FOL, matching logic patterns are interpreted as a set of elements in a model rather than a single element.
 Intuitively, the interpretation is the set of elements that match a pattern.
@@ -229,19 +229,19 @@ The \emph{modal fragment} of matching logic has:
 
 That is, the modal fragment of matching logic only allows quantifier- and fixedpoint-free patterns and the empty theory.
 This fragment may be regarded as a polyadic multi-arity variant of modal logic.
-In Section~\ref{sec:decidable-modal-fragment}, we show that this fragment has the small-model property (and therefore is also decidable and has the finite-model property).
+In [@sec:modal-fragment], we show that this fragment has the small-model property (and therefore is also decidable and has the finite-model property).
 
-The quantifier free fragment is less restrictive, allowing fixedpoints in patterns as well:
+quantifier free fragment is less restrictive, allowing fixedpoints in patterns as well:
 
-Definition (The quantifier-free fragment)
+nition (The quantifier-free fragment)
 
-:   The *quantifier-free fragment* of matching logic has:
+The *quantifier-free fragment* of matching logic has:
 
-    \begin{align*}
-    \PP &= \{\text{ patterns built from \structure{}, } \\
-        & \qquad\qquad { \logic{} and \fixedpoint{} }\} \\
-    \TT &= \{\emptyset\}
-    \end{align*}
+\begin{align*}
+\PP &= \{\text{ patterns built from \structure{}, } \\
+      \qquad\qquad \text{\logic{} and \fixedpoint{}}\} \\
+\TT &= \{\emptyset\}
+\end{align*}
 
 This fragment also exhibits the small-model property as proved in Section~\ref{sec:decidable-qf-fragment}.
 
@@ -317,21 +317,21 @@ We summarize the meta properties of these fragments in Table \ref{table:status-q
 \multicolumn{5}{c}{Empty theories}\\
 \hline
 \rule{0pt}{3ex}Small-model
-              & \cmark[Sec.\ref{sec:decidable-modal-fragment}]    & \cmark[Sec.\ref{sec:decidable-qf-fragment}]       & \xmark                                                 & \xmark               & \xmark  \\
-Finite-model  & \cmark                                            & \cmark                                            & \xmark[Ex.\ref{ex:naturals-are-guarded}]               & \xmark               & \xmark  \\
-Decidability  & \cmark                                            & \cmark                                            & \cmark                                                 & \xmark               & \xmark  \\
+              & \cmark[Sec.\ref{sec:modal-fragment}]        & \cmark[Sec.\ref{sec:decidable-qf-fragment}]       & \xmark                                                 & \xmark               & \xmark  \\
+Finite-model  & \cmark                                      & \cmark                                            & \xmark[Ex.\ref{ex:naturals-are-guarded}]               & \xmark               & \xmark  \\
+Decidability  & \cmark                                      & \cmark                                            & \cmark                                                 & \xmark               & \xmark  \\
 \hline
 \multicolumn{5}{c}{Finite theories}\\
 \hline
-Small-model   & ?                                                 & ?                                                 & \xmark                                                 & \xmark               & \xmark  \\
-Finite-model  & ?                                                 & ?                                                 & \xmark                                                 & \xmark               & \xmark  \\
-Decidability  & \cmark[Sec.\ref{sec:decidable-guarded-fragment}]  & \cqmark$\dagger$[Sec.\ref{sec:decidable-guarded-fragment}] & \cmark[Sec.\ref{sec:decidable-guarded-fragment}]       & \xmark               & \xmark  \\
+Small-model   & ?                                           & ?                                                 & \xmark                                                 & \xmark               & \xmark  \\
+Finite-model  & ?                                           & ?                                                 & \xmark                                                 & \xmark               & \xmark  \\
+Decidability  & \cmark[Sec.\ref{sec:guarded-fragment}]      & \cqmark$\dagger$[Sec.\ref{sec:decidable-guarded-fragment}] & \cmark[Sec.\ref{sec:decidable-guarded-fragment}]       & \xmark               & \xmark  \\
 \hline
 \multicolumn{5}{c}{Recursively enumerable theories}\\
 \hline
-Small-model   &  \xmark                                           & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
-Finite-model  &  \xmark[Ex. \ref{ex:modal-inf-infinite}]          & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
-Decidability  &  \xmark\cite{urquhart1981}                        & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
+Small-model   &  \xmark                                     & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
+Finite-model  &  \xmark[Ex. \ref{ex:modal-inf-infinite}]    & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
+Decidability  &  \xmark\cite{urquhart1981}                  & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
 \hline
 \end{tabular}
 \caption{

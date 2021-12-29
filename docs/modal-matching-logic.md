@@ -1,47 +1,43 @@
-# Modal Matching Logic
+# The Modal Fragment {#sec:modal-fragment}
 
 Our goal is to show the *small model property* of the modal fragment of matching logic,
 which states that if $\psi$ is *satisfiable*,
 then there exists a (finite) model $M$ with size bounded by a computable
 function $f(\size{\psi})$ on the size of $\psi$
-such that $\phi_M \neq \emptyset$
+such that $\evaluation{\phi}_M \neq \emptyset$
 (or equivalently, there is an element 
 $a \in M$ such that $a \vDash \psi$ in $M$).
-Note that the SMP implies the \emph{finite model property} (FMP).
-Also, note that SMP implies decidability (DEC), because one can exhaustively 
-search for a 
-model
-of the given pattern $\psi$ up to the size bound $f(\size{\psi})$.
 
+The SMP implies decidability,
+because one can exhaustively  search for a model for $\psi$
+up to the size bound $f(\size{\psi})$.
 
-\begin{definition}
-Given $\psi$, let its \emph{closure} $C(\psi)$ be the smallest set
-that contains all its sub-patterns and their negations.
-\end{definition}
+Definition (Closure)
+:   Given $\psi$, let its *closure* $C(\psi)$ be the smallest set
+    that contains all its sub-patterns and their negations.
 
-The size of $C(\psi)$, written $\size{C(\psi)}$, 
+The size of $C(\psi)$, written $\size{C(\psi)}$,
 is defined in the usual way and smaller than twice the size of $\psi$.
 
-\begin{definition}
-Given $\Gamma$ and $M$, we say that two elements $a,b \in M$ are
-\emph{$\Gamma$-indistinguishable}, written $a \cong_\Gamma b$ or simply $a 
-\cong b$ when $\Gamma$ is understood, 
-if $a \vDash \psi$ iff $b \vDash \psi$ for all $\psi \in \Gamma$.
-\end{definition}
+Definition ($\Gamma$-indistinguishable)
 
-\begin{lemma}
-$\cong_\Gamma$ is an equivalence relation on $M$.
-\end{lemma}
-\begin{proof}
-By directly applying the definition.
-\end{proof}
+:   Given $\Gamma$ and $M$, we say that two elements $a,b \in M$ are
+    *$\Gamma$-indistinguishable*, written $a \cong_\Gamma b$ or simply
+    $a \cong b$ when $\Gamma$ is understood, 
+    if $a \vDash \psi$ iff $b \vDash \psi$ for all $\psi \in \Gamma$.
 
-\begin{definition}\label{def:eqclass}
-We use $[a]_\Gamma = \{b \in M \mid a \cong_\Gamma b\}$ to denote the 
-equivalence class of $a \in M$. 
-We use $[A]_\Gamma = \{ [a]_\Gamma \mid a \in A \}$ to denote the set of 
-equivalence classes of all elements in $A \subseteq M$.
-\end{definition}
+Lemma
+:   $\cong_\Gamma$ is an equivalence relation on $M$.
+
+Proof
+:   By directly applying the definition.
+
+Definition ($\Gamma$-equivalence classes){#def:eqclass}
+
+:   We use $[a]_\Gamma = \{b \in M \mid a \cong_\Gamma b\}$ to denote the 
+    equivalence class of $a \in M$. 
+    We use $[A]_\Gamma = \{ [a]_\Gamma \mid a \in A \}$ to denote the set of 
+    equivalence classes of all elements in $A \subseteq M$.
 
 In the following, we drop $\Gamma$ when it is understood.
 

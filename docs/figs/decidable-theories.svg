@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="161.22397mm"
-   height="75.341431mm"
-   viewBox="0 0 161.22397 75.341431"
+   width="104.33135mm"
+   height="77.460663mm"
+   viewBox="0 0 104.33135 77.460663"
    version="1.1"
    id="svg182167"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20, custom)"
@@ -23,11 +23,11 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.6338244"
-     inkscape:cx="269.61282"
-     inkscape:cy="88.136768"
-     inkscape:window-width="2516"
-     inkscape:window-height="1353"
+     inkscape:zoom="6.5352976"
+     inkscape:cx="372.66857"
+     inkscape:cy="34.657947"
+     inkscape:window-width="1920"
+     inkscape:window-height="1080"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -241,93 +241,110 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-3.7362817,-16.340314)">
+     transform="translate(-12.024979,-16.750776)">
+    <rect
+       style="vector-effect:non-scaling-stroke;fill:#b3b3b3;stroke:#999999;stroke-width:7.58e-06;stroke-miterlimit:4;stroke-dasharray:none;-inkscape-stroke:hairline"
+       id="rect13918-6"
+       width="103.70554"
+       height="55.124371"
+       x="12.358075"
+       y="16.883068"
+       ry="1"
+       rx="1" />
+    <rect
+       style="vector-effect:non-scaling-stroke;fill:#ececec;stroke:#999999;stroke-width:5.21e-06;stroke-miterlimit:4;stroke-dasharray:none;-inkscape-stroke:hairline"
+       id="rect13918-3"
+       width="98.567436"
+       height="31.66979"
+       x="12.24386"
+       y="16.883068"
+       ry="1"
+       rx="1" />
+    <rect
+       style="fill:#f9f9f9;stroke:#999999;stroke-width:0.00000342;stroke-miterlimit:4;stroke-dasharray:none;vector-effect:non-scaling-stroke;-inkscape-stroke:hairline"
+       id="rect13918"
+       width="93.252701"
+       height="15.57671"
+       x="12.157271"
+       y="16.883068"
+       ry="1"
+       rx="1" />
     <text
        xml:space="preserve"
-       style="font-size:4.15248px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.103812"
-       x="135.35381"
-       y="26.992899"
+       style="font-size:3.52778px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.103812"
+       x="110.20764"
+       y="42.643932"
        id="text151532-9-9"
        transform="scale(0.99531298,1.0047091)"><tspan
          sodipodi:role="line"
-         style="text-align:start;text-anchor:start;stroke-width:0.103812"
-         x="135.35381"
-         y="26.992899"
-         id="tspan16373">Quant. free </tspan><tspan
+         style="font-size:3.52778px;text-align:end;text-anchor:end;stroke-width:0.103812"
+         x="110.20764"
+         y="42.643932"
+         id="tspan16373">Quant. free</tspan><tspan
          sodipodi:role="line"
-         style="text-align:start;text-anchor:start;stroke-width:0.103812"
-         x="135.35381"
-         y="32.183498"
-         id="tspan16381">matching logic</tspan></text>
+         style="font-size:3.52778px;text-align:end;text-anchor:end;stroke-width:0.103812"
+         x="110.20764"
+         y="47.053658"
+         id="tspan16381">fragment</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:6.34873px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.158718"
-       x="63.381847"
-       y="19.828814"
+       x="13.759761"
+       y="22.346655"
        id="text106633"
        transform="scale(0.99531298,1.0047091)"><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="19.828814"
-         id="tspan117719">Propositional Logic</tspan><tspan
+         x="13.759761"
+         y="22.346655"
+         id="tspan117719">• Propositional Logic</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="27.764727"
-         id="tspan10741">Modal Logic</tspan><tspan
+         x="13.759761"
+         y="30.282568"
+         id="tspan10741">• Modal Logic</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="35.700638"
-         id="tspan34289">Modal μ-calculus</tspan><tspan
+         x="13.759761"
+         y="38.218479"
+         id="tspan34289">• Modal μ-calculus</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="43.636551"
-         id="tspan114081">Propositional Dynamic Logic</tspan><tspan
+         x="13.759761"
+         y="46.154392"
+         id="tspan114081">• Propositional Dynamic Logic</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="51.572464"
-         id="tspan1772">Infinite trace LTL</tspan><tspan
+         x="13.759761"
+         y="54.090305"
+         id="tspan1772">• Infinite trace LTL</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="59.508377"
-         id="tspan114309">Finite trace LTL</tspan><tspan
+         x="13.759761"
+         y="62.026218"
+         id="tspan114309">• Finite trace LTL</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="67.44429"
-         id="tspan114311">Computation Tree Logic</tspan><tspan
+         x="13.759761"
+         y="69.962128"
+         id="tspan114311">• Computation Tree Logic</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="75.380203"
-         id="tspan184099">Matching over algebraic data types</tspan><tspan
+         x="13.759761"
+         y="77.898041"
+         id="tspan184099">• Matching over algebraic data types</tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="83.316116"
-         id="tspan114303">Separation Logic with Rec. Defns<tspan
+         x="13.759761"
+         y="85.833954"
+         id="tspan114303">• Separation Logic with Rec. Defns<tspan
    style="font-size:65%;baseline-shift:super"
    id="tspan231558">†</tspan></tspan><tspan
          sodipodi:role="line"
          style="font-size:4.2325px;stroke-width:0.158718"
-         x="63.381847"
-         y="91.252029"
-         id="tspan178484">...</tspan></text>
-    <g
-       aria-label="{"
-       transform="matrix(0.41985496,0,0,0.47003056,74.245548,-19.121285)"
-       id="text140207"
-       style="font-size:38.1788px;line-height:1.25;letter-spacing:0px;word-spacing:0px;stroke-width:0.954471">
-      <path
-         d="m -30.743069,182.81354 v 2.68445 h -1.155804 c -3.094571,0 -5.170046,-0.45983 -6.226425,-1.37951 -1.043951,-0.91967 -1.565927,-2.7528 -1.565927,-5.49939 v -41.39037 c 0,-1.87663 -0.335556,-3.17535 -1.006668,-3.89618 -0.671111,-0.72082 -1.447528,-1.08123 -3.65383,-1.08123 h -1.137161 v -2.66581 h 1.137161 c 1.777203,0 2.995147,-0.3542 3.65383,-1.06259 0.671112,-0.72083 1.006668,-2.00712 1.006668,-3.85889 V 82.356409 c 0,-2.746587 0.521976,-4.573502 1.565927,-5.480745 1.056379,-0.919672 3.131854,-1.379508 6.226425,-1.379508 h 1.155804 v 2.665805 h -1.267656 c -1.752347,0 -2.895722,0.273416 -3.430126,0.820248 -0.534404,0.546832 -0.801606,1.696421 -0.801606,3.448768 v 42.456743 c 0,1.95119 -0.285844,3.36798 -0.857531,4.25037 -0.55926,0.88239 -1.52243,1.47893 -2.889509,1.78963 1.379507,0.33556 2.348891,0.94453 2.908151,1.82692 0.559259,0.88239 0.838889,2.29296 0.838889,4.23173 v 41.55816 c 0,1.75235 0.267202,2.90194 0.801606,3.44876 0.534404,0.54684 1.677779,0.82025 3.430126,0.82025 z"
-         id="path143586"
-         sodipodi:nodetypes="ccscssssccscsscsccssssccsssssc" />
-    </g>
+         x="13.759761"
+         y="93.769867"
+         id="tspan178484">• ...</tspan></text>
     <g
        aria-label="{"
        transform="matrix(-0.41985496,0,0,0.47003056,112.86505,-19.121285)"
@@ -335,16 +352,21 @@
        style="font-size:38.1788px;line-height:1.25;letter-spacing:0px;word-spacing:0px;stroke-width:0.954471" />
     <text
        xml:space="preserve"
-       style="font-size:4.15248px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.103812"
-       x="53.336273"
-       y="43.418652"
+       style="font-size:3.52778px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.103812"
+       x="115.5284"
+       y="65.683189"
        id="text151532"
        transform="scale(0.99531298,1.0047091)"><tspan
          sodipodi:role="line"
-         style="text-align:end;text-anchor:end;stroke-width:0.103812"
-         x="53.336277"
-         y="43.418652"
-         id="tspan151536">Guarded matching logic</tspan></text>
+         style="font-size:3.52778px;text-align:end;text-anchor:end;stroke-width:0.103812"
+         x="115.5284"
+         y="65.683189"
+         id="tspan151536">Guarded</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:end;text-anchor:end;stroke-width:0.103812"
+         x="115.5284"
+         y="70.092911"
+         id="tspan24883">fragment</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:10.5833px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
@@ -366,47 +388,24 @@
        transform="matrix(-0.41985496,0,0,0.47003056,113.39422,-19.145186)"
        id="text140207-3-36"
        style="font-size:38.1788px;line-height:1.25;letter-spacing:0px;word-spacing:0px;stroke-width:0.954471" />
-    <g
-       aria-label="{"
-       transform="matrix(-0.41985496,0,0,0.47003056,115.51096,-19.145186)"
-       id="text140207-3-35"
-       style="font-size:38.1788px;line-height:1.25;letter-spacing:0px;word-spacing:0px;stroke-width:0.954471">
-      <path
-         d="m -30.743069,131.02613 v 2.68445 h -1.155804 c -3.094571,0 -5.170046,-0.45983 -6.226425,-1.37951 -1.043951,-0.91967 -1.565927,-2.7528 -1.565927,-5.49939 v -18.87411 c 0,-1.87663 -0.335556,-3.17535 -1.006668,-3.89618 -0.671111,-0.72082 -1.889042,-1.08123 -3.65383,-1.08123 h -1.137161 v -2.66581 h 1.137161 c 1.777203,0 2.995147,-0.354196 3.65383,-1.062586 0.671112,-0.72083 1.006668,-2.00712 1.006668,-3.85889 V 82.356409 c 0,-2.746587 0.521976,-4.573502 1.565927,-5.480745 1.056379,-0.919672 3.131854,-1.379508 6.226425,-1.379508 h 1.155804 v 2.665805 h -1.267656 c -1.752347,0 -2.895722,0.273416 -3.430126,0.820248 -0.534404,0.546832 -0.801606,1.696421 -0.801606,3.448768 v 13.185597 c 0,1.95119 -0.285844,3.36798 -0.857531,4.25037 -0.55926,0.882386 -1.52243,1.478926 -2.889509,1.789626 1.379507,0.33556 2.348891,0.94453 2.908151,1.82692 0.559259,0.88239 0.838889,2.29296 0.838889,4.23173 v 19.0419 c 0,1.75235 0.267202,2.90194 0.801606,3.44876 0.534404,0.54684 0.698458,0.82025 3.430126,0.82025 z"
-         id="path143586-5-6"
-         sodipodi:nodetypes="ccscssssccscsscsccssssccsssssc" />
-    </g>
     <text
        xml:space="preserve"
-       style="font-size:2.82222px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.103812"
-       x="111.00829"
-       y="20.61175"
+       style="font-size:3.52778px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.103812"
+       x="104.90474"
+       y="26.530783"
        id="text151532-9-9-0"
        transform="scale(0.99531298,1.0047091)"><tspan
          sodipodi:role="line"
-         style="font-size:2.82222px;text-align:start;text-anchor:start;stroke-width:0.103812"
-         x="111.00829"
-         y="20.61175"
-         id="tspan16381-3">Modal</tspan><tspan
+         style="text-align:end;baseline-shift:baseline;text-anchor:end;stroke-width:0.103812"
+         x="104.90474"
+         y="26.530783"
+         id="tspan16381-3"
+         rotate="0 0 0 0 0 0">Modal</tspan><tspan
          sodipodi:role="line"
-         style="font-size:2.82222px;text-align:start;text-anchor:start;stroke-width:0.103812"
-         x="111.00829"
-         y="24.139524"
-         id="tspan14680">matching</tspan><tspan
-         sodipodi:role="line"
-         style="font-size:2.82222px;text-align:start;text-anchor:start;stroke-width:0.103812"
-         x="111.00829"
-         y="27.667299"
-         id="tspan14684">logic</tspan></text>
-    <g
-       aria-label="{"
-       transform="matrix(-0.41985496,0,0,0.47003056,90.64012,-19.145186)"
-       id="text140207-3-35-6"
-       style="font-size:38.1788px;line-height:1.25;letter-spacing:0px;word-spacing:0px;stroke-width:0.954471">
-      <path
-         d="m -30.743069,102.8808 v 2.68445 h -1.155804 c -3.094571,0 -5.170046,-0.45983 -6.226425,-1.37951 -1.043951,-0.91967 -1.565927,-2.7528 -1.565927,-5.499393 v -1.98691 c 0,-1.87663 -0.335556,-3.17535 -1.006668,-3.89618 -0.671111,-0.72082 -1.889042,-1.08123 -3.65383,-1.08123 h -1.137161 v -2.66581 h 1.137161 c 1.777203,0 2.995147,-0.354196 3.65383,-1.062586 0.671112,-0.72083 1.006668,-2.00712 1.006668,-3.85889 v -1.778332 c 0,-2.746587 0.521976,-4.573502 1.565927,-5.480745 1.056379,-0.919672 3.131854,-1.379508 6.226425,-1.379508 h 1.155804 v 2.665805 h -1.267656 c -1.752347,0 -2.895722,0.273416 -3.430126,0.820248 -0.534404,0.546832 -0.801606,1.696421 -0.801606,3.448768 v 1.927464 c 0,1.95119 -0.285844,3.36798 -0.857531,4.25037 -0.55926,0.882386 -1.52243,1.478926 -2.889509,1.789626 1.379507,0.33556 2.348891,0.94453 2.908151,1.82692 0.559259,0.88239 0.838889,2.29296 0.838889,4.23173 v 2.1547 c 0,1.752353 0.267202,2.901943 0.801606,3.448763 0.534404,0.54684 0.698458,0.82025 3.430126,0.82025 z"
-         id="path143586-5-6-0"
-         sodipodi:nodetypes="ccscssssccscsscsccssssccsssssc" />
-    </g>
+         style="text-align:end;baseline-shift:baseline;text-anchor:end;stroke-width:0.103812"
+         x="104.90474"
+         y="30.940508"
+         id="tspan14684"
+         rotate="0 0 0 0 0 0 0 0 0">fragment</tspan></text>
   </g>
 </svg>

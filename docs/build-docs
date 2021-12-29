@@ -8,7 +8,7 @@ BUILD_DIR="$REPO_DIR/.build"
 cd "$DOC_DIR"
 
 mkdir -p "$BUILD_DIR"
-pandoc --standalone -t latex -o "$BUILD_DIR/tableau.pdf" \
+pandoc --standalone -f markdown -t latex -o "$BUILD_DIR/tableau.pdf" \
        "$DOC_DIR"/introduction.md \
        "$DOC_DIR"/preliminaries.md \
        "$DOC_DIR"/modal-matching-logic.md \
@@ -19,6 +19,6 @@ pandoc --standalone -t latex -o "$BUILD_DIR/tableau.pdf" \
        --pdf-engine=xelatex \
        --template="$DOC_DIR/template.tex" \
        -F pandoc-crossref \
-       --citeproc --bibliography "$DOC_DIR"/refs.bib \
+       --citeproc --bibliography "$DOC_DIR"/refs.bib --csl "$DOC_DIR"/acm-sig-proceedings-long-author-list.csl \
        --table-of-contents \
        -F pandocfilters/defenv.py
