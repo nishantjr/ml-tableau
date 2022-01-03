@@ -238,8 +238,9 @@ nition (The quantifier-free fragment)
 The *quantifier-free fragment* of matching logic has:
 
 \begin{align*}
-\PP &= \{\text{ patterns built from \structure{}, } \\
-      \qquad\qquad \text{\logic{} and \fixedpoint{}}\} \\
+\PP &= \left\{\begin{array}{l}\text{ patterns built from \structure{}, } \\
+            \text{\logic{} and \fixedpoint{}}
+              \end{array}\right\}\\
 \TT &= \{\emptyset\}
 \end{align*}
 

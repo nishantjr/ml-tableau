@@ -1,0 +1,13 @@
+/figs/*.pdf
+/figs/*.pdf_tex
+/**/*.aux
+/tableau.fdb_latexmk
+/tableau.fls
+/tableau.log
+/tableau.out
+/tableau.pdf
+/tableau.xdv
+
+
+
+

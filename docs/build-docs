@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 set -eu -o pipefail
 REPO_DIR="$(cd $(dirname $0)/..; pwd)"
 DOC_DIR="$REPO_DIR/docs"
@@ -7,8 +8,27 @@ BUILD_DIR="$REPO_DIR/.build"
 
 cd "$DOC_DIR"
 
+pdflatex_quiet() {
+    : | latexmk -pdfxe "$@" | grep '^!.*' -A200 --color=always
+}
+
+svg_to_latex() {
+    input=$1; shift
+    inkscape -D --file=$input --export-latex --export-type=pdf
+}
+
+date
 mkdir -p "$BUILD_DIR"
-pandoc --standalone -f markdown -t latex -o "$BUILD_DIR/tableau.pdf" \
+
+cd "$DOC_DIR"
+
+for fig in figs/*.svg; do
+    svg_to_latex "$fig";
+done
+
+paper_tex="$BUILD_DIR/tableau.tex"
+
+pandoc --standalone -f markdown -t latex -o "$paper_tex" \
        "$DOC_DIR"/introduction.md \
        "$DOC_DIR"/preliminaries.md \
        "$DOC_DIR"/modal-matching-logic.md \
@@ -19,6 +39,8 @@ pandoc --standalone -f markdown -t latex -o "$BUILD_DIR/tableau.pdf" \
        --pdf-engine=xelatex \
        --template="$DOC_DIR/template.tex" \
        -F pandoc-crossref \
+       -V graphicspath="$DOC_DIR/figs" \
        --citeproc --bibliography "$DOC_DIR"/refs.bib --csl "$DOC_DIR"/acm-sig-proceedings-long-author-list.csl \
-       --table-of-contents \
        -F pandocfilters/defenv.py
+
+pdflatex_quiet "$paper_tex"

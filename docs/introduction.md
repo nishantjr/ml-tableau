@@ -10,8 +10,9 @@ abstract:
     The largest of these fragments, called the guarded fragment,
     allows both fixedpoints and a restricted form of quantification.
     It is intended to extend the automated prover for uniform reasoning across
-    logics developed in [@towards-a-unified-framework],
-    by providing a robust basis for unfolding fixedpoints and simplification.
+    logics developed by Chen et al[@towards-a-unified-framework],
+    by providing a robust basis for unfolding fixedpoints and simplification
+    analogous to DPLL(T) in SMT solvers.
 ---
 
 \emergencystretch 5em
@@ -46,7 +47,7 @@ The framework uses this to generate
 parsers, interpreters, deductive verifiers[@SPY+16; @Ros17a],
 program equivalence checkers[@kasampalis2021language], among others.
 This approach is no longer of purely academic interest---diverse and complex programming languages have been specified in \K{}
-including C[@c-semantics], Java[@java-semantics], JavaScript[@javascript-semantics],
+including [@c-semantics], Java[@java-semantics], JavaScript[@javascript-semantics],
 EVM[@evm-semantics] and x86 assembly[@x86-semantics].
 The commercial success of verification tools built using this approach (e.g. \url{https://runtimeverifcation.com}) show that these tools are practical, valuable
 and in-demand.
@@ -64,12 +65,20 @@ These language tasks range from running a program in an interpreter
 to proving reachability claims.
 If these tools emit proof certificates, they may be checked with the matching logic proof checker[@chen-lin-trinh-rosu-2021-cav].
 
-![Matching Logic as the foundation for \K{}](figs/ml-as-basis-for-k.svg){ #fig:ml-as-basis-for-k width=45% }
+\begin{figure}
+\def\svgwidth{\columnwidth}
+\newcommand{\kbox}[1]{
+    \tikz[baseline=(char.base)]{\node[draw,rectangle,rounded corners=2pt,inner sep=2pt] (char){\phantom{\rlap{yL$._y$}}#1};}
+}
+\newcommand{\g}[1]{$\Gamma_\text{#1}$}
+\input{figs/ml-as-basis-for-k.pdf_tex}
+\caption{Matching Logic as the foundation for \K{}}
+\label{fig:ml-as-basis-for-k}
+\end{figure}
 
 Matching logic provides this foundation by creating a unifying logic, or *lingua franca*, for formal verification.
 Constructs for building terms, first-order quantification, and fixedpoints,
-allow capturing
-the many formalisms important to verification, including LTL, CTL, separation logic,
+allow capturing the many formalisms important to verification, including LTL, CTL, separation logic,
 reachability logic[@matchinglogiclmcs; @matching-mu-logic].
 and also the language-semantics-as-a-theory produced by \K{}.
 Together, these may be used to define the various language tasks described above.
@@ -85,22 +94,41 @@ and translation to SMT-LIB2 [@smtlib] for dispatch to the Z3 solver[@z3].
 This leads to quite a few deficiencies---limited support for induction,
 users need to spell out many lemmas and simplifications,
 caching and optimization are at the mercy of what Z3's incremental interface will accept.
+\newline
 
-Our grand vision is to develop a matching logic solver, systematically and methodically,
-that unifies reasoning across embedded logics, to alleviate these problems.
-In [@towards-a-unified-framework], the authors begin such an effort---they build the foundations for a unified proof framework that allows fixedpoint reasoning across logics.
-However, this was built around a naive depth first search over strategies for unfolding fixedpoints
-and other simplifications.
-This is less than ideal for a couple of reasons.
-First, this is ad-hoc.
-We do not know the boundaries of where this procedure is complete, and when it would not terminate.
-Each of the strategies required that the claim is in a specific normal form,
-and often the simplification procedures weren't powerful to re-normalize between applications of these strategies.
-Secondly, it is far from efficient---a lot of time is spent re-proving the the same claim with different unfolding orders.
+*Our grand vision is to develop a matching logic solver, systematically and methodically,
+that unifies reasoning across embedded logics, and alleviates these problems.*
+In [@towards-a-unified-framework], the authors took the first steps in this
+effort---they build the foundations for a unified proof framework that allows
+fixedpoint reasoning across logics.
+The authors developed a set of
+high-level (relative to matching logic's own proof rules)
+syntax-driven proof system, amenable to automation.
+This approach was effective---the framework was evaluated against four logical
+systems---first-order logic with fixedpoints, separation logic, reachability
+logic, and linear temporal logic (LTL).
+
+However, as admitted in [@towards-a-unified-framework] itself, it would be unreasonable
+to hope that at such a nascent stage this framework would be able to compete with
+state-of-the-art domain-specific provers and decision procedures.
+We, however, believe that such a goal is possible and within reach in the near-term, but will
+likely take several years of sustained effort.
+Such an effort is worthwhile, because if successful could be transformative to the fields
+of automated deduction and program verification.
+
+In this work, we take aim at some shortcomings of this framework.
+First, the core of the framework was based on an ad-hoc unfolding of fixedpoints.
+The boundaries of where this procedure is complete, and when it would not terminate are not known.
+To work around this, an arbitary bound on the number of unfoldings for fixedpoints.
+Further, the procedure unnecessarily tried all possible interleavings of unfoldings
+leading to poor performance when there were more than a few fixedpoints in the claim. 
+Second, the framework peformed poorly with arbitary claims, getting "stuck" when not in a specific normalized form.
+Often the simplification procedures weren't powerful enough to re-normalize between applications of these strategies.
+\todo{make sure we answer precisely how these are solved later in the paper.}
 
 We propose that this heuristic be replaced with a decision procedure for a fragment of matching logic,
-analogously to how  DPLL[@dpll], a decision procedure for propositional fragment of first-order logic,
-forms the core of many SMT solvers[@dpll-core].
+analogously to how  DPLL[@dpll;@dpllt], a decision procedure for propositional fragment of first-order logic,
+forms the core of many first-order SMT solvers[@z3;@mathsat4;@cvc4].
 Solvers for first-order logic are typically constructed around DPLL,
 an algorithm for checking the satisfiability of propositional logic formulae.
 A first-order formula is transformed into a propositional "skeleton" by replacing atoms with propositional variables.
@@ -109,39 +137,48 @@ If any of these solutions are consistent with the atoms from the original formul
 then the entire first-order formula is satisfiable.
 
 Unfortunately, DPLL cannot directly be used in the same way as the core for matching logic automated proving
-because matching logic formulae cannot be reduced to a propositional skeleton.
+because matching logic formulae (called "patterns") cannot be reduced to a propositional skeleton.
 This is because matching logic patterns are interpreted as the set of elements
-they match, unlike propositional variables which are two-valued (true or false).
-Translation to first-order logic or other logics is not desired in general,
-because of the additional level of complexity added, such as quantifiers,
-and because many of its nice properties can be lost in translation.
-In addition,
-since fixedpoint reasoning is an important aspect of program verification, the core motivation for matching logic,
+they match, unlike propositional variables which are two-valued (either true or false).
+In fact, translation to first-order logic or other logics is not desired in general,
+because the additional complexity, such as quantifiers,
+thwarts the nice properties such as compactness and modularity gained by using matching logic.
+In addition, since fixedpoint reasoning is an important aspect of program verification,
+the core motivation for matching logic,
 and it would be ideal if inductive reasoning is built into this core.
+\newline
 
-In this paper we propose three increasingly powerful decidable fragments of matching logic.
-The final fragment, called *guarded matching logic*, allows both fixedpoints and restricted quantification.
-We propose using the decision procedure for this fragment as a new core for the prover
-analogously to the use of DPLL as the core of SMT solvers.
+*In this paper we propose three increasingly powerful decidable fragments of matching logic.*
+Despite being redundant, presenting all three fragments allows us to incrementally introduce the techniques used
+instead of forcing the reader to deal with the complexity all at once.
 
-# Summary of Results
+\begin{figure}
+\def\svgwidth{\columnwidth}
+\newcommand{\g}[1]{$\Gamma_\text{#1}$}
+\input{figs/decidable-theories.pdf_tex}
+\caption{Proposed decidable fragments of matching logic, and some decidable embedded logics they subsume.}
+\end{figure}
 
-In this paper, we define three increasingly powerful decidable fragments of matching logic.
-Presenting this in increasing order of complexity allows us to build up to the
-final and most complex proof without introducing all the complexity at once.
+The first and simplest fragment is called the *modal fragment* and allows neither fixedpoints nor quantification.
+To those familiar with modal logic, it may be thought of as a polyadic multimodal form of this logic.
+We prove that this fragment is decidable by showing that it has the small-model
+property---the size models for satisfiable are bound by a computable function of the size of the pattern.
 
-![Proposed decidable fragments of matching logic, and some embedded logics they subsume](figs/decidable-theories.svg){}
+The second fragment, the *quantifier-free fragment*, extends this to allow
+least- and greatest-fixedpoints, the modal $\mu$-calculus extension of modal logic.
+This is proved decidable through an extension to the approach
+first show in [@games-for-mu-calculus].
 
-For the most part these procedures are incremental extensions of proofs from the corresponding fragments
-for first order logic or fixedpoint logic to matching logic.
-However, there are some significant innovations we have made:
-
--   Brought over the concept of refutations from games with mu calculus to guarded logic.
-    This removes the need to iterate over all possible interpretations (as required by the algorithm presented by Gradel).
-    This gives us a tangible object in case the pattern is unsatisfiable.
-    We may later work on a way of converting this to a formal proof.
--   First known implementation of the procedure for guarded logics
-
-\todo{expand}
+The final fragment, called the *guarded fragment*,
+allows both fixedpoints and a restricted form of quantification.
+Again, this is proved decidable through an extension to the corresponding
+decision procedure for guarded fixedpoint logic.
+We introduce a resolution-like rule that plays the role of backtracking in DPLL.
+It also removes the need to iterate over all possible interpretations
+(as required by the algorithm presented by Grädel).
+and gives us a tangible object, called a refutation, in case the pattern is unsatisfiable.
+We may later work on a way of converting this to a formal proof.
+We propose using the presented decision procedure for this fragment as a new
+core for the proof framework in [@towards-a-unified-framework].
 
 \clearpage
