@@ -3,6 +3,9 @@ title: "Decidable Fragments of Matching Logic"
 figPrefix:
  -  Figure
  -  Figures
+secPrefix:
+ -  Section
+ -  Sections
 abstract:
     Matching logic has been put forward as a "lingua franca"
     for verifying and reasoning about programs and programming languages.
@@ -10,9 +13,8 @@ abstract:
     The largest of these fragments, called the guarded fragment,
     allows both fixedpoints and a restricted form of quantification.
     It is intended to extend the automated prover for uniform reasoning across
-    logics developed by Chen et al[@towards-a-unified-framework],
-    by providing a robust basis for unfolding fixedpoints and simplification
-    analogous to DPLL(T) in SMT solvers.
+    logics in a previously developed framework,
+    by providing a robust basis for unfolding fixedpoints and simplification.
 ---
 
 \emergencystretch 5em
@@ -34,7 +36,9 @@ while still covering this breadth of diversity of languages and their domains
 requires that we systematically streamline these redundancies.
 
 We envision an *ideal language framework*, shown in [@fig:ideal-framework],
-where a language designer must only provide a formal description of the syntax and behaviour for their language,
+where a language designer must only provide
+a formal description of the syntax
+and a formal semantics for their language,
 from which language tooling may be automatically generated "for free" by the framework.
 
 ![An ideal language framework: all language tools are generated from a formal language semantics.](figs/ideal.png){ #fig:ideal-framework width=45% }
@@ -44,11 +48,11 @@ The \K{} framework (\url{https://kframework.org}) pursues this vision.
 may define the formal semantics of their programming language
 as a transition system.
 The framework uses this to generate
-parsers, interpreters, deductive verifiers[@SPY+16; @Ros17a],
-program equivalence checkers[@kasampalis2021language], among others.
+parsers, interpreters, deductive verifiers [@SPY+16; @Ros17a],
+program equivalence checkers [@kasampalis2021language], among others.
 This approach is no longer of purely academic interest---diverse and complex programming languages have been specified in \K{}
-including [@c-semantics], Java[@java-semantics], JavaScript[@javascript-semantics],
-EVM[@evm-semantics] and x86 assembly[@x86-semantics].
+including [@c-semantics], Java [@java-semantics], JavaScript [@javascript-semantics],
+EVM [@evm-semantics] and x86 assembly [@x86-semantics].
 The commercial success of verification tools built using this approach (e.g. \url{https://runtimeverifcation.com}) show that these tools are practical, valuable
 and in-demand.
 
@@ -63,7 +67,7 @@ $\Gamma_L \vdash \phi_\mathit{task}$, where $\phi_\mathit{task}$ is the formal s
 These language tasks range from running a program in an interpreter
 (i.e. checking if there is a terminating execution trace for a program),
 to proving reachability claims.
-If these tools emit proof certificates, they may be checked with the matching logic proof checker[@chen-lin-trinh-rosu-2021-cav].
+If these tools emit proof certificates, they may be checked with the matching logic proof checker [@chen-lin-trinh-rosu-2021-cav].
 
 \begin{figure}
 \def\svgwidth{\columnwidth}
@@ -78,11 +82,13 @@ If these tools emit proof certificates, they may be checked with the matching lo
 
 Matching logic provides this foundation by creating a unifying logic, or *lingua franca*, for formal verification.
 Constructs for building terms, first-order quantification, and fixedpoints,
-allow capturing the many formalisms important to verification, including LTL, CTL, separation logic,
-reachability logic[@matchinglogiclmcs; @matching-mu-logic].
-and also the language-semantics-as-a-theory produced by \K{}.
+allow capturing the many formalisms important to verification,
+including linear temporal logic (LTL) [@ltl], computation tree logic (CTL) [@ctl], separation logic (SL) [@separation-logic], and
+reachability logic [@matchinglogiclmcs; @matching-mu-logic],
+as well as the language-semantics-as-a-theory produced by \K{}.
 Together, these may be used to define the various language tasks described above.
-It does all this while maintaining minimal *representational distance*---because it preserves and respects the original syntactic and semantic structures,
+It does all this while maintaining minimal *representational distance*---because
+it preserves and respects the original syntactic and semantic structures,
 such as program ASTs, continuations, heaps and stacks, language semantics may be captured in a compact and modular way.
 In fact, the embeddings of many logics are syntactically identical to the original logics.
 This is in contrast to approaches that translate these to, say, first-order logic,
@@ -90,7 +96,7 @@ that introduce quantifiers and other clutter.
 
 \K{}'s tools are best-effort checking for the validity of these entailments.
 Currently, this is done through ad-hoc reasoning developed on an as-needed basis
-and translation to SMT-LIB2 [@smtlib] for dispatch to the Z3 solver[@z3].
+and translation to SMT-LIB2 [@smtlib] for dispatch to the Z3 solver [@z3].
 This leads to quite a few deficiencies---limited support for induction,
 users need to spell out many lemmas and simplifications,
 caching and optimization are at the mercy of what Z3's incremental interface will accept.
@@ -127,8 +133,8 @@ Often the simplification procedures weren't powerful enough to re-normalize betw
 \todo{make sure we answer precisely how these are solved later in the paper.}
 
 We propose that this heuristic be replaced with a decision procedure for a fragment of matching logic,
-analogously to how  DPLL[@dpll;@dpllt], a decision procedure for propositional fragment of first-order logic,
-forms the core of many first-order SMT solvers[@z3;@mathsat4;@cvc4].
+analogously to how  DPLL [@dpll;@dpllt], a decision procedure for propositional fragment of first-order logic,
+forms the core of many first-order SMT solvers [@z3;@mathsat4;@cvc4].
 Solvers for first-order logic are typically constructed around DPLL,
 an algorithm for checking the satisfiability of propositional logic formulae.
 A first-order formula is transformed into a propositional "skeleton" by replacing atoms with propositional variables.
@@ -181,4 +187,3 @@ We may later work on a way of converting this to a formal proof.
 We propose using the presented decision procedure for this fragment as a new
 core for the proof framework in [@towards-a-unified-framework].
 
-\clearpage

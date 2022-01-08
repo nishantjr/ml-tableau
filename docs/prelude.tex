@@ -9,6 +9,7 @@
 % By subset we normally mean non-strict subset.
 \renewcommand{\subset}  {\subseteq}
 
+
 % logic operators
 % ---------------
 
@@ -62,6 +63,13 @@
 \newtheorem{definition}   [theorem]  {Definition}
 \newtheorem{remark}       [theorem]  {Remark}
 \newtheorem{example}      [theorem]  {Example}
+
+% Tables and figures share a counter
+% ----------------------------------
+\makeatletter 
+\let\c@table\c@figure
+\makeatother
+
 
 % To do notes
 % -----------
@@ -124,18 +132,12 @@
 \newcommand{\Universals}{\mathcal{U}}
 \newcommand{\Elements}{\mathcal{E}}
 
-\newcommand{\name}[1]{(\text{#1})\quad}
+\newcommand{\name}[1]{\text{(#1)}}
 \newcommand{\dapp}   {$\overline{\mbox{app}}$}
 
-\newcommand{\pruleun}[2]{\tabcolsep=2pt\begin{array}{c}%
- #1\\
- \noalign{\vskip-7pt}
- \hrulefill{{⓿}} \\
- \noalign{\vskip-2pt}
- #2\end{array}}
-
-\newcommand{\prulebin}[3]{\frac{#1}{#2\quad#3}}
-
+\newcommand{\pruleun} [2]{\displaystyle\frac{#1}{#2}}
+\newcommand{\prulebin}[3]{\displaystyle\frac{#1}{#2\qquad#3}}
+%\newcommand{\prulebin}[3]{$$\frac{#1}{#2\quad#3}$$}
 \newcommand{\prftree}[3][YYY]{XXX \frac{#1}{#2\quad#3}}
 
 \newcommand{\satruleun}[2]
@@ -160,9 +162,8 @@
 \newcommand{\Wit}{\mathit{Wit}}
 \newcommand{\SSS}{\mathcal{S}}
 \newcommand{\SSSmod}{\mathcal{S}_\mathrm{mod}}
-\newcommand{\appa}{(app$_1$)}
+\newcommand{\appa}{(choose-app)}
 \newcommand{\appb}{(app$_2$)}
-\newcommand{\appbb}{(app'$_2$)}
 \newcommand{\appc}{(app$_3$)}
 \newcommand{\rt}{\mathit{root}}
 \newcommand{\Nodes}{\mathit{Nodes}}
@@ -189,6 +190,7 @@
 % Games
 % -----
 
+\newcommand {\dependson}{\prec^\phi}
 \newcommand{\Pos}{\mathrm{Pos}}
 
 % Miscelanious
@@ -201,8 +203,8 @@
 \newcommand{\size}[1] {\left\lVert #1\right\rVert}
 \newcommand{\width}[1]{\mathrm{width}(#1)}
 
-\newcommand {\where}[1] {\quad\parbox[t]{0.5\textwidth}{where #1 }}
-\newcommand {\since}[1] {\quad\parbox[t]{0.5\textwidth}{since #1 }}
+\newcommand {\where}[1]
+            {{\footnotesize\quad\parbox[t]{0.3\textwidth}{where #1 }}}
 
 \usepackage{multicol}
 

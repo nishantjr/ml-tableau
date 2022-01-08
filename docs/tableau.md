@@ -1,4 +1,4 @@
-## Guarded Matching Logic
+# The Guarded Fragment {#sec:decidable-guarded-fragment}
 
 * Define Assertions, Basic assertions, Sequents
 * Show tableau, define parity game
@@ -22,6 +22,7 @@ Remark
     as shorthand for nested quantifier patterns.
 
 Definition (Guarded pattern)
+
 :   A guarded pattern is a closed pattern (i.e. without any free element or set variables)
     such that:
 
@@ -29,8 +30,9 @@ Definition (Guarded pattern)
        and every universal sub-pattern is of the form $\forall \bar x. \alpha \limplies \phi$
        where:
 
-       a)   $\alpha = \lAnd_i \sigma_i(\bar {z_i})$ is a conjunction of application patterns where each argument is an element variable,
-       b)   every variable $x \in \bar x$ appears in some application,
+       a)   $\alpha$ is a conjunction where each conjunct is either an element variable,
+            or an application pattern where each argument is an element variable,
+       b)   every variable $x \in \bar x$ appears in some conjunct,
        c)   for each pair of variables $x \in \bar x$ and $y \in \free{\phi}$
             there is some application $\sigma_i(\bar {z_i})$ in $\alpha$ where $x, y \in \bar {z_i}$.
             \label{gp:xxx}
@@ -366,9 +368,12 @@ Theorem
 
 # Future Work (1 page)
 
-- Integration with semi-decision procedures
+- Implementation
+    - 
 - Integration with SMT solvers for dealing with domain specific reasoning -- integers, bitvectors, arrays...
-- Extension of the decidable fragment (e.g. Allow existentials in guards a la Martin Marx's Packed Fragment/Tolerance logic)
+- Extension of the decidable fragment 
+    - guards allow existentials a la packed logic
+    - the proof only relies on the restriction to universal quantifiers.
 - Optimizations -- things like constructors/functions/commutative symbols
 - Building the parity game solver into the engine itself.
   Currently we must build a complete game before sending it to the solver.

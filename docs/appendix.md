@@ -1,7 +1,153 @@
 \clearpage
 \appendix
+
+# Proofs for Section "The Modal Fragment"
+
+\begin{lemma}\label{lem:filter_size}
+$[M]$ has at most $\sqrt{2^{\size{C(\psi)}}}$ elements.
+\end{lemma}
+\begin{proof}
+For $a \in M$, define its \emph{indicator set}
+$I(a) = \{\phi \in C(\psi) \mid a \vDash \phi \}$
+as the set of patterns in $C(\psi)$ that are matched by $a$.
+Enumerate all patterns in $C(\psi)$ as follows:
+$\phi_1,\neg \phi_1,\dots,\phi_{\size{C(\psi)}/2},\neg 
+\phi_{\size{C(\psi)}/2}$.
+For any indicator set $I$ and for any $1 \le i \le \size{C(\psi)}/2$, 
+one of the following holds:
+\begin{enumerate}
+\item $\phi_i \in I$ and $\neg \phi_i \not\in I$;
+\item $\phi_i \not\in I$ and $\neg \phi_i \in I$.
+\end{enumerate}
+Therefore, the number of all indicator sets is bounded by
+$2^{\size{C(\psi)}/2} = \sqrt{2^{\size{C(\psi)}}}$. 
+By definition, $[a] = [b]$ iff $I(a) = I(b)$.
+Therefore, the size of $[M]$ is bounded by
+$\sqrt{2^{\size{C(\psi)}}}$.
+\end{proof}
+
+\begin{lemma}\label{lem:fl}
+For any $\phi \in C(\psi)$, the following propositions are equivalent:
+\begin{enumerate}
+\item $\phi_{[M]} = [\phi_M]$;
+\item $[a] \vDash \phi_{[{M}]}$ iff $a \vDash \phi_M$, for all $a \in M$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+We first prove the easier direction, which is (2) implies (1).
+We prove both $\phi_{[M]} \subseteq [\phi_M]$ and
+$[\phi_M] \subseteq \phi_{[M]}$.
+For $\phi_{[M]} \subseteq [\phi_M]$, let $[a] \in \phi_{[M]}$, i.e., 
+$[a] \vDash \phi_{[M]}$.
+By (2), $a \vDash \phi_M$, i.e., $a \in \phi_M$.
+Therefore, $[a] \in [\phi_M]$.
+This shows that $\phi_{[M]} \subseteq [\phi_M]$.
+For $[\phi_M] \subseteq \phi_{[M]}$, 
+let $[a] \in [\phi_M]$.
+This means that there exists $a' \in \phi_M$, i.e., $a' \vDash \phi_M$, 
+such that $[a] = [a']$.
+By (2), $[a'] \vDash \phi_{[M]}$, and therefore
+$[a] \vDash \phi_{[M]}$, i.e., $[a] \in \phi_{[M]}$.
+This shows that $[\phi_M] \subseteq \phi_{[M]}$.
+In conclusion, we prove that
+$[\phi_M] = \phi_{[M]}$. Therefore, (2) implies (1).
+
+We now prove (1) implies (2).
+For the ``if'' direction, let $a \vDash \phi_M$, i.e., $a \in \phi_M$.
+Therefore, $[a] \in [\phi_M]$, and by (1), $[a] \in \phi_{[M]}$.
+Therefore, $[a] \vDash \phi_{[M]}$.
+For the ``only if'' direction, let $[a] \vDash \phi_{[M]}$, i.e.,
+$[a] \in \phi_{[M]}$.
+By (1), $[a] \in [\phi_M]$, which means that there exists $a' \in \phi_M$,
+i.e., $a' \vDash \phi_M$, 
+such that $[a] = [a']$.
+Since $\phi \in C(\psi)$, and $a,a'$ are $C(\psi)$-indistinguishable, 
+we have $a \vDash \phi_M$.
+Therefore, (1) implies (2).
+\end{proof}
+
+\begin{lemma}\label{lemma:filter}
+For every $\phi \in C(\psi)$,  we have 
+$\phi_{[M]} = [\phi_M]$.
+\end{lemma}
+\begin{proof}
+We do structural induction on $\phi$, where the only nontrivial case
+is the last case, when $\phi$ is a symbol application.
+
+($\phi$ is $c$).
+We have that $c_{[M]} = \{ [a] \mid a \in c_M \} = [c_M]$.
+
+($\phi$ is $\phi_1 \wedge \phi_2$).
+By Lemma~\ref{lem:fl}, we need to prove that
+$[a] \vDash (\phi_1 \wedge \phi_2)_{[M]}$ iff $a \vDash (\phi_1 \wedge 
+\phi_2)_M$ for all $a \in M$.
+We have the following reasoning:
+\begin{align*}
+& [a] \vDash (\phi_1 \wedge \phi_2)_{[M]} \\
+\text{iff}\quad & [a] \vDash (\phi_1)_{[M]} \cap (\phi_2)_{[M]}\\
+\text{iff}\quad & [a] \vDash (\phi_1)_{[M]} \text{ and } 
+[a] \vDash (\phi_2)_{[M]} \\
+\text{iff}\quad & a \vDash (\phi_1)_M \text{ and } a \vDash (\phi_2)_M
+&&\text{by inductive hypotheses} \\
+&&&\text{and Lemma~\ref{lem:fl}} \\
+\text{iff}\quad & a \vDash (\phi_1)_M \cap (\phi_2)_M \\
+\text{iff}\quad & a \vDash (\phi_1 \wedge \phi_2)_M
+\end{align*}
+
+($\phi$ is $\neg \phi_1$).
+By Lemma~\ref{lem:fl}, we need to prove that
+$[a] \vDash (\neg \phi_1)_{[M]}$ iff
+$a \vDash (\neg \phi_1)_M$ for all $a \in M$.
+We have the following reasoning:
+\begin{align*}
+& [a] \vDash (\neg \phi_1)_{[M]} \\
+\text{iff}\quad & [a] \not\vDash (\phi_1)_{[M]} \\
+\text{iff}\quad & a \not\vDash (\phi_1)_M
+&&\text{by inductive hypotheses} \\
+&&&\text{and Lemma~\ref{lem:fl}} \\
+\text{iff}\quad & a \vDash (\neg \phi_1)_M
+\end{align*}
+
+($\phi$ is $\sigma(\phi_1,\dots,\phi_n)$).
+This is the only nontrivial case. 
+Note that by induction hypotheses, we have
+$(\phi_i)_{[M]} = [(\phi_i)_M]$ for every $1 \le i \le n$.
+We prove $(\sigma(\phi_1,\dots,\phi_n))_{[M]}
+= [(\sigma(\phi_1,\dots,\phi_n))_M]$ by deriving both sides.
+Firstly, we have
+\begin{align}
+[(\sigma(\phi_1,\dots,\phi_n))_M]
+&= [\sigma_M((\phi_1)_M,\dots,(\phi_n)_M)] \\
+&= \left[\bigcup_{a_i \in (\phi_i)_M, 1 \le i \le 
+n}\sigma_M(a_1,\dots,a_n)\right] \label{n}
+\end{align}
+Secondly, we have
+\begin{align}
+(\sigma(\phi_1,\dots,\phi_n))_{[M]}
+&= \sigma_{[M]}((\phi_1)_{[M]},\dots,(\phi_n)_{[M]}) \\
+&= \sigma_{[M]}([(\phi_1)_M],\dots,[(\phi_n)_M]) \\
+&= \bigcup_{a_i \in (\phi_i)_M, 1 \le i \le n}
+   \sigma_{[M]}([a_1],\dots,[a_n]) \\
+&= \bigcup_{a_i \in (\phi_i)_M, 1 \le i \le n}
+   \left[ \sigma_M([a_1],\dots,[a_n]) \right] \\
+&= \left[  \bigcup_{a_i \in (\phi_i)_M, 1 \le i \le n} 
+\sigma_M([a_1],\dots,[a_n]) \right] \label{push}
+\end{align}
+For any $\phi$, we use $a \cong a' \in (\phi)_M$ to mean that
+$a,a' \in (\phi)_M$ and $a \cong a'$.
+Then, we continue the above reasoning from~\eqref{push}
+\begin{align}
+\cdots &= \left[ \bigcup_{a_i \cong a'_i\in (\phi_i)_M, 1 \le i 
+\le n} \sigma_M(a'_1,\dots,a'_n) \right] \\
+&= \left[ \bigcup_{a'_i\in (\phi_i)_M, 1 \le i 
+\le n} \sigma_M(a'_1,\dots,a'_n) \right]
+\end{align}
+which is equal to~\eqref{n}.
+\end{proof}
 \addcontentsline{toc}{chapter}{Appendix}
-# Correctness
+
+\clearpage
+# Proofs for Section "Guarded Fragment"
 
 Below, we define concepts that will be used later for proving the
 above two theorems.
@@ -224,7 +370,6 @@ Lemma (Either pre-model or refutation)
 From this two lemma, one of our two main theorems, Theorem \ref{theorem:validity} follows.
 Restated:
 
-\todo{fix theorem number}
 Theorem
 
 :   \label{theorem:validity}
@@ -292,8 +437,9 @@ Lemma
     Let $\alpha = \matches{y_0}{\phi}$, where $\phi$ is the guard of some existential pattern.
     That is, let $\bar x \subset \free{\phi}$, and:
 
-    a) $\phi = \phi_1 \land \cdots \land \phi_n$ where each $\phi_i$ is an application of the form $\sigma(\bar w)$ where $\bar w$ are element variables.
-    b) every $x \in \bar x$ appears in some $\phi_i$
+    a) $\phi = \phi_1 \land \cdots \land \phi_n$
+       where each $\phi_i$ is either an application of the form $\sigma(\bar w)$ where $\bar w$ are element variables.
+    b) every variable $x \in \bar x$ appears in some conjunct,
     c) for every pair $x \in \bar x$ and $z \in \free{\phi}$ we have $x$ coexists with $z$ in some $\phi_i$.
 
     Then, if there is a valuation
@@ -308,16 +454,18 @@ Proof
     The element is introduced by either the root node or some (exists) or (app) node followed by
     a linear sequence of (resolve) nodes.
     As we decend the tree the asssertions in $\Basic$ that mention the $\var(m)$
-    increase until the last (resolve) node in that sequence and then does not change.
+    increase until the last (resolve) node in that sequence and then does not change
+    the variable is removed from the sequent (by the (app) or (exists) rule).
 
     Let $\bar y = \free{\phi} \setminus \bar x$.
     We will show that for each pair of variables in $w_1, w_2 \in \{y_0\}\union\free{\phi}$,
     we have $\nodes(w_1) \intersection \nodes(z_2) \ne \emptyset$.
     Then, using a well-known graph theory result saying that any collection of pairwise intersection
     subtrees of a tree share a common edge.
+    \todo{cite}
 
     Suppose $w_1, w_2 \in \{ y_0 \} \union \bar y$. Then by assumption, they have a non empty intersection.
-    If $w_1 = y_0$ and $w_2 \in \bar x$ then by point (b) they must coexist in some assertion.
+    If $w_1 = y_0$ and $w_2 \in \bar x$ then by point (b) they must coexist in some conjunct.
     If $w_1 \in \free{\phi}$ and $w_2 \in \bar x$ then by point (c) they must coexist in some assertion.
     By definition of $M(S)$ they must co-exist in some assertion.
 
@@ -498,205 +646,7 @@ Theorem (Emerson; Julta)
 : For every parity game, if a player has a winning strategy, then there is a
   memoryless winning strategy for player $i$.
 
-# Functional symbols
-
-A symbol $f$ is called functional
-if, for any tuple of element $\bar a$,
-$\size{f_M(\bar a)} = 1$.
-
-Proposition (Functional Axioms)
-
-:   A symbol $f$ is functional iff it satisfies the axiom:
-    $$\forall \bar x \ldotp \exists y. f(\bar x) = y$$
-
-This axiom is 
-
-\onecolumn
-# Pseudocode
-
-```
-class ClosureMembership:
-    --- Assertion of the form $e \in App(\bar args)$ or $e \in e'$
-    atom: Assertion
-
-    --- Status
-    status in: Holds, DoesNotHold, Undecided
-
-    --- Node in which membership's status was decided.
-    --- Must have type App or Exists for status = Undecided
-    --- and type Resolve or Unify for Holds and DoesNotHold.
-    originating_node: GameNode
-
-class GameNode:
-    type in:
-        Unsat(  conflict: Assertion, ClosureMembership )
-
-          And(   matched: Assertion)
-           Or(   matched: Assertion)
-          Def(   matched: Assertion)
-       Unfold(   matched: Assertion)
-         DApp(   matched: Assertion)
-       Forall(   matched: Assertion)
-
-          App(   matched: Assertion)
-       Exists(   matched: Assertion)
-
-      Resolve(membership: ClosureMembership)
-        Unify(     first: EVar, second: EVar) -- EVars we unify on.
-                                              -- We require that `first` is fresh.
-          Sat()
-
-   Incomplete( assertion: Assertion)
-     Backlink(      node: GameNode)
-
-    --- For Gamma, only existentials and universals need to be stored.
-    --- The rest are immediately processed.
-    universals:     Set{ Assertion }
-    existentials:   Set{ Assertion }
-
-    --- A
-    atoms:          Set{ ClosureMembership }
-
-    --- C
-    constants:      Set{ EVar }
-
-    children:       Set { GameNode}
-
---- Builds a graph representation of G(T) for the pattern phi.
-def build_game_init(phi):
-    --- e = fresh_constant()
-    g = GameNode( type = Incomplete(Assertion(\exists e. e \in phi))
-                , children = undefined
-                , universals = {}
-                , existentials = {}
-                , atoms = {}
-                , constants = {}
-                )
-    complete_nodes([g], {})
-
-def complete_nodes(incomplete_nodes, processed_nodes):
-    curr, remaining = incomplete_nodes
-
-    if has_same_existentials_universals_atoms_and_matched_in(curr, processed_nodes):
-        curr.type = Backlink(curr)
-        complete_nodes(remaining, processed_nodes)
-        return
-    if is_atomic_assertion(assertion):
-        membership = get_membership_for_assertion(curr, assertion)
-        if  matches(assertion, membership):
-            curr.type = Sat()
-            return
-        elif conflicts(assertion, membership):
-            curr.type = Unsat(assertion, membership)
-            return
-        else:
-            --- assertion is undecided.
-            --- We must clone the sub-game starting from where the membership we care about originated.
-            --- on one branch, the assertion is satisfiable, on the other it is not.
-
-            orig = membership.originating_node
-            --- assert orig.parent.type matches App( _ ) or Exists( _ )
-
-            --- The clone operation copies the entire tree begining at orig,
-            --- with one copy where the membership holds, and one where it does not.
-            --- If a node in the `incomplete_nodes` list is cloned,
-            --- the clones are placed into the new copy of the list,
-            --- otherwise, the original is left in the list.
-            --- Preferably, a stable order is maintained.
-            left_clone_membership, right_clone_membership,
-            left_clone_orig, right_clone_orig,
-            incomplete_nodes = orig.clone_resolving_membership(membership, incomplete_nodes) 
-            orig.children = { GameNode( type = Resolve(parent_membership, left_clone_membership, right_clone_membership)
-                                      , universals = orig.universals
-                                      , existentials = orig.existentials
-                                      , atoms =  orig.atoms
-                                      , contants = orig.constants
-                                      , children = { left_clone_orig, right_clone_orig }
-                                      )
-                            }
-            complete_nodes(incomplete_nodes, processed_nodes)
-            return
-    if assertion matches Assertion(e \in And(phi, psi)):
-        curr.type     = And(assertion)
-        left = GameNode( type = Incomplete(e \in phi)
-                       , children = undefined
-                       , ... --- copy other parameters
-                       )
-        --- TODO(clone-incomplete-nodes)
-        right = GameNode( type = Incomplete(e \in phi)
-                        , children = undefined
-                        , ...)
-        node.children = { left, right }
-        complete_nodes({ left, right } + remaining, { curr } + processed_nodes)
-    if assertion matches Assertion(e \in Or(phi, psi)):
-        --- identical to above besides assignment to curr.type
-    if assertion matches Assertion(e \in Mu/Nu):
-        --- build single child
-    if assertion matches Assertion(e \in SVar(D)):
-        --- build single child
-    if assertion matches Assertion(e \in Forall(x, Phi)):
-        type = Forall(assertion)
-        curr.universals += assertion
-        --- instantiate with all permutations of curr.constants, and no fresh variables.
-        instantiations = make_conjunction(instantiate(assertion, curr.constants, 0))
-        curr.children = { GameNode( type = Incomplete(Instantiations)
-                                  , children = undefined
-                                  , ...)
-                        }
-        complete_nodes(curr.children + remaining, {curr} + processed_nodes)
-        return
-    if assertion matches Assertion(e \in DApp(...)):
-        --- similar to above
-
-    if assertion matches Assertion(e \in Exists(...)):
-        --- TODO: I think this is OK to process immediately,
-        --- since we are building the parity game and not the tableau.
-        --- Any changes to the membership created by other branches of the game
-        --- will propagate from here, and replicate the same conflicts.
-        --- We should think about this more, though.
-
-        --- TODO: Can we apply the unify rule here to reduce size of the tableau?
-        --- We need the child node to bring in only the constants
-        --- that are required for handling the existential,
-        --- otherwise, the number of constants will grow unbounded
-        --- and we may not terminate.
-        ---
-        --- I think figuring out the correct application of the (unify) rule is the source
-        --- of undecidability for un-guarded patterns.
-        --- What is it about guarded patterns that avoids this?!
-        ---
-        --- We therefore avoid using it for now and just try all possible instantiations.
-
-        type = Exists(assertion)
-        new_constants = make_fresh(len(assertion.bound_vars), curr.constants)
-                      + free_vars(assertion)
-        curr.children = {}
-        for instantiation in instantiations(assertion, curr.constants, len(assertion.free_evars())):
-            child += { GameNode( type = Incomplete(curr.children)
-                               , children = undefined
-                               , existentials = { a | a in curr.existentials and a.free_evars() <= instantiation.free_evars()) }
-                               , universals   = { a | a in curr.universals   and a.free_evars() <= instantiation.free_evars()) }
-                               , memberships  = { a | a in curr.memberships  and a.free_evars() <= instantiation.free_evars()) }
-                     }
-        complete_nodes(curr.children + remaining, {curr} + processed_nodes)
-        return
-```
-
 ## Notes
-
-- Assertions
-    - use x instead of c/e
-    - ELement variables x, y, z
-    - Symantically => Intuitively
-    - ONly use positive form for assertions
-- Seqeunts
-    - Atoms, Univesrals, Elements => Use greek letters
-- Tableau
-    - Remove requirement for guarded pattern
-    - Remove K is a set of "distinct"
-    - Get rid of K
-        - State that tableau if for $\phi$
-- Proof that there we use a bounded set of constatns
 
 Novelties:
 

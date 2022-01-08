@@ -1,45 +1,5 @@
 ## Definition Lists, Approximations and Parity games
 
-We define the next two procedures over "positive-form" patterns
--- patterns where negations are pushed down as far as they can go using De
-Morgan's and related equivalences.
-
-Definition (Positive Form Pattern)
-:   Positive form patterns are defined using the syntax:
-
-    \begin{alignat*}{5}
-    \phi := \quad&       \sigma(\phi_1, \ldots, \phi_n)
-       &\quad\mid\quad&  \bar \sigma(\phi_1, \ldots, \phi_n) \\
-        \quad\mid\quad&  \phi_1 \land \phi_2
-       &\quad\mid\quad&  \phi_1 \lor  \phi_2 \\
-        \quad\mid\quad&  x
-       &\quad\mid\quad&  \lnot x
-       &\quad\mid\quad&  \exists x \ldotp \phi
-       &\quad\mid\quad&  \forall x \ldotp \phi \\
-        \quad\mid\quad&  X &
-                      &    &
-        \quad\mid\quad&  \mu X \ldotp \phi
-       &\quad\mid\quad&  \nu X \ldotp \phi
-    \end{alignat*}
-    where $\bar \sigma(\phi_1, \ldots, \phi_n) \equiv \lnot\sigma(\lnot \phi_1, \ldots, \lnot\phi_n)$.
-
-When $\sigma$ is a nullary symbol we use $\sigma$ and $\bar \sigma$ as shorthand for $\sigma()$ and $\bar \sigma()$.
-
-Remark
-
-: We allow negation of element variables, but not set variables.
-  This ensures that set variables may only occur positively in their binding fixedpoint.
- 
-By definition, we have:
-
-\begin{lemma}
-Every pattern is equivalent to some positive guarded pattern.
-\end{lemma}
-
-From now on, we only consider positive guarded patterns and simply call them 
-patterns.
-
-
 For convenience, the derived semantics of $\bar\sigma(\bar \phi)$ is:
 \begin{align*}
 \evaluation{\bar\sigma(\phi_1,\ldots,\phi_n)} &= \{a \in M \mid 
@@ -79,8 +39,6 @@ Definition (Fixedpoint marker)
 
     Since the evaluation of a pattern now also depends on its dependency list,
     we make the dependency list used explicit by adding it as a superscript as in $\evaluation{\phi}^\deflist_{M,\rho}$.
-
-\newcommand {\dependson}{\prec^\phi}
 
 Definition (depends on) 
 

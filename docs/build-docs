@@ -32,15 +32,14 @@ pandoc --standalone -f markdown -t latex -o "$paper_tex" \
        "$DOC_DIR"/introduction.md \
        "$DOC_DIR"/preliminaries.md \
        "$DOC_DIR"/modal-matching-logic.md \
-       "$DOC_DIR"/game-preliminaries.md \
        "$DOC_DIR"/qf-matching-logic.md \
        "$DOC_DIR"/tableau.md \
        "$DOC_DIR"/appendix.md \
        --pdf-engine=xelatex \
        --template="$DOC_DIR/template.tex" \
+       -F pandocfilters/defenv.py \
        -F pandoc-crossref \
        -V graphicspath="$DOC_DIR/figs" \
        --citeproc --bibliography "$DOC_DIR"/refs.bib --csl "$DOC_DIR"/acm-sig-proceedings-long-author-list.csl \
-       -F pandocfilters/defenv.py
 
 pdflatex_quiet "$paper_tex"
