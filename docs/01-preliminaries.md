@@ -237,19 +237,6 @@ decidable despite being infinite.
 In the next sections,
 we will define some fragments and prove some properties about them.
 
----
-
-We shall only define the next fragment, called guarded matching logic,
-informally here. We shall describe it in more depth in
-[@sec:decidable-guarded-fragment].
-This fragment allows both quantification and fixedpoints. However, quantifiers must be of the form:
-\begin{align*}
-\forall \bar x \ldotp \alpha(\bar x, \bar y) &\limplies \phi(\bar x, \bar y) \\
-\exists \bar x \ldotp \alpha(\bar x, \bar y) &\land    \phi(\bar x, \bar y)
-\end{align*}
-where $\alpha$ is a conjunction of applications and every pair of free variables in $\phi$ are arguments of some application in $\alpha$.
-This fragment possesses neither the small-model property nor the less strict finite-model property and yet is decidable.
-
 <!--
 Finally, for the sake of completeness,
 we also define fixedpoint-free matching logic,

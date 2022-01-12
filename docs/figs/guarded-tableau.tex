@@ -1,0 +1,113 @@
+\begin{figure*}
+$$\begin{array}{rlrlrrr}
+\prule{conflict}                & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \fnot{\alpha} \} \union \Basic; \Universals}}
+                                          { \unsat }
+                                &
+\prule{ok}                      & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \alpha \} \union \Basic; \Universals}}
+                                          {\sequent{        \Gamma; \Basic; \Universals}}
+\\
+                                & \text{ when $\alpha$ is a basic assertion.}
+                                &
+                                & \text{ when $\alpha$ is a basic assertion.}
+\\\\
+\prule{conflict-el}             & \pruleun{\sequent{\matches{x}{y}, \Gamma; \Basic; \Universals}}
+                                          { \unsat }
+                                  \quad \text{when $x \neq y$.}
+                                &
+\prule{ok-el}                   & \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals}}
+                                          {\sequent{                \Gamma; \Basic; \Universals}} \\
+\hideinappendix{ \\ \multicolumn{4}{l}{\text{\fbox{
+Rules for \prule{and}, \prule{or}, \prule{def}, \prule{mu}, and \prule{nu}
+identical to those in Figure~\ref{fig:qf-tableau} but lifted to the form of sequents.
+}}}\\\\}
+\hideunlessappendix{
+\prule{and}                     & \unsatruleun{\sequent{ \matches{z}{\phi} \land \matches{w}{\psi},   \Gamma; \Basic; \Universals}}
+                                              {\sequent{ \matches{z}{\phi}, \matches{w}{\psi},  \Gamma; \Basic; \Universals}}
+                                &
+\prule{or}                      & \satrulebin{\sequent{ \matches{z}{\phi} \lor \matches{w}{\psi}, \Gamma; \Basic; \Universals}}
+                                             {\sequent{ \matches{z}{\phi}, \Gamma; \Basic; \Universals}}
+                                             {\sequent{ \matches{w}{\psi}, \Gamma; \Basic; \Universals}}
+\\
+\prule{def}                     & \pruleun{\sequent{ \matches{z}{\kappa X . \phi(X)}, \Gamma; \Basic; \Universals}}
+                                          {\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals}}
+\\
+                                & \text{when $D := \kappa X. \phi(X) \in \deflist$ } \\
+\prule{mu}                      & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals}}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals}}
+                                &
+\prule{nu}                      & \pruleun{\sequent{ \matches{z}{D}, \Gamma; \Basic; \Universals }}
+                                          {\sequent{ \matches{z}{\phi[D/X]}, \Gamma; \Basic; \Universals}}
+                                & \text{when $D := \nu X. \phi \in \deflist$ }
+                                & \text{when $D := \mu X. \phi \in \deflist$ }
+\\
+}
+\prule{forall}                  & \unsatruleun { \sequent{ \matches{z}{\forall \bar x \ldotp \phi}, \Gamma; \Basic; \Universals} }
+                                               { \sequent{ \mathrm{inst} \union \Gamma
+                                                         ; \Basic
+                                                         ; \matches{z}{\forall \bar x \ldotp \phi}, \Universals
+                                                         } }
+                                &
+\prule{\dapp}                   & \unsatruleun{\sequent{ \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Gamma; \Basic; \Universals}}
+                                              { \sequent{ \mathrm{inst} \union \Gamma;
+                                                          \Basic;
+                                                          \{\matches{z}{\bar\sigma(\bar \phi)}\} \union \Universals;
+                                              } }
+\\
+ & \text{where $\mathrm{inst} := \{ \matches{z}{ \phi[\bar y / \bar x]} \mid \bar y \subset \Elements \}$}
+ &
+ & \text{where $\matches{z}{\bar \sigma(\bar \phi)}$ is not a basic assertion.}
+\\
+ &
+ &
+ & \text{and $\mathrm{inst} := \left\{ \matches{z}{\fnot{\sigma(\bar y)}} \lor \lOr_i \matches{y_i}{\phi_i}
+                                    \mid \bar y \subset \Elements \right\}$}
+\\\\
+\prule{choose-ex}               & \multicolumn{3}{l}{
+                                  \unsatruleun {\sequent{ \Gamma; \Basic; \Universals }}
+                                               {\{ \alpha \leadsto \sequent{ \Gamma;\Basic; \Universals } \mid \text{for each $\alpha \in \Gamma$}\}}
+                                    \qquad\parbox{0.4\textwidth}{
+                                    when all assertions in $\alpha$ are either existentials or applications. i.e. when no other of the above rules apply }}
+\\\\
+\prule{app}                     & \begin{array}{l}
+                                  \satruleun { \matches{z}{\sigma(\bar \phi)} \leadsto \sequent{ \Gamma; \Basic; \Universals  } }
+                                             { \left\{ \begin{array}{l}
+                                                       \sequent{ \begin{array}{l}
+                                                                     \matches{z}{\sigma(\bar k)}
+                                                                     \\\land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \}
+                                                                 \end{array}
+                                                          }
+                                                          \vspace{0.5em}\\
+                                                          \text{for each $\bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements)$}
+                                                        \end{array}
+                                               \right\}
+                                             } \\
+                                  \text{where} \\
+                                  \text{\qquad $\Elements' = \bar k \union \{ z \} \union  \free{\bar \phi}$} \\
+                                  \text{\qquad $\Basic' = \Basic|_{\Elements'}$},
+                                  \text{       $\Gamma' = \Gamma|_{\Elements'}$},
+                                  \text{and    $\Universals' = \Universals|_{\Elements'}$} \\
+                                  \end{array} &
+\prule{exists}                  & \begin{array}{l}
+                                  \satruleun { \matches{z}{\exists \bar x \ldotp \phi} \leadsto \sequent{ \Gamma; \Basic; \Universals } }
+                                             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \} } \}
+                                             } \\
+                                  \text{for each $\alpha \in \{ \matches{z}{\phi[\bar k/\bar x]} \mid \bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements) \}$} \\
+                                  \text{where} \\
+                                  \text{\qquad $\Elements'   = \free{\alpha}$} \\
+                                  \text{\qquad $\Basic' = \Basic|_{\Elements'}$},
+                                  \text{       $\Gamma' = \Gamma|_{\Elements'}$},
+                                  \text{and    $\Universals' = \Universals|_{\Elements'}$}
+                                  \end{array}
+\\\\
+%\cline{1-3}
+%\intertext{This rule may only apply (as many times as needed) immediately after the (exists)/(app) rules or on the root node.
+%$\mathsf{fresh}$ denotes the fresh variables introduced by the last application of those rules.}
+\prule{resolve}                 & \multicolumn{3}{l}{
+                                  \satrulebin{\sequent{ \Gamma; \Basic; \Universals}}
+                                            {\sequent{ \Gamma; \matches{x_0}{\sigma(x_1,\ldots,x_n)}      \union \Basic; \Universals}}
+                                            {\sequent{ \Gamma; \matches{x_0}{\lnot\sigma(x_1,\ldots,x_n)} \union \Basic; \Universals}} } \\
+               & \multicolumn{3}{l}{\text{when neither $\matches{x}{{\sigma(x_1,\ldots,x_n)}}$ nor $\matches{x}{\fnot{\sigma(x_1,\ldots,x_n)}}$ are in $\Basic$}} \\
+               & \multicolumn{3}{l}{\text{and  $\bar x \subset \Elements$ and $\bar x \intersection \mathsf{fresh} \neq \emptyset$.}} \\
+\\
+\end{array}$$
+\end{figure*}

@@ -189,6 +189,3 @@ determining whether $\psi$ is satisfiable is decidable.
 \begin{proof}
 The same as Theorem \ref{thm:ooodec}.
 \end{proof}
-
-\clearpage
-

@@ -108,10 +108,10 @@
 \newunicodechar{✓}{\ding{51}}
 \newunicodechar{✗}{\ding{55}}
 \newunicodechar{⍻}{\ding{55}}
-\newcommand{\cmark}{{\color{green}\ding{51}}}%
-\newcommand{\xmark}{{\color{red}  \ding{55}}}%
-\newcommand{\cxmark} {{\color{green}\ding{51}}\textsuperscript{\kern-0.47em\tiny\color{red}\ding{55}}}
-\newcommand{\cqmark} {{\color{green}\ding{51}}\textsuperscript{\kern-0.47em\textbf{?}}}
+\newcommand{\cmark}{{\ding{51}}}%
+\newcommand{\xmark}{{  \ding{55}}}%
+\newcommand{\cxmark} {{\ding{51}}\textsuperscript{\kern-0.47em\tiny\ding{55}}}
+\newcommand{\cqmark} {{\ding{51}}\textsuperscript{\kern-0.47em\textbf{?}}}
 \newcommand{\fin}{$_\mathrm{fin}$}
 \renewcommand{\inf}{$_\mathrm{inf}$}
 
@@ -140,15 +140,10 @@
 %\newcommand{\prulebin}[3]{$$\frac{#1}{#2\quad#3}$$}
 \newcommand{\prftree}[3][YYY]{XXX \frac{#1}{#2\quad#3}}
 
-\newcommand{\satruleun}[2]
-    {{\color{green}\pruleun{\color{black}#1}{\color{black}#2}}}
-\newcommand{\satrulebin}[3]
-    {{\color{green}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
-
-\newcommand{\unsatruleun}[2]
-    {{\color{blue}\pruleun{\color{black}#1}{\color{black}#2}}}
-\newcommand{\unsatrulebin}[3]
-    {{\color{blue}\prulebin{\color{black}#1}{\color{black}#2}{\color{black}#3}}}
+\newcommand{\satruleun}[2]      {{\pruleun{#1}{#2}}}
+\newcommand{\satrulebin}[3]     {{\prulebin{#1}{#2}{#3}}}
+\newcommand{\unsatruleun}[2]    {{\pruleun{#1}{#2}}}
+\newcommand{\unsatrulebin}[3]   {{\prulebin{#1}{#2}{#3}}}
 
 \newcommand{\inst}{\mathsf{inst}}
 
@@ -162,17 +157,17 @@
 \newcommand{\Wit}{\mathit{Wit}}
 \newcommand{\SSS}{\mathcal{S}}
 \newcommand{\SSSmod}{\mathcal{S}_\mathrm{mod}}
-\newcommand{\appa}{(choose-app)}
-\newcommand{\appb}{(app$_2$)}
-\newcommand{\appc}{(app$_3$)}
+\newcommand{\appa}{\prule{choose-app}}
+\newcommand{\appb}{\prule{choose-wit}}
+\newcommand{\appc}{\prule{app}}
 \newcommand{\rt}{\mathit{root}}
-\newcommand{\Nodes}{\mathit{Nodes}}
+\newcommand{\Nodes}{\mathsf{Nodes}}
 \newcommand{\contr}[1]{[\!\rangle #1 \langle\!]}
 \newcommand{\expan}[1]{\langle\!] #1 [\!\rangle}
 \newcommand{\seq}{\mathit{seq}}
 \newcommand{\prule}[1]{\textsc{(#1)}}
 \newcommand{\Tr}{\mathit{Tr}}
-\newcommand{\Pattern}{\textsc{Pattern}}
+\newcommand{\Pattern}{\textsf{Pattern}}
 \newcommand{\wbar}{\overline}
 \newcommand{\SigD}{\umeasure}
 \newcommand{\SignD}{\mathsf{SignD}}
@@ -191,7 +186,11 @@
 % -----
 
 \newcommand {\dependson}{\prec^\phi}
-\newcommand{\Pos}{\mathrm{Pos}}
+\newcommand {\Pos}{\mathrm{Pos}}
+\newcommand {\game} {\mathcal G^{\mathcal T}}
+\newcommand {\PosT} {\Pos^{\mathcal T}}
+\newcommand {\ET}   {E^{\mathcal T}}
+\newcommand {\OmegaT}   {\Omega^{\mathcal T}}
 
 % Miscelanious
 % ============

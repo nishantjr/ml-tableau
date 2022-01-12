@@ -29,12 +29,13 @@ done
 paper_tex="$BUILD_DIR/tableau.tex"
 
 pandoc --standalone -f markdown -t latex -o "$paper_tex" \
-       "$DOC_DIR"/introduction.md \
-       "$DOC_DIR"/preliminaries.md \
-       "$DOC_DIR"/modal-matching-logic.md \
-       "$DOC_DIR"/qf-matching-logic.md \
-       "$DOC_DIR"/tableau.md \
-       "$DOC_DIR"/appendix.md \
+       "$DOC_DIR"/00-introduction.md     \
+       "$DOC_DIR"/01-preliminaries.md    \
+       "$DOC_DIR"/02-modal-patterns.md   \
+       "$DOC_DIR"/03-qf-patterns.md      \
+       "$DOC_DIR"/04-guarded-patterns.md \
+       "$DOC_DIR"/05-conclusion.md       \
+       "$DOC_DIR"/06-appendix.md         \
        --pdf-engine=xelatex \
        --template="$DOC_DIR/template.tex" \
        -F pandocfilters/defenv.py \
