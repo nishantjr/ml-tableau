@@ -176,7 +176,6 @@ Remark (A note about variants of matching logic)
     we will use pattern, model, etc, to refer to those concepts in polyadic matching logic
     although the same terms may be used in other variants of matching logic.
 
-
 ## Fragments and Meta-Properties
 
 In general, matching logic's power and expressivity entails

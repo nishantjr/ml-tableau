@@ -1,4 +1,5 @@
 \begin{figure*}
+\footnotesize
 $$\begin{array}{rlrlrrr}
 \prule{conflict}                & \pruleun{\sequent{\{ \alpha \} \union \Gamma; \{ \fnot{\alpha} \} \union \Basic; \Universals}}
                                           { \unsat }
@@ -16,9 +17,9 @@ $$\begin{array}{rlrlrrr}
                                 &
 \prule{ok-el}                   & \pruleun{\sequent{\matches{x}{x}, \Gamma; \Basic; \Universals}}
                                           {\sequent{                \Gamma; \Basic; \Universals}} \\
-\hideinappendix{ \\ \multicolumn{4}{l}{\text{\fbox{
+\hideinappendix{ \\ \multicolumn{4}{c}{\text{\fbox{
 Rules for \prule{and}, \prule{or}, \prule{def}, \prule{mu}, and \prule{nu}
-identical to those in Figure~\ref{fig:qf-tableau} but lifted to the form of sequents.
+identical to those in Figure~\ref{fig:qf-tableau} but lifted to the new form of sequents.
 }}}\\\\}
 \hideunlessappendix{
 \prule{and}                     & \unsatruleun{\sequent{ \matches{z}{\phi} \land \matches{w}{\psi},   \Gamma; \Basic; \Universals}}
@@ -73,7 +74,7 @@ identical to those in Figure~\ref{fig:qf-tableau} but lifted to the form of sequ
                                              { \left\{ \begin{array}{l}
                                                        \sequent{ \begin{array}{l}
                                                                      \matches{z}{\sigma(\bar k)}
-                                                                     \\\land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \{ \}
+                                                                     \\\land \lAnd_i \matches{k_i}{\phi_i}, \Gamma' \union \Universals'; \Basic' ; \emptyset
                                                                  \end{array}
                                                           }
                                                           \vspace{0.5em}\\
@@ -89,7 +90,7 @@ identical to those in Figure~\ref{fig:qf-tableau} but lifted to the form of sequ
                                   \end{array} &
 \prule{exists}                  & \begin{array}{l}
                                   \satruleun { \matches{z}{\exists \bar x \ldotp \phi} \leadsto \sequent{ \Gamma; \Basic; \Universals } }
-                                             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \{ \} } \}
+                                             { \{ \sequent{ \alpha, \Gamma' \union \Universals'; \Basic' ;  \emptyset } \}
                                              } \\
                                   \text{for each $\alpha \in \{ \matches{z}{\phi[\bar k/\bar x]} \mid \bar k \subset \{z\} \union \free{\bar \phi} \union (K \setminus \Elements) \}$} \\
                                   \text{where} \\

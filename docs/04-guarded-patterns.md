@@ -1,15 +1,49 @@
+\newcommand{\hideunlessappendix}[1]{}
+\newcommand{\hideinappendix}[1]{#1}
+\input{figs/guarded-tableau.tex}
+
 # The Guarded Fragment {#sec:decidable-guarded-fragment}
 
-Remark
+In this section, we present the guarded fragment of matching logic.
+This fragment is inspired by the guarded fragment of fixedpoint logic[@guarded-fixedpoint-logic],
+with extensions to allow for the differences between matching logic and fixedpoint logic.
 
-:   For a nonempty tuple $\bar x$,
-    We treat $\exists \bar x  \ldotp \phi$ and $\forall \bar x  \ldotp \phi$
-    as shorthand for nested quantifier patterns.
+Inspired by the robust decidablity properties of modal logic,
+guarded logics were created as a means of "taming" a logic,
+i.e. of restricting a logic so that it becomes decidable.
+This is done through syntactic restrictions on quantification.
+In [@why-is-modal-logic-so-robustly-decidable]
+we saw that the  reason for this "robust" decidability was
+that its models have the "tree-model property",
+and that this property leads to automata based decision procedures.
+With this insight, fragments that preserved decidability under such extensions were identified.
+The *guarded fragment* of first-order logic defined in [@modal-languages-and-bounded-fragments] allows
+quantification over an arbitary number of variables so long as it is in the form
+that, informally, relates each newly introduced variable to those previously
+introduced.
+This has since been generalized in two directions.
+First, to allow more general guards.
+In *loosely guarded* first-order logic presented in [@loosely-guarded-fol], guards are allowed to be conjunctions of atoms, rather than just single atoms.
+*Packed logic* extends this further, allowing even existentials to occur in guards.
+In the *clique guarded* fragment of first-order logic [@clique-guarded-logic], quantification is semantically restricted to cliques within the Gaifman graph of models.
+Second, to allow fixedpoints: guarded fixedpoint logic, loosely guarded fixedpoint logic [@guarded-fixedpoint-logic], and clique-guarded fixedpoint logic [@clique-guarded-logic].
+extend the corresponding guarded logics to allow fixedpoints constructs.
+An interesting property of guarded fixedpoint logics, is that despite being decidable, they admit "infinity axioms" --
+axioms that are satisfiable only in infinite models.
+
+The algorithm we present here is an extension to the one presented in [@guarded-fixedpoint-logic]
+modified for matching logic with an important extension, to enable resolution,
+that we found vital to a practical implementation.
+We also try to empasize its relation with the tableau defined in [@sec:qf-fragment].
+
+For a nonempty tuple $\bar x$,
+We treat $\exists \bar x  \ldotp \phi$ and $\forall \bar x  \ldotp \phi$
+as shorthand for nested quantifier patterns.
 
 Definition (Guarded pattern)
 
-:   A guarded pattern is a closed pattern (i.e. without any free element or set variables)
-    such that:
+:   A *guarded pattern* is a closed (i.e. without any free element or set variables)
+    positive-form pattern such that:
 
     1. Every existential   sub-pattern is of the form $\exists \bar x. \alpha \land     \phi$
        and every universal sub-pattern is of the form $\forall \bar x. \alpha \limplies \phi$
@@ -33,11 +67,14 @@ Definition (Guarded pattern)
     3.  \label{item:fixedpoint-no-elements}
         Each fixedpoint sub-pattern $\mu X \ldotp \phi$ and $\nu X \ldotp \phi$ has no free element variables.
 
-TODO: Give examples that violate each of these conditions.
-
-Now, we shall begin defining the sequents over which our tableau operates.
-
 ## Tableau Construction
+
+While in the previous section, it was sufficient to use simple sets of patterns as sequents,
+we now need something more complex.
+Previously, each sequent in the quantifier-free tableau corresponds to a single
+element in the model, in the more complex guarded patterns existentials
+introduce additional elements we must keep track of.
+We now build the nessesary constructs to represent those sequents.
 
 Definition (Assertion)
 
@@ -74,6 +111,9 @@ Definition (Restriction)
     the restriction of $A$ to $E$, denoted $A|_{E}$,
     is the subset of assertion in $A$ whose free variables are a subset of $E$.
 
+The use of element variables in the \prule{\dapp} allow us to drop the
+concept of $\wit$.
+
 Definition (Sequent)
 :   A *sequent* is:
 
@@ -90,24 +130,17 @@ Definition (Sequent)
 
 Informally,
 $\Gamma$ represents the set of assertions whose combined satisfiability we are checking.
-$\Basic$ and $\Universals$ represent assertions we have deemed must hold.
+$\Basic$ and $\Universals$ are sets of consistent assertions that we are using to build our model.
 Each free element variable in these assertions corresponds (roughly) to a distinct element in the
-model we are building (if one exists). We will go into more details about this later.
+model we are building (if one exists).
 
-\newcommand{\hideunlessappendix}[1]{}
-\newcommand{\hideinappendix}[1]{#1}
-\input{figs/guarded-tableau.tex}
+Definition (Tableaux)
 
-Definition (Tableau)
-
-:   For a signature $\Sigma$, and a guarded  pattern $\phi$,
-    fix an arbitary dependency order,
-    and let $K$ be an (arbitary) finite set of fresh element variables.
-    A *tableau* is a (possibly infinte) tree
-    with nodes labeled by sequents
-    and built using the application of the rules below.
+:   For a guarded  pattern $\psi$, fix an arbitary dependency order.
+    A *tableau* is a (possibly infinte) tree with nodes labeled by sequents
+    and built using the application of the rules in [@fig:qf-tableau].
     The label of the root node is $\sequent{\matches{x}{\phi}, \emptyset, \emptyset, \{x\}}$
-    where $x \in K$.
+    where $x$ is a fresh element variable.
     Leaf nodes must be labeled either with $\unsat$
     or with a sequent where $\Gamma = \emptyset$.
     -- i.e. it is not a valid tableau when some leaf node does not meet this condition.
@@ -116,8 +149,9 @@ Proposition
 :   For any sequent built using these rules, we cannot have both $\matches{x}{\phi}$ and $\matches{x}{\fnot\phi}$ in $\Basic$
 
 Proof
-:   The root node starts with $\Basic$ empty, and therefore this invariant is maintained.
-    Basic assertions are added to $\Basic$ only through the (resolve) rule which maintains the invariant.
+:   The root node starts with $\Basic$ empty, and therefore this invariant is
+    maintained. Basic assertions are added to $\Basic$ only through the
+    \prule{resolve} rule which maintains the invariant.
 
 Proposition
 :   There is a tableau for any guarded pattern
@@ -125,18 +159,15 @@ Proposition
 Proof
 :   For any assertion that is not basic, there is some rule that applies.
     For a basic assertion if either the assertion itself or its negation in in $\Basic$,
-    then the (conflict) or (ok) rule applies.
-    Otherwise, there was some application of the (exists),  (app) rule
+    then the \prule{conflict} or \prule{ok} rule applies.
+    Otherwise, there was some application of the \prule{exists},  \prule{app} rule
     after which all variables in the assertion are in $\Elements$.
-    We may build a tableau where the (resolve) rule
-    is applied for this basic assertion after this (exists)/(app) rule. 
+    We may build a tableau where the \prule{resolve} rule
+    is applied for this basic assertion after this \prule{exists}/\prule{app} rule. 
 
 ## Parity Game
 
-Now that we have defined how a tableau is built,
-we define how we may build a parity game from this.
-
-From a tableau, $\mathcal T$, we now define a parity game $\mathcal G(\mathcal T)$.
+As before, using this tableau we now build a parity game.
 In this game, player $0$ may be thought of as trying to prove the satisfiablity of the pattern,
 and player $1$ as trying to prove it unsatisfiable.
 
@@ -212,4 +243,5 @@ Theorem
     If a guarded pattern has a tableau with a refutation, then it is unsatisfiable
     and its negation is valid.
 
+## Working with axioms
 

@@ -1,4 +1,4 @@
-# The Quantifier-Free Fragment
+# The Quantifier-Free Fragment {#sec:qf-fragment}
 
 The quantifier free fragment is less restrictive, allowing fixedpoints in patterns as well:
 
@@ -92,6 +92,7 @@ Since the evaluation of a pattern now also depends on its dependency list,
 we make the dependency list used explicit by adding it as a superscript as in $\evaluation{\phi}^\deflist_{M,\rho}$.
 
 \begin{figure*}
+\footnotesize
 $$\def\arraystretch{2.5}\begin{array}{rlrl}
 \prule{conflict}
 & \pruleun{\sigma,\bar\sigma,\Gamma}
@@ -256,11 +257,7 @@ Definition
 
 Definition (Tableaux)
 :   \label{def:tableau}
-    Let $\deflist$ be a definition list.
-    We define the set $\SSS$ of \emph{tableau rules} with respect to 
-    $\deflist$ in [@fig:qf-tableau], where $\Gamma$ is a finite nonempty set of sentences and 
-    $\phi,\phi_1,\phi_2$ are sentences, whose definition constants are 
-    all contained in $\deflist$.
+    Fix a definition list $\deflist$ for $\psi$.
     A *tableau* for $\psi$ is a possibly infinite labeled tree
     $(T,L)$.
     We denote its nodes as $\Nodes(T)$ and the root node is $\rt(T)$.
@@ -269,8 +266,6 @@ Definition (Tableaux)
     are satisfied:
 
     1.  $L(\rt(T)) = \{ \psi \}$;
-    2.  For every $s \in \Nodes(T)$, if $L(s)$ is an inconsistent sequent then 
-        $s$ is a leaf of $T$;
     3.  For every $s \in \Nodes(T)$, if one of the tableau rules in $\SSS$ can be applied (with respect to the 
         definition list $\deflist^\psi$), and the resulting sequents are  
         $\seq_1,\dots,\seq_k$, then
