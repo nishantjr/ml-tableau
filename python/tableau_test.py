@@ -201,55 +201,55 @@ def commentid(args:Tuple[str, bool, Pattern, List[EVar], Dict[Symbol, int]]) -> 
 
     # App/And
     ('app',             True,   App(C),                      [c, c1], signature),
-    ('dapp',            True,   DApp(C),                     [c, c1], signature),
-    ('app and neg',     False,  And(App(C),DApp(C)),         [c, c1], signature),
-    ('app and neg 2',   True,   And(App(D), Not(App(C))),    [c, c1], {C: 0, D: 0}),
-
-    ('app-nested',      True,   App(S, App(C)),              [c, c1, c2, c3], signature),
-    ('app-nested-neg',  False,  And( App(S, App(C))
-                                   , DApp(S, DApp(C))),      [c, c1, c2, c3], signature),
-
-    ('non-normal-form', True,   DApp(S, Not(App(C))),        [c, c1, c2, c3], signature),
-    ('non-normal-form', False,  And(App(C), Not(App(C))),    [c, c1, c2, c3], signature),
-    ('non-normal-form', False,  And( App(S, App(C))
-                                   , DApp(S, Not(App(C)))),  [c, c1, c2, c3], signature),
-
-    # App/Or
-    ('or',              True,   Or(App(C), Not(App(C))),     [c, c1, c2, c3], signature),
-    ('or-app-nested',   True,   Or( App(S, App(C))
-                                  , DApp(S, Not(App(C)))),   [c, c1, c2, c3], signature),
-    ('or-unsat',        False,  Or( And(App(C), Not(App(C)))
-                                  , And(App(C), Not(App(C)))
-                                  ),                         [c, c1], signature),
-
-    # Fixed points
-    ('nu-top',          True,   Nu(X, X), [c, c1], signature),
-    ('mu-bot',          False,  Mu(X, X), [c, c1], signature),
-
-    ('eventually-c',    True,   Mu(X,  Or(X,  App(C))), [c, c1], signature),
-    ('always-not-c',    True,   Nu(X, And(X, DApp(C))), [c, c1], signature),
-    ('Ec-and-A-not-c',  False,  And( Nu(X, And(X, DApp(C)))
-                                   , Mu(X,  Or(X, App(C)))), [c, c1], signature),
-
-    ('nu-or-app',       True,   Nu(X, Or(X,  App(C))),  [c, c1], signature),
-    ('mu-and-dapp',     False,  Mu(X, And(X, DApp(C))), [c, c1], signature),
-
-    ('nu-mu',           False,  Nu(X, Mu(X, X)), [c, c1], signature),
-    ('mu-nu',           True,   Mu(X, Nu(X, X)), [c, c1], signature),
-
-    ('nu-mu-and',       False,  Nu(X, Mu(Y, And(X, Y))), [c, c1], signature),
-
-    ('mu-and-nu',       False,  Mu(X, And(X, Nu(X, X))), [c, c1], signature),
-    ('mu-or-nu',        True,   Mu(X,  Or(X, Nu(X, X))), [c, c1], signature),
-
-    ('nu-and-dapp',     True,   Nu(X, And(X, DApp(C))), [c, c1], signature),
-    ('nu-and-dapp-app', True,   Nu(X, And(X, DApp(S, App(C)))), [c, c1], signature),
-
-    ('nu-app',          True,   Nu(X, App(S, X)), [c, c1, c2, c3], { S : 1 }),
-    ('fp-1',            False,  And( Nu(X, And(App(C), App(S, X)))
-                                   , DApp(S, Not(App(C)))
-                                   ), [c, c1, c2, c3], signature),
-
+#    ('dapp',            True,   DApp(C),                     [c, c1], signature),
+#    ('app and neg',     False,  And(App(C),DApp(C)),         [c, c1], signature),
+#    ('app and neg 2',   True,   And(App(D), Not(App(C))),    [c, c1], {C: 0, D: 0}),
+#
+#    ('app-nested',      True,   App(S, App(C)),              [c, c1, c2, c3], signature),
+#    ('app-nested-neg',  False,  And( App(S, App(C))
+#                                   , DApp(S, DApp(C))),      [c, c1, c2, c3], signature),
+#
+#    ('non-normal-form', True,   DApp(S, Not(App(C))),        [c, c1, c2, c3], signature),
+#    ('non-normal-form', False,  And(App(C), Not(App(C))),    [c, c1, c2, c3], signature),
+#    ('non-normal-form', False,  And( App(S, App(C))
+#                                   , DApp(S, Not(App(C)))),  [c, c1, c2, c3], signature),
+#
+#    # App/Or
+#    ('or',              True,   Or(App(C), Not(App(C))),     [c, c1, c2, c3], signature),
+#    ('or-app-nested',   True,   Or( App(S, App(C))
+#                                  , DApp(S, Not(App(C)))),   [c, c1, c2, c3], signature),
+#    ('or-unsat',        False,  Or( And(App(C), Not(App(C)))
+#                                  , And(App(C), Not(App(C)))
+#                                  ),                         [c, c1], signature),
+#
+#    # Fixed points
+#    ('nu-top',          True,   Nu(X, X), [c, c1], signature),
+#    ('mu-bot',          False,  Mu(X, X), [c, c1], signature),
+#
+#    ('eventually-c',    True,   Mu(X,  Or(X,  App(C))), [c, c1], signature),
+#    ('always-not-c',    True,   Nu(X, And(X, DApp(C))), [c, c1], signature),
+#    ('Ec-and-A-not-c',  False,  And( Nu(X, And(X, DApp(C)))
+#                                   , Mu(X,  Or(X, App(C)))), [c, c1], signature),
+#
+#    ('nu-or-app',       True,   Nu(X, Or(X,  App(C))),  [c, c1], signature),
+#    ('mu-and-dapp',     False,  Mu(X, And(X, DApp(C))), [c, c1], signature),
+#
+#    ('nu-mu',           False,  Nu(X, Mu(X, X)), [c, c1], signature),
+#    ('mu-nu',           True,   Mu(X, Nu(X, X)), [c, c1], signature),
+#
+#    ('nu-mu-and',       False,  Nu(X, Mu(Y, And(X, Y))), [c, c1], signature),
+#
+#    ('mu-and-nu',       False,  Mu(X, And(X, Nu(X, X))), [c, c1], signature),
+#    ('mu-or-nu',        True,   Mu(X,  Or(X, Nu(X, X))), [c, c1], signature),
+#
+#    ('nu-and-dapp',     True,   Nu(X, And(X, DApp(C))), [c, c1], signature),
+#    ('nu-and-dapp-app', True,   Nu(X, And(X, DApp(S, App(C)))), [c, c1], signature),
+#
+#    ('nu-app',          True,   Nu(X, App(S, X)), [c, c1, c2, c3], { S : 1 }),
+#    ('fp-1',            False,  And( Nu(X, And(App(C), App(S, X)))
+#                                   , DApp(S, Not(App(C)))
+#                                   ), [c, c1, c2, c3], signature),
+#
 ], ids=commentid)
 def test_is_sat(args:Tuple[str, bool, Pattern, List[EVar], Dict[Symbol, int]]) -> None:
     comment, sat, pattern, consts, sig = args

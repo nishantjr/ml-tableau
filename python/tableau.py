@@ -13,6 +13,28 @@ from pml import *
 
 Signature = Dict[Symbol, int]
 
+
+PatternLike = Union[Pattern, Assertion, Membership]
+
+def free_evars(ps: Iterable[PatternLike]) -> FrozenSet[EVar]:
+    ret : FrozenSet[EVar] = frozenset()
+    for assertion in ps:
+        ret = ret.union(assertion.free_evars())
+    return ret
+
+def restrict(ps: Iterable[PatternLike], vars : Iterable[EVar]) -> Iterable[PatternLike]:
+    vars_set = set(vars)
+    def free_evars_is_subset(p: PatternLike) -> bool:
+        return p.free_evars() <= vars_set
+    return filter(free_evars_is_subset, ps)
+
+def restrict_a(ps: Iterable[Assertion], vars : Iterable[EVar]) -> Iterable[Assertion]:
+    return cast(Iterable[Assertion], restrict(ps, vars))
+def restrict_m(ps: Iterable[Membership], vars : Iterable[EVar]) -> Iterable[Membership]:
+    return cast(Iterable[Membership], restrict(ps, vars))
+def restrict_u(ps: Iterable[ForallAssertion], vars : Iterable[EVar]) -> Iterable[ForallAssertion]:
+    return cast(Iterable[ForallAssertion], restrict(ps, vars))
+
 DefList = List[Pattern]
 def definition_list(p: Pattern, def_list: DefList) -> DefList:
     if def_list is None: def_list = []
@@ -38,12 +60,6 @@ def definition_list(p: Pattern, def_list: DefList) -> DefList:
         return definition_list(p.negate(), def_list)
     else:
         raise RuntimeError("Unsupported pattern: " + str(p))
-
-def unfold(p: Union[Mu, Nu], def_list: DefList) -> Pattern:
-    if isinstance(p, Mu):
-        return p.subpattern.substitute(p.bound, SVar(def_list.index(p)))
-    else:
-        return p.subpattern.substitute(p.bound, Not(SVar(def_list.index(p.negate()))))
 
 class Assertion:
     @abstractmethod
@@ -207,9 +223,13 @@ class Membership:
 
     owning_sequent: Optional['Sequent']
 
-Sequent = Union['BasicSequent', 'UnsatSequent', 'ChooseExistentialSeqeunt']
+    def free_evars(self) -> FrozenSet[EVar]:
+        return frozenset(self.elements)
+
+Sequent = Union['BasicSequent', 'UnsatSequent', 'ChooseExistentialSequent']
 class Sat:
     pass
+
 
 class BasicSequent:
     gamma          : List[Assertion]
@@ -217,11 +237,7 @@ class BasicSequent:
     universals     : List[ForallAssertion]
 
     children       : List[Sequent] = []
-    game_edges     : List[Tuple[ Assertion      # Parent assertion
-                               , Union[Sequent, Sat]
-                               , Assertion      # Child assertion
-                         ]     ] \
-                   = []
+    pg_children     : Dict[Assertion, List['GameNode']] = {}
 
     def __init__(self, gamma:List[Assertion], basics:List[Membership], universals:List[ForallAssertion]) -> None:
         self.gamma      = gamma
@@ -242,65 +258,95 @@ class BasicSequent:
                                            , owning_sequent = self
                                            ) ]
 
-    def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
+    def build_children(self, K : List[EVar]) -> Tuple[Optional[Membership], List[Sequent]]:
+        """ Returns a membership that needs to be resolved on in order to continue,
+            and the list on incomplete nodes.
+        """
         non_existential = list(filterfalse(is_existential, self.gamma))
         if non_existential:
             alpha, *_ = self.gamma
             return self.apply_nonexistential_rule()
         return self.apply_choose_existentials()
 
-    def apply_choose_existentials(self) -> Tuple[Optional[Membership], List[Sequent]]:
-        for existential in self.gamma:
-            child = ChooseExistentialSeqeunt(existential, self)
-            self.children += [ child ]
-            self.game_edges += [(existential, child, existential)]
-        return (None, self.children)
-
     def apply_nonexistential_rule(self) -> Tuple[Optional[Membership], List[Sequent]]:
         assertion, *rest = self.gamma
         child : Sequent
         if isinstance(assertion, Matches):
             p = assertion.pattern
-            if   isinstance(p, (Bottom)):
+            if isinstance(p, (Bottom)):
                 child = UnsatSequent()
-                self.children = [ child ]
-                self.game_edges = [(assertion, child, assertion)]
+                self.children = [ ]
+                for g in self.gamma:
+                    self.pg_children[g] = [UnsatGameNode()]
+                return (None, self.children)
             elif isinstance(p, (Top)):
                 child = BasicSequent(gamma = rest, basics = self.basics, universals = self.universals)
                 self.children = [child]
-                self.game_edges = [(assertion, child, assertion)]
+                self.pg_children[assertion] = [BasicGameNode(assertion, self)]
+                for assertion in rest:
+                    self.pg_children[assertion] = [BasicGameNode(assertion, child)]
                 return (None, self.children)
             assert False
         return (None, [])
 
+    def apply_choose_existentials(self) -> Tuple[Optional[Membership], List[Sequent]]:
+        for existential in self.gamma:
+            child = ChooseExistentialSequent(existential, self)
+            self.children += [ child ]
+            for assertion in self.gamma:
+                if assertion == existential: continue
+                self.pg_children[assertion] = [ChooseExistentialGameNode(assertion, child)]
+            return (None, self.children)
+        return (None, self.children)
+
+    def free_evars(self) -> FrozenSet[EVar]:
+        ret : FrozenSet[EVar] = frozenset()
+        # No need to check other assertions since basics should contain all memberships
+        for membership in self.basics:
+            ret = ret.union(membership.free_evars())
+        return ret
+
 @dataclass(frozen=True)
 class UnsatSequent:
-    def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
+    def build_children(self, K : List[EVar]) -> Tuple[Optional[Membership], List[Sequent]]:
         return (None, [])
 
     def get_children(self) -> List['Sequent']:
         return [self]
 
 @dataclass(frozen=False)
-class ChooseExistentialSeqeunt:
-    alpha   : Assertion
-    parent  : BasicSequent
+class ChooseExistentialSequent:
+    alpha    : Assertion
+    parent   : BasicSequent
+    children : List[BasicSequent] = []
 
-    def build_children(self) -> Tuple[Optional[Membership], List[Sequent]]:
-        assert False
+    def build_children(self, K : List[EVar]) -> Tuple[Optional[Membership], List[Sequent]]:
+        assert isinstance(self.alpha, Matches)
+        assert isinstance(self.alpha.pattern, (App, Exists))
+
+        for inst in self.instantiations(K):
+            self.children += [BasicSequent( gamma       = list(restrict_a(self.parent.gamma, inst.free_evars()))
+                                          , basics      = list(restrict_m(self.parent.basics, inst.free_evars()))
+                                          , universals  = list(restrict_u(self.parent.universals, inst.free_evars()))
+                                          )]
+        return (None, cast(List[Sequent], self.children))
+
+    def instantiations(self, K : List[EVar]) -> List[Assertion]:
+        assert isinstance(self.alpha, Matches)
+        assert isinstance(self.alpha.pattern, (App, Exists))
+
+        if isinstance(self.alpha.pattern, App):
+            instantiations(len(self.alpha.pattern.arguments), self.alpha.free_evars(), self.parent.free_evars(), K)
 
     def get_children(self) -> List['Sequent']:
         assert False
-        return []
 
 @dataclass(frozen=True)
 class BasicGameNode:
     assertion:  Assertion
-    sequent:    Sequent
+    sequent:    BasicSequent
 
     def priority(self, def_list: DefList) -> int: 
-        if isinstance(self.sequent, UnsatSequent):
-            return 1
         if isinstance(self.assertion, Matches):
             p = self.assertion.pattern
             if isinstance(p, Top):
@@ -334,10 +380,7 @@ class BasicGameNode:
             raise RuntimeError("Unimplemented: " + str(self.assertion))
 
     def player(self) -> int:
-        # If a node has player N, then that player can make a move
-        if isinstance(self.sequent, UnsatSequent):
-            # There is no choice to be made here, so it does not matter whose turn it is.
-            return 0
+        """ If a node has player N, then that player can make a move """
         if isinstance(self.assertion, Matches):
             if isinstance(self.assertion.pattern, (Top, Bottom, Mu, Nu, SVar, EVar)) or \
                (isinstance(self.assertion.pattern, Not) and isinstance(self.assertion.pattern.subpattern, SVar)) or \
@@ -356,21 +399,13 @@ class BasicGameNode:
         raise RuntimeError("Unimplemented: " + str(self))
 
     def label(self) -> str:
-        if isinstance(self.sequent, UnsatSequent):
-            return "Unsat"
-        else:
-            return self.assertion.to_utf()
+        return self.assertion.to_utf()
 
     def get_pg_children(self) -> List[GameNode]:
-        ret : List[GameNode] = []
-        for child_sequent in self.sequent.get_children():
-            if isinstance(child_sequent, BasicSequent):
-                assert False
-            if isinstance(child_sequent, UnsatSequent):
-                ret += [BasicGameNode(self.assertion, child_sequent)]
-            if isinstance(child_sequent, ChooseExistentialSeqeunt):
-                assert False
-        return ret
+        """ Returns a list of (source, list of destination) pairs.
+            Each source node appears exactly once.
+        """
+        return self.sequent.pg_children[self.assertion] 
 
 @dataclass
 class ResolveGameNode:
@@ -384,14 +419,55 @@ class ResolveGameNode:
     def player(self) -> int:
         return 0
 
-    def get_pg_children(self) -> List[GameNode]:
-        assert False
-        pass
-
     def label(self) -> str:
         return "Resolve on:" + str(self.membership)
 
-GameNode = Union[ BasicGameNode, ResolveGameNode ]
+    def get_pg_children(self) -> List[GameNode]:
+        """ Returns a list of (source, list of destination) pairs.
+            Each source node appears exactly once.
+        """
+        assert False
+
+@dataclass(frozen=True)
+class ChooseExistentialGameNode:
+    assertion:  Assertion
+    sequent:    ChooseExistentialSequent
+
+    def priority(self, def_list: DefList) -> int:
+        return 2 * len(def_list) + 2 # Not relevant; some other node will have lower or equal priority
+
+    def player(self) -> int:
+        return 1
+
+    def label(self) -> str:
+        return self.assertion.to_utf()
+
+    def get_pg_children(self) -> List[GameNode]:
+        """ Returns a list of (source, list of destination) pairs.
+            Each source node appears exactly once.
+        """
+        assert False
+
+
+@dataclass(frozen=True)
+class UnsatGameNode:
+    def priority(self, def_list: DefList) -> int:
+        return 1
+
+    def player(self) -> int:
+        return 0 # Not relevant. No choice
+
+    def label(self) -> str:
+        return "Unsat"
+
+    def get_pg_children(self) -> List[GameNode]:
+        """ Returns a list of (source, list of destination) pairs.
+            Each source node appears exactly once.
+        """
+        return [UnsatGameNode()]
+
+
+GameNode = Union[ BasicGameNode, ResolveGameNode, UnsatGameNode, ChooseExistentialGameNode ]
 
 class Tableau:
     root : BasicSequent
@@ -399,15 +475,15 @@ class Tableau:
 
     def __init__(self, pattern: Pattern, sig: Signature, K: List[EVar]):
         self.root = BasicSequent( gamma        = [Matches(K[0], pattern)]
-                           , basics       = []
-                           , universals   = []
-                           )
+                                , basics       = []
+                                , universals   = []
+                                )
         self.root.extend_memberships(sig, [K[0]])
         self.def_list = definition_list(pattern, def_list = [])
         next_nodes : List[Sequent] = [self.root]
         while next_nodes:
             first, *rest = next_nodes
-            (resolve_on, new_nodes) = first.build_children()
+            (resolve_on, new_nodes) = first.build_children(K)
             next_nodes = new_nodes + rest
             if resolve_on:
                 next_nodes = self.resolve(resolve_on, next_nodes)
@@ -434,25 +510,22 @@ class Tableau:
             max_priority = 2 * len(self.def_list) + 2
             return max_priority - node.priority(self.def_list)
 
-        node_queue : List[GameNode] = [BasicGameNode(self.root.gamma[0], self.root)]
+        node_queue      : List[GameNode]      = [BasicGameNode(self.root.gamma[0], self.root)]
         processed_nodes : FrozenSet[GameNode] = frozenset()
-        i = 0
         while node_queue:
-            i = i+1
-            assert i < 4
-            parent, *node_queue = node_queue
-            print('parent', parent)
-            if parent in processed_nodes:
+            node, *node_queue = node_queue
+            if node in processed_nodes:
                 continue
-            processed_nodes = processed_nodes.union([parent])
-            print('x')
-            ret += [(ident(parent),
-                     pgsolver_priority(parent),
-                     parent.player(),
-                     sorted(list(map(ident, parent.get_pg_children()))),
-                     parent.label()
+            processed_nodes = processed_nodes.union([node])
+            dests = node.get_pg_children()
+            ret += [(ident(node),
+                     pgsolver_priority(node),
+                     node.player(),
+                     sorted(list(map(ident, node.get_pg_children()))),
+                     node.label()
                     )]
-            node_queue = parent.get_pg_children() + node_queue
+            node_queue += dests
+        print('ret', ret)
         return ret
 
     """
@@ -595,24 +668,11 @@ class Tableau:
         else:
             raise RuntimeError("Unimplemented: " + str(assertion))
 
-    def free_evars(self) -> FrozenSet[EVar]:
-        ret : FrozenSet[EVar] = frozenset()
-        for assertion in chain(self.existentials, self.universals):
-            ret = ret.union(assertion.free_evars())
-        for membership in self.memberships:
-            ret = ret.union(membership.elements)
-        return ret
     """
 
 # ----
 
 Closure = FrozenSet[Union[Matches, ForallAssertion, ExistsAssertion]]
-
-def free_evars(assertions: Iterable[Assertion]) -> FrozenSet[EVar]:
-    ret : FrozenSet[EVar] = frozenset()
-    for assertion in assertions:
-        ret = ret.union(assertion.free_evars())
-    return ret
 
 @dataclass(frozen=True)
 class PGNode():
@@ -656,7 +716,6 @@ def instantiations_lists(length: int, curr: List[EVar], avail: List[EVar]) -> It
 
 run = 0
 def run_pgsolver(game: SerializedParityGame) -> bool:
-
     def entry_to_string(entry : SerializedParityGameEntry) -> str:
         source, priority, player, dests, label = entry
         assert len(dests) > 0
