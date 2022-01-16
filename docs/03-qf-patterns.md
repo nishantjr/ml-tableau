@@ -266,7 +266,7 @@ Definition (Tableaux)
     are satisfied:
 
     1.  $L(\rt(T)) = \{ \psi \}$;
-    3.  For every $s \in \Nodes(T)$, if one of the tableau rules in $\SSS$ can be applied (with respect to the 
+    3.  For every $s \in \Nodes(T)$, if one of the tableau rules in $\SSS$ in [@fig:qf-tableau] can be applied (with respect to the 
         definition list $\deflist^\psi$), and the resulting sequents are  
         $\seq_1,\dots,\seq_k$, then
         $s$ has exactly $k$ child nodes $s_1,\dots,s_k$, and 
@@ -440,12 +440,11 @@ iff $\psi$ is satisfiable.
 By Propositions \ref{prop:mpm} and \ref{prop:pmm}. 
 \end{proof}
 
-\begin{theorem}
-For any positive-form quantifier-free sentence $\psi$, determining whether $\psi$ is 
+\begin{theorem}\label{thm:qf-decidable}
+For any quantifier-free pattern $\psi$, determining whether $\psi$ is 
 satisfiable is decidable.
 \end{theorem}
 \begin{proof}
-\todo{Check details.}
 By Theorem \ref{thm:pm}, we can look for a pre-model for $\psi$.
 We will construct a tree automaton $\Aut$ on infinite trees that accepts 
 exactly the pre-models for $\psi$.

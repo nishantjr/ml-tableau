@@ -109,6 +109,10 @@ identical to those in Figure~\ref{fig:qf-tableau} but lifted to the new form of 
                                             {\sequent{ \Gamma; \matches{x_0}{\lnot\sigma(x_1,\ldots,x_n)} \union \Basic; \Universals}} } \\
                & \multicolumn{3}{l}{\text{when neither $\matches{x}{{\sigma(x_1,\ldots,x_n)}}$ nor $\matches{x}{\fnot{\sigma(x_1,\ldots,x_n)}}$ are in $\Basic$}} \\
                & \multicolumn{3}{l}{\text{and  $\bar x \subset \Elements$ and $\bar x \intersection \mathsf{fresh} \neq \emptyset$.}} \\
+               & \multicolumn{3}{l}{\text{May be applied only directly on the root node, or immediately after the application \prule{app}, \prule{exists} or \prule{resolve} rules.}} \\
 \\
 \end{array}$$
+\caption{Tableau rules for the guarded fragment.}
+\label{fig:guarded-tableau}
 \end{figure*}
+

@@ -1,8 +1,9 @@
-# Next Steps
+# Examples
 
-<!--
-## Integration with automated prover in [@towards-a-unified-framework]
--->
+Due to space constraints, we show examples of theories captured by the above fragments, as well as example tableaux in the
+[Appendix @app:examples].
+
+# Future Work
 
 As mentioned in [@sec:introduction],
 our goal and primary motivation
@@ -15,14 +16,15 @@ for the corresponding procedure of guarded fixedpoint logic.
 Indeed, it was difficulties implementing the procedure in [@guarded-fixedpoint-logic]
 that led us to develop the \prule{resolve} rule.
 Without it, we had needed to search through all possible combinations of consistent basic assertions.
-Our plan is to produce a parity game, and then use a pre-existing solver for parity games[@pgsolver]
+Our plan is to produce a parity game, and then use a pre-existing solver for parity games&nbsp;[@friedmann2009-pgsolver]
 to search for pre-models or refutations.
+\todo{should we remove this completely?}
 
 Second, we must be able to combine this procedure with our decision procedures
 and semi-algorithms. This will allow us to take advantage of this decision
 procedure even when the pattern we are dealing with lies outside the fragment.
 In the world of first-order SMT solvers, this is typically done using the
-Nelson-Oppen combination procedure[@neslon-oppen].
+Nelson-Oppen combination procedure [@nelsonoppen1979-cooperating-decision-procedures;@krstic2007-architecting].
 One approach may be to extend the \prule{conflict-*} and \prule{ok-*} rules
 to treat the SMT solver as an oracle for checking the consistency of basic assertions.
 This approach will likely work when the algorithm decides that the pattern is unsatisfiable.
@@ -34,9 +36,12 @@ In particular, the model produced may have inconsistencies between assertions
 over elements that do not share nodes in the tableau.
 In the case where we are able to identify the elements that produce the conflict,
 we may be able to synthesize guarded lemmas that allow us to rule out these models.
-\newline
+\todo{relatively complete wrt oracle}
+\todo{mention integration with K}
+newline
 
-Another important direction is to extend our decidable as much as possible.
+Another important direction is to extend our decidable fragment as much as possible.
+\todo{take away: decidability comes from the restriction to quantification}
 One easy candidate to to drop the requirement that fixedpoints may not have free
 element variables. This will involve extending fixedpoint markers to take arguments,
 and changes to the \prule{def}, \prule{mu}, and \prule{nu} rules to work with these extended fixedpoint markers.
@@ -51,9 +56,9 @@ so the restriction do existentials can be dropped for axioms when checking
 both the validity and satisfiability modulo theories.
 
 A third avenue draw inspiration from other decideable logics. For example, the
-decidability of the packed fragment of first-order logic[@tolerance-logic] seems
+decidability of the packed fragment of first-order logic [@marx2001-tolerance-logic] seems
 to imply that we can allow nested existentials or applications in guards. That
-of guarded separation logic[@guarded-separation-logic] implies that we could
+of guarded separation logic [@guarded-separation-logic] implies that we could
 handle associative-commutive symbols, perhaps by drawing inspiration from
 unification algorithms. The relationship between the finite variant property and
 the guarded fragment is another exciting direction.
@@ -63,7 +68,7 @@ As we draw inspiration from these decision procedures we increase the complexity
 of our decision procedure, and that complexity increases the risk of incorrectness.
 To mitigate this risk we aim to produce proofs of validity from refutations.
 These proofs can then be checked with a small trust-base, for example by the proof checker
-developed in [@proof-checker].
+developed in&nbsp;[@chen-lin-trinh-rosu-2021-cav].
 
 For the most part the tableau rules in [@fig:guarded-tableau]
 (when viewed through the lens of a refutation) correspond directly
@@ -77,6 +82,9 @@ Fortunately these plays must be $\omega$-regular, and we should be able to
 represent them in a finite proof
 through the combination of *implication contexts* introduced in [@towards-a-unified-framework],
 and the \prule{knaster-tarski} proof rule.
+\todo{no need to mention knaster-tarksi rule}
+\todo{talk about the the proof checker}
+\todo{... so that we don't need to trust the prover.}
 
 # Conclusion
 

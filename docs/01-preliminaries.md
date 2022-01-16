@@ -311,29 +311,16 @@ We summarize the meta properties of these fragments in Table \ref{table:status-q
 
 \begin{table*}
 \small
-\begin{tabular} {|r||l|l|l|l|l|}
+\begin{tabular} {|r||l|l|l||l|l|l||l|l|l|}
+\hline
+              & \multicolumn{3}{c||}{Empty theories}                                                                                    &\multicolumn{3}{c||}{Finite theories}                                                                                                  & \multicolumn{3}{c|}{Recursively enumerable theories}  \\
 \hline
 \diagbox[height=2em,width=9em]{Property}{Fragment}
-              &  Modal                                            & Quantifier-free                                   & Guarded                                                & Fixedpoint-free      & Full    \\
-\hline
-\multicolumn{5}{c}{Empty theories}\\
-\hline
-\rule{0pt}{3ex}Small-model
-              & \cmark[Sec.\ref{sec:modal-fragment}]        & \cmark[Sec.\ref{sec:decidable-qf-fragment}]       & \xmark                                                 & \xmark               & \xmark  \\
-Finite-model  & \cmark                                      & \cmark                                            & \xmark[Ex.\ref{ex:naturals-are-guarded}]               & \xmark               & \xmark  \\
-Decidability  & \cmark                                      & \cmark                                            & \cmark                                                 & \xmark               & \xmark  \\
-\hline
-\multicolumn{5}{c}{Finite theories}\\
-\hline
-Small-model   & ?                                           & ?                                                 & \xmark                                                 & \xmark               & \xmark  \\
-Finite-model  & ?                                           & ?                                                 & \xmark                                                 & \xmark               & \xmark  \\
-Decidability  & \cmark[Sec.\ref{sec:guarded-fragment}]      & \cqmark$\dagger$[Sec.\ref{sec:decidable-guarded-fragment}] & \cmark[Sec.\ref{sec:decidable-guarded-fragment}]       & \xmark               & \xmark  \\
-\hline
-\multicolumn{5}{c}{Recursively enumerable theories}\\
-\hline
-Small-model   &  \xmark                                     & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
-Finite-model  &  \xmark[Ex. \ref{ex:modal-inf-infinite}]    & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
-Decidability  &  \xmark\cite{urquhart1981}                  & \xmark                                            & \xmark                                                 & \xmark               & \xmark  \\
+              &  Modal                                  & Quant. free                       & Guarded                                   &  Modal                                      & Quant. free                                 & Guarded                                   &  Modal                                  & Quant. free & Guarded                                   \\
+\hline\rule{0pt}{3ex}
+Small-model   & \cmark[Sec.\ref{sec:modal-fragment}]    & \cmark[Sec.\ref{sec:qf-fragment}] & \xmark                                    & \qmark                                      & \qmark                                      & \xmark                                    & \xmark                                  & \xmark      & \xmark                                    \\
+Finite-model  & \cmark                                  & \cmark                            & \xmark[Ex.\ref{ex:naturals-are-guarded}]  & \qmark                                      & \qmark                                      & \xmark                                    & \xmark[Ex. \ref{ex:modal-inf-infinite}] & \xmark      & \xmark                                    \\
+Decidability  & \cmark                                  & \cmark                            & \cmark                                    & \cmark[Sec.\ref{sec:guarded-fragment}]      & $\dagger$[Sec.\ref{sec:guarded-fragment}]   & \cmark[Sec.\ref{sec:guarded-fragment}]    & \xmark\cite{urquhart1981}               & \xmark      & \xmark                                    \\
 \hline
 \end{tabular}
 \caption{

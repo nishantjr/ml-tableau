@@ -19,7 +19,7 @@ abstract:
 
 \emergencystretch 5em
 
-# Motivation
+# Motivation {#sec:introduction}
 
 The recent proliferation of programming languages has brought into focus the
 need for a carefully streamlined language infrastructure.

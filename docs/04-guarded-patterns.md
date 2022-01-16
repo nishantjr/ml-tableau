@@ -2,7 +2,7 @@
 \newcommand{\hideinappendix}[1]{#1}
 \input{figs/guarded-tableau.tex}
 
-# The Guarded Fragment {#sec:decidable-guarded-fragment}
+# The Guarded Fragment {#sec:guarded-fragment}
 
 In this section, we present the guarded fragment of matching logic.
 This fragment is inspired by the guarded fragment of fixedpoint logic[@guarded-fixedpoint-logic],
@@ -136,14 +136,20 @@ model we are building (if one exists).
 
 Definition (Tableaux)
 
-:   For a guarded  pattern $\psi$, fix an arbitary dependency order.
-    A *tableau* is a (possibly infinte) tree with nodes labeled by sequents
-    and built using the application of the rules in [@fig:qf-tableau].
-    The label of the root node is $\sequent{\matches{x}{\phi}, \emptyset, \emptyset, \{x\}}$
-    where $x$ is a fresh element variable.
-    Leaf nodes must be labeled either with $\unsat$
-    or with a sequent where $\Gamma = \emptyset$.
-    -- i.e. it is not a valid tableau when some leaf node does not meet this condition.
+:   \label{def:tableau}
+    Fix a definition list $\deflist$ for $\psi$.
+    A *tableau* for $\psi$ is a possibly infinite labeled tree $(T,L)$.
+    We denote its nodes as $\Nodes(T)$ and the root node is $\rt(T)$.
+    The labeling function $L \colon \Nodes \to \mathsf{Sequents}$
+    associates every node of $T$ with a sequent, such that the following conditions 
+    are satisfied:
+
+    1.  $L(\rt(T)) = \{ \sequent{\matches{x}{\psi}} \}$ where $x$ is a fresh element variable;
+    2.  For every $s \in \Nodes(T)$, if one of the tableau rules in $\SSS$ in [@fig:guarded-tableau] can be applied (with respect to the 
+        definition list $\deflist^\psi$), and the resulting sequents are
+        $\seq_1,\dots,\seq_k$, then
+        $s$ has exactly $k$ child nodes $s_1,\dots,s_k$, and 
+        $L(s_1) = \seq_1$, \dots, $L(s_k) = \seq_k$. 
 
 Proposition
 :   For any sequent built using these rules, we cannot have both $\matches{x}{\phi}$ and $\matches{x}{\fnot\phi}$ in $\Basic$
@@ -179,14 +185,10 @@ Otherwise, $a \in \Gamma$.
 
 There is an edge from a position $(a_0, v_0)$ to $(a_1, v_2)$ if:
 
-a)  (child constructed by the (conflict) rule):
-
-    $v_1 = \unsat$ is a child constructed through (conflict)
+a)  $v_1 = \unsat$ is a child constructed through (conflict)
     and (conflict-el), $a_0 = a_1$. (same as above)
 
-b)  (assertion matched by other tableau rule):
-
-    1.  $v_1$ is constructed from $v_0$
+b)  1.  $v_1$ is constructed from $v_0$
         using the (and), (or), (def), (mu), (nu), (\dapp) or (forall) rules
         and $a_0$ was modified by this rule,
         and $a_1$ is one of the newly created assertions.
@@ -199,9 +201,7 @@ b)  (assertion matched by other tableau rule):
         using (app) or (exists)
         and $a_0 = \alpha$ and $a_1$ is the an instantiation from $\inst$.
 
-c)  (unmatched by a tableau rule):
-
-    $v_1$ is a child constructed through any rule besides (conflict)
+c)  $v_1$ is a child constructed through any rule besides (conflict)
     and (conflict-el),
     $a_0 = a_1$ is in $\Gamma(v_0) \union \Universals(v_0)$
     and $\Gamma(v_1) \union \Universals(v_1)$.
@@ -231,7 +231,8 @@ The parity condition $\Omega$ is defined as follows:
 * $\Omega((e \in \exists \bar x\ldotp \phi, v)) = 2 \times N + 1$ where $N$ is the number of fixedpoint markers in $\deflist$.
 * $\Omega(a, v)                                 = 2 \times N + 2$ otherwise.
 
-In the next section we prove some important theorems:
+Similar to Theorems~\ref{thm:qf-decidable}
+we may prove that pre-models correspond to models and that guarded patterns are decidable.
 
 Theorem
 
@@ -243,5 +244,21 @@ Theorem
     If a guarded pattern has a tableau with a refutation, then it is unsatisfiable
     and its negation is valid.
 
-## Working with axioms
+## Working modulo theories
+
+The tableau presented in [@fig:guarded-tableau] may be easily extended to handle
+satisfiability modulo theorems for finite theories with guarded axioms.
+
+First, we extend assertions to allow quantifying over its variable---i.e.
+we allow assertions of the form $\forall x \ldotp \matches{x}{\phi}$.
+Next, we add a new tableau rule:
+$$
+\text{\prule{axiom}}\qquad
+\pruleun{\sequent{\forall x \ldotp \matches{x}{\phi},\Gamma;\Basic;\Universals}}
+        {\sequent{\inst \union \Gamma;\Basic;\Universals}}
+$$
+
+for each axiom $\tau$ in the theory and $x \in \free{\Gamma\union\Basic\union\Universals}$.
+
+## Complexity
 
