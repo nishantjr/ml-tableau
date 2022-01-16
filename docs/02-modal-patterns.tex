@@ -1,60 +1,51 @@
-# The Modal Fragment {#sec:modal-fragment}
+\hypertarget{sec:modal-fragment}{%
+\section{The Modal Fragment}\label{sec:modal-fragment}}
 
 The modal fragment of matching logic only allows quantifier- and fixedpoint-free
 patterns and the empty theory.
 This fragment may be regarded as a polyadic multiarity variant of modal logic.
 
-Definition (The modal fragment)
-:   The \emph{modal fragment} of matching logic has:
-    \begin{align*}
-    \PP &= \{\text{ patterns built from \structure{} and \logic{} }\} \\
-    \TT &= \{\emptyset\}
-    \end{align*}
+\begin{definition}[The modal fragment]The \emph{modal fragment} of matching logic has:
+\begin{align*}
+\PP &= \{\text{ patterns built from \structure{} and \logic{} }\} \\
+\TT &= \{\emptyset\}
+\end{align*}\end{definition}
 
-Our goal is to show the *small model property* of the modal fragment of matching logic,
-which states that if $\psi$ is *satisfiable*,
-then there exists a (finite) model $M$ with size bounded by a computable
-function $f(\size{\psi})$ on the size of $\psi$
-such that $\evaluation{\phi}_M \neq \emptyset$
-(or equivalently, there is an element 
-$a \in M$ such that $a \vDash \psi$ in $M$).
+Our goal is to show the \emph{small model property} of the modal fragment of matching logic,
+which states that if \(\psi\) is \emph{satisfiable},
+then there exists a (finite) model \(M\) with size bounded by a computable
+function \(f(\size{\psi})\) on the size of \(\psi\)
+such that \(\evaluation{\phi}_M \neq \emptyset\)
+(or equivalently, there is an element
+\(a \in M\) such that \(a \vDash \psi\) in \(M\)).
 
 The SMP implies decidability,
-because one can exhaustively  search for a model for $\psi$
-up to the size bound $f(\size{\psi})$.
+because one can exhaustively search for a model for \(\psi\)
+up to the size bound \(f(\size{\psi})\).
 
-Remark
+\begin{remark}In the interest of space, all proofs for this section are in Appendix \ref{modal-appendix}\end{remark}
 
-: In the interest of space, all proofs for this section are in Appendix \ref{modal-appendix}
+\begin{definition}[Closure]Given \(\psi\), let its \emph{closure} \(C(\psi)\) be the smallest set
+that contains all its sub-patterns and their negations.\end{definition}
 
-Definition (Closure)
-:   Given $\psi$, let its *closure* $C(\psi)$ be the smallest set
-    that contains all its sub-patterns and their negations.
+The size of \(C(\psi)\), written \(\size{C(\psi)}\),
+is defined in the usual way and smaller than twice the size of \(\psi\).
 
-The size of $C(\psi)$, written $\size{C(\psi)}$,
-is defined in the usual way and smaller than twice the size of $\psi$.
+\begin{definition}[\(\Gamma\)-indistinguishable]Given \(\Gamma\) and \(M\), we say that two elements \(a,b \in M\) are
+\emph{\(\Gamma\)-indistinguishable}, written \(a \cong_\Gamma b\) or simply
+\(a \cong b\) when \(\Gamma\) is understood,
+if \(a \vDash \psi\) iff \(b \vDash \psi\) for all \(\psi \in \Gamma\).\end{definition}
 
-Definition ($\Gamma$-indistinguishable)
+\begin{lemma}\(\cong_\Gamma\) is an equivalence relation on \(M\).\end{lemma}
 
-:   Given $\Gamma$ and $M$, we say that two elements $a,b \in M$ are
-    *$\Gamma$-indistinguishable*, written $a \cong_\Gamma b$ or simply
-    $a \cong b$ when $\Gamma$ is understood, 
-    if $a \vDash \psi$ iff $b \vDash \psi$ for all $\psi \in \Gamma$.
+\begin{proof}By directly applying the definition.\end{proof}
 
-Lemma
-:   $\cong_\Gamma$ is an equivalence relation on $M$.
+\begin{definition}We use \([a]_\Gamma = \{b \in M \mid a \cong_\Gamma b\}\) to denote the
+equivalence class of \(a \in M\).
+We use \([A]_\Gamma = \{ [a]_\Gamma \mid a \in A \}\) to denote the set of
+equivalence classes of all elements in \(A \subseteq M\).\end{definition}
 
-Proof
-:   By directly applying the definition.
-
-Definition ($\Gamma$-equivalence classes){#def:eqclass}
-
-:   We use $[a]_\Gamma = \{b \in M \mid a \cong_\Gamma b\}$ to denote the 
-    equivalence class of $a \in M$. 
-    We use $[A]_\Gamma = \{ [a]_\Gamma \mid a \in A \}$ to denote the set of 
-    equivalence classes of all elements in $A \subseteq M$.
-
-In the following, we drop $\Gamma$ when it is understood.
+In the following, we drop \(\Gamma\) when it is understood.
 
 \begin{definition}\label{def:filtered}
 Given $\psi$ and $M$, 
@@ -79,29 +70,29 @@ It can even evaluate to a set of more than one equivalent classes,
 even when $\sigma_M$ is functional.
 \end{remark}
 
-We emphasize that $[M]$ is indeed an matching logic model,
-for which all it requires is a powerset interpretation of the symbols, 
+We emphasize that \([M]\) is indeed an matching logic model,
+for which all it requires is a powerset interpretation of the symbols,
 as done in Definition \ref{def:filtered}.
-In fact, it is the nature of matching logic that makes this elegantly possible, because it 
+In fact, it is the nature of matching logic that makes this elegantly possible, because it
 allows symbols to be interpreted in the powerset.
-The above construction would not work for FOL, for example, 
-if $\sigma$ were a function symbol.
+The above construction would not work for FOL, for example,
+if \(\sigma\) were a function symbol.
 
-We point out that $\sigma_{[M]}([a_1],\dots,[a_n])$ is not necessarily
-equal to $[\sigma_M(a_1,\dots,a_n)]$. 
-In general, $\phi_{[M]}$
-is not necessarily equal to $[\phi_M]$ for arbitrary $\phi$.
-Later, in Lemma \ref{lemma:filter}, we show that $\phi_{[M]} = [\phi_M]$ 
-holds for a selection of patterns, namely those which are in $C(\psi)$.
+We point out that \(\sigma_{[M]}([a_1],\dots,[a_n])\) is not necessarily
+equal to \([\sigma_M(a_1,\dots,a_n)]\).
+In general, \(\phi_{[M]}\)
+is not necessarily equal to \([\phi_M]\) for arbitrary \(\phi\).
+Later, in Lemma \ref{lemma:filter}, we show that \(\phi_{[M]} = [\phi_M]\)
+holds for a selection of patterns, namely those which are in \(C(\psi)\).
 
 \begin{lemma}\label{lem:filter_size}
 $[M]$ has at most $\sqrt{2^{\size{C(\psi)}}}$ elements.
 \end{lemma}
 
-Note that $\size{C(\psi)} \le  2{\size{\psi}}$ under a reasonable choice of the 
+Note that \(\size{C(\psi)} \le 2{\size{\psi}}\) under a reasonable choice of the
 size function.
-Therefore,the space size of the filtered model $[M]$ is bounded by 
-$\sqrt{2^{2\size{\psi}}} = 2^{\size{\psi}}$.
+Therefore,the space size of the filtered model \([M]\) is bounded by
+\(\sqrt{2^{2\size{\psi}}} = 2^{\size{\psi}}\).
 
 \begin{lemma}\label{lem:fl}
 For any $\phi \in C(\psi)$, the following propositions are equivalent:
@@ -116,7 +107,7 @@ The condition $\phi \in C(\psi)$ is necessary in Lemma \ref{lem:fl}.
 It is used in proving that (1) implies (2), for the ``only if'' direction.
 \end{remark}
 
-The following is the key lemma that links the semantics 
+The following is the key lemma that links the semantics
 between the original and the filtered models.
 
 \begin{lemma}\label{lemma:filter}
@@ -157,8 +148,8 @@ up to size ${2^{\size{\psi}}}$ and to check the satisfiability.
 We can extend Theorems \ref{thm:ooosmp} and \ref{thm:ooodec}
 to patterns that also have \emph{set variables},
 by replacing them by constant symbols.
-Note that all set variables are free variables, because there is no binder 
-$\mu$ in the fragment.
+Note that all set variables are free variables, because there is no binder
+\(\mu\) in the fragment.
 
 \begin{theorem}\label{thm:ooosmp_sv}
 Every satisfiable pattern $\phi$, without element variables, $\exists$, or 

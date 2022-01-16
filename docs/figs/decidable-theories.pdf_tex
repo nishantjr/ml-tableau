@@ -1,0 +1,65 @@
+%% Creator: Inkscape 1.1.1 (3bf5ae0d25, 2021-09-20, custom), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'decidable-theories.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{239.37323142bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.75503752)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{decidable-theories.pdf}}%
+    \put(0.11368228,0.2916066){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}• Infinite trace LTL\\• Finite trace LTL\\• Computation Tree Logic\end{tabular}}}}%
+    \put(0.94035586,0.6120042){\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}Modal\\Fragment\end{tabular}}}}%
+    \put(0.96137072,0.42148142){\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}Quant. free\\fragment\end{tabular}}}}%
+    \put(0.97313371,0.22310442){\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}Guarded\\fragment\end{tabular}}}}%
+    \put(0.11365311,0.64311287){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}• Propositional Logic\\• Modal Logic\end{tabular}}}}%
+    \put(0.11365291,0.45712928){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}• Modal μ-calculus\\• Propositional Dynamic Logic\end{tabular}}}}%
+    \put(0.11094617,0.09596265){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}• Matching over algebraic data types\\• Separation Logic with Rec. Defns †\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

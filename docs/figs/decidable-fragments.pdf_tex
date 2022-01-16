@@ -1,0 +1,69 @@
+%% Creator: Inkscape 1.1.1 (3bf5ae0d25, 2021-09-20, custom), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'decidable-fragments.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{381.98024277bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.63439311)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{decidable-fragments.pdf}}%
+    \put(0.74652338,0.35200118){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}\fragment{Non-nested guarded}\end{tabular}}}}%
+    \put(0.04088876,0.12100485){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}•Guarded Separation logic\end{tabular}}}}%
+    \put(0.43857873,0.54616254){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}•Finite Trace LTL\end{tabular}}}}%
+    \put(0.43896639,0.47522388){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}•PDL\end{tabular}}}}%
+    \put(0.43767676,0.50865512){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}•Infinite Trace LTL\end{tabular}}}}%
+    \put(0.37492017,0.21939848){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}\fragment{Quantifier free}\end{tabular}}}}%
+    \put(0.05301628,0.28978622){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}•Modal $\mu$-calculus\end{tabular}}}}%
+    \put(0.77159634,0.18681461){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}\fragment{Loosely guarded}\end{tabular}}}}%
+    \put(0.80700595,0.01378059){\color[rgb]{1,1,1}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Matching logic\end{tabular}}}}%
+    \put(0.92757737,0.09553422){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}\fragment{Decidable}\end{tabular}}}}%
+    \put(0.99933292,0.01201793){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}\fragment{Matching logic}\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

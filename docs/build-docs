@@ -26,21 +26,5 @@ for fig in figs/*.svg; do
     svg_to_latex "$fig";
 done
 
-paper_tex="$BUILD_DIR/tableau.tex"
-
-pandoc --standalone -f markdown -t latex -o "$paper_tex" \
-       "$DOC_DIR"/00-introduction.md     \
-       "$DOC_DIR"/01-preliminaries.md    \
-       "$DOC_DIR"/02-modal-patterns.md   \
-       "$DOC_DIR"/03-qf-patterns.md      \
-       "$DOC_DIR"/04-guarded-patterns.md \
-       "$DOC_DIR"/05-conclusion.md       \
-       "$DOC_DIR"/06-appendix.md         \
-       --pdf-engine=xelatex \
-       --template="$DOC_DIR/template.tex" \
-       -F pandocfilters/defenv.py \
-       -F pandoc-crossref \
-       -V graphicspath="$DOC_DIR/figs" \
-       --citeproc --bibliography "$DOC_DIR"/refs.bib --csl "$DOC_DIR"/acm-sig-proceedings-long-author-list.csl \
-
-pdflatex_quiet "$paper_tex"
+paper_tex=./rodrigues-chen-rosu-2022-lics.tex
+pdflatex_quiet -bibtex "$paper_tex"

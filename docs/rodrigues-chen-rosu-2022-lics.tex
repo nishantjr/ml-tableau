@@ -1,0 +1,46 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[sigplan,review,screen]{acmart}
+
+\include{prelude.tex}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+
+\graphicspath{{figs/}}
+
+\newcommand{\tightlist}{}
+
+\begin{document}
+
+\title{Decidable Fragments of Matching Logic}
+\begin{abstract}
+    Matching logic has been put forward as a "lingua franca"
+    for verifying and reasoning about programs and programming languages.
+    We propose three increasingly powerful decidable fragments of matching logic.
+    The largest of these fragments, called the guarded fragment,
+    allows both fixedpoints and a restricted form of quantification.
+    It is intended to extend the automated prover for uniform reasoning across
+    logics in a previously developed framework,
+    by providing a robust basis for unfolding fixedpoints and simplification.
+\end{abstract}
+
+\maketitle
+\input{00-introduction.tex}
+\input{01-preliminaries.tex}
+\input{02-modal-patterns.tex}
+\input{03-qf-patterns.tex}
+\input{04-guarded-patterns.tex}
+\input{05-conclusion.tex}
+
+\bibliography{./refs.bib}
+\bibliographystyle{plainnat}
+\end{document}

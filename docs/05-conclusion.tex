@@ -1,9 +1,11 @@
-# Examples
+\hypertarget{examples}{%
+\section{Examples}\label{examples}}
 
 Due to space constraints, we show examples of theories captured by the above fragments, as well as example tableaux in the
 Appendix \ref{@app:examples}.
 
-# Future Work
+\hypertarget{future-work}{%
+\section{Future Work}\label{future-work}}
 
 As mentioned in Section \ref{sec:introduction},
 our goal and primary motivation
@@ -16,7 +18,7 @@ for the corresponding procedure of guarded fixedpoint logic.
 Indeed, it was difficulties implementing the procedure in \cite{guarded-fixedpoint-logic}
 that led us to develop the \prule{resolve} rule.
 Without it, we had needed to search through all possible combinations of consistent basic assertions.
-Our plan is to produce a parity game, and then use a pre-existing solver for parity games&nbsp;\cite{friedmann2009-pgsolver}
+Our plan is to produce a parity game, and then use a pre-existing solver for parity games~\cite{friedmann2009-pgsolver}
 to search for pre-models or refutations.
 \todo{should we remove this completely?}
 
@@ -46,7 +48,7 @@ One easy candidate to to drop the requirement that fixedpoints may not have free
 element variables. This will involve extending fixedpoint markers to take arguments,
 and changes to the \prule{def}, \prule{mu}, and \prule{nu} rules to work with these extended fixedpoint markers.
 
-A second low hanging fruit stems from the observation that 
+A second low hanging fruit stems from the observation that
 the proof of Theorem \ref{theorem:xxx} depends on the properties of guarded patterns,
 whereas that of Theorem \ref{theorem:yyy} does not.
 This implies that we can likely drop the restriction to existentials patterns
@@ -68,7 +70,7 @@ As we draw inspiration from these decision procedures we increase the complexity
 of our decision procedure, and that complexity increases the risk of incorrectness.
 To mitigate this risk we aim to produce proofs of validity from refutations.
 These proofs can then be checked with a small trust-base, for example by the proof checker
-developed in&nbsp;\cite{chen-lin-trinh-rosu-2021-cav}.
+developed in~\cite{chen-lin-trinh-rosu-2021-cav}.
 
 For the most part the tableau rules in Figure \ref{fig:guarded-tableau}
 (when viewed through the lens of a refutation) correspond directly
@@ -76,17 +78,18 @@ to matching logic proof rules.
 The \prule{exists} may be thought of as a combination of the \prule{$\exists$-generalization}
 followed by case analysis between the introduced variables.
 One tricky aspect when converting the refutations to proofs is dealing with infinite plays.
-By definition of a refutation, these contain a $\mu$-marker that is unfolded infinitely often.
+By definition of a refutation, these contain a \(\mu\)-marker that is unfolded infinitely often.
 We must somehow turn this into a finite proof.
-Fortunately these plays must be $\omega$-regular, and we should be able to
+Fortunately these plays must be \(\omega\)-regular, and we should be able to
 represent them in a finite proof
-through the combination of *implication contexts* introduced in \cite{towards-a-unified-framework},
+through the combination of \emph{implication contexts} introduced in \cite{towards-a-unified-framework},
 and the \prule{knaster-tarski} proof rule.
 \todo{no need to mention knaster-tarksi rule}
 \todo{talk about the the proof checker}
 \todo{... so that we don't need to trust the prover.}
 
-# Conclusion
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
 
 We presented three decision procedures for fragments of matching logic.
 The guarded fragment is a powerful fragment supporting both fixedpoints
@@ -94,15 +97,34 @@ and some quantification and allows us to capture many theories important to prog
 We outlined next steps to be taken in order to use this procedure as the core of an automated prover.
 \clearpage
 
-# To do
+\hypertarget{to-do}{%
+\section{To do}\label{to-do}}
 
-* Examples:
-    *  $(\mu X \ldotp z \lor s(X)) \land \nu X \ldotp \lnot z \land \bar s(X)$
-    *  this is an interesting example because it shows the need for alpha renaming in the implementation.
-* Extension to theories.
-* Examples of patterns inside and outside this fragment
-    * Inside: LTL, PDL, Sorts and Subsorts
-    * Outside: Guarded Separation Logic, ...
-* What happens when we're outside the guarded fragment?
+\begin{itemize}
+\tightlist
+\item
+  Examples:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \((\mu X \ldotp z \lor s(X)) \land \nu X \ldotp \lnot z \land \bar s(X)\)
+  \item
+    this is an interesting example because it shows the need for alpha renaming in the implementation.
+  \end{itemize}
+\item
+  Extension to theories.
+\item
+  Examples of patterns inside and outside this fragment
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Inside: LTL, PDL, Sorts and Subsorts
+  \item
+    Outside: Guarded Separation Logic, \ldots{}
+  \end{itemize}
+\item
+  What happens when we're outside the guarded fragment?
   Refutations are still correct, though models produced may not make sense.
-
+\end{itemize}
