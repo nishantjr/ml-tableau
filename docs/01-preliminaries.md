@@ -1,6 +1,6 @@
 # Matching Logic Preliminaries {#sec:ml-prelims}
 
-Matching logic was first proposed in [@matchinglogiclmcs] as a unifying logic
+Matching logic was first proposed in \cite{matchinglogiclmcs} as a unifying logic
 for specifying and reasoning about programming languages.
 An important feature of matching logic is that it makes no distinction between terms and formula.
 This flexibility makes many important concepts easily definable in matching logic,
@@ -97,7 +97,7 @@ Definition def:semantics (Semantics of matching logic)
     \text{and} &&
         \mathsf{LFP}(f) &\mapsto \Intersection\left\{A \in \powerset{M} \mid f(A) \subset A \right\}
     \end{align*}
-    takes a monotonic function to its least fixedpoint [@matching-mu-logic].
+    takes a monotonic function to its least fixedpoint \cite{matching-mu-logic}.
 
 
 As seen, $\sigma$ is interpreted as a relation. 
@@ -111,7 +111,7 @@ We say that $\sigma_M$ is \emph{functional}, if:
 ## Satisfiability and Validity
 
 In this subsection, formally define satisfiability and validity in matching logic\footnote{
-Note that our definitions differ from [@matchinglogiclmcs] where only validity in a model is defined (but referred to as satisfiability).
+Note that our definitions differ from \cite{matchinglogiclmcs} where only validity in a model is defined (but referred to as satisfiability).
 We avoid using the $\models$ notation to avoid confusion between the two.
 }.
 Because of the powerset interpretation of patterns, the notions of satisfiability and validity differ
@@ -157,7 +157,7 @@ Remark (A note about variants of matching logic)
 
 :   In its original formulation, matching logic had a many-sorted flavor where each symbol and pattern had a fixed sort.
     While it is convenient to define models that are also many-sorted,
-    in [@applicative-matching-logic] the authors point out that 
+    in \cite{applicative-matching-logic} the authors point out that 
     the many-sorted setting actually becomes an obstacle when it comes to 
     more complex sort structures.
     Therefore, they proposed a much simpler, unsorted variant of matching logic called applicative matching logic (AML),
@@ -304,7 +304,7 @@ Proof
     $n \in \N$.
     By mathematical induction, we can prove that
     $\evaluation{s^m(z)} = \{ m \}$ for all $m \in \N$.
-    By [@def:semantics], we conclude that $M_0$ satisfies $\Gamma$.
+    By \cite{def:semantics}, we conclude that $M_0$ satisfies $\Gamma$.
 -->
 
 We summarize the meta properties of these fragments in Table \ref{table:status-quo}.

@@ -5,36 +5,36 @@
 # The Guarded Fragment {#sec:guarded-fragment}
 
 In this section, we present the guarded fragment of matching logic.
-This fragment is inspired by the guarded fragment of fixedpoint logic[@guarded-fixedpoint-logic],
+This fragment is inspired by the guarded fragment of fixedpoint logic\cite{guarded-fixedpoint-logic},
 with extensions to allow for the differences between matching logic and fixedpoint logic.
 
 Inspired by the robust decidablity properties of modal logic,
 guarded logics were created as a means of "taming" a logic,
 i.e. of restricting a logic so that it becomes decidable.
 This is done through syntactic restrictions on quantification.
-In [@why-is-modal-logic-so-robustly-decidable]
+In \cite{why-is-modal-logic-so-robustly-decidable}
 we saw that the  reason for this "robust" decidability was
 that its models have the "tree-model property",
 and that this property leads to automata based decision procedures.
 With this insight, fragments that preserved decidability under such extensions were identified.
-The *guarded fragment* of first-order logic defined in [@modal-languages-and-bounded-fragments] allows
+The *guarded fragment* of first-order logic defined in \cite{modal-languages-and-bounded-fragments} allows
 quantification over an arbitary number of variables so long as it is in the form
 that, informally, relates each newly introduced variable to those previously
 introduced.
 This has since been generalized in two directions.
 First, to allow more general guards.
-In *loosely guarded* first-order logic presented in [@loosely-guarded-fol], guards are allowed to be conjunctions of atoms, rather than just single atoms.
+In *loosely guarded* first-order logic presented in \cite{loosely-guarded-fol}, guards are allowed to be conjunctions of atoms, rather than just single atoms.
 *Packed logic* extends this further, allowing even existentials to occur in guards.
-In the *clique guarded* fragment of first-order logic [@clique-guarded-logic], quantification is semantically restricted to cliques within the Gaifman graph of models.
-Second, to allow fixedpoints: guarded fixedpoint logic, loosely guarded fixedpoint logic [@guarded-fixedpoint-logic], and clique-guarded fixedpoint logic [@clique-guarded-logic].
+In the *clique guarded* fragment of first-order logic \cite{clique-guarded-logic}, quantification is semantically restricted to cliques within the Gaifman graph of models.
+Second, to allow fixedpoints: guarded fixedpoint logic, loosely guarded fixedpoint logic \cite{guarded-fixedpoint-logic}, and clique-guarded fixedpoint logic \cite{clique-guarded-logic}.
 extend the corresponding guarded logics to allow fixedpoints constructs.
 An interesting property of guarded fixedpoint logics, is that despite being decidable, they admit "infinity axioms" --
 axioms that are satisfiable only in infinite models.
 
-The algorithm we present here is an extension to the one presented in [@guarded-fixedpoint-logic]
+The algorithm we present here is an extension to the one presented in \cite{guarded-fixedpoint-logic}
 modified for matching logic with an important extension, to enable resolution,
 that we found vital to a practical implementation.
-We also try to empasize its relation with the tableau defined in [@sec:qf-fragment].
+We also try to empasize its relation with the tableau defined in Section \ref{sec:qf-fragment}.
 
 For a nonempty tuple $\bar x$,
 We treat $\exists \bar x  \ldotp \phi$ and $\forall \bar x  \ldotp \phi$
@@ -145,7 +145,7 @@ Definition (Tableaux)
     are satisfied:
 
     1.  $L(\rt(T)) = \{ \sequent{\matches{x}{\psi}} \}$ where $x$ is a fresh element variable;
-    2.  For every $s \in \Nodes(T)$, if one of the tableau rules in $\SSS$ in [@fig:guarded-tableau] can be applied (with respect to the 
+    2.  For every $s \in \Nodes(T)$, if one of the tableau rules in $\SSS$ in Figure \ref{fig:guarded-tableau} can be applied (with respect to the 
         definition list $\deflist^\psi$), and the resulting sequents are
         $\seq_1,\dots,\seq_k$, then
         $s$ has exactly $k$ child nodes $s_1,\dots,s_k$, and 
@@ -246,7 +246,7 @@ Theorem
 
 ## Working modulo theories
 
-The tableau presented in [@fig:guarded-tableau] may be easily extended to handle
+The tableau presented in Figure \ref{fig:guarded-tableau} may be easily extended to handle
 satisfiability modulo theorems for finite theories with guarded axioms.
 
 First, we extend assertions to allow quantifying over its variable---i.e.

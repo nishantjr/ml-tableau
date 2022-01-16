@@ -35,7 +35,7 @@ Creating tooling that provides a depth in terms of quality and complexity,
 while still covering this breadth of diversity of languages and their domains
 requires that we systematically streamline these redundancies.
 
-We envision an *ideal language framework*, shown in [@fig:ideal-framework],
+We envision an *ideal language framework*, shown in Figure \ref{fig:ideal-framework},
 where a language designer must only provide
 a formal description of the syntax
 and a formal semantics for their language,
@@ -48,26 +48,26 @@ The \K{} framework (\url{https://kframework.org}) pursues this vision.
 may define the formal semantics of their programming language
 as a transition system.
 The framework uses this to generate
-parsers, interpreters, deductive verifiers [@SPY+16; @Ros17a],
-program equivalence checkers [@kasampalis2021language], among others.
+parsers, interpreters, deductive verifiers \cite{SPY+16,Ros17a},
+program equivalence checkers \cite{kasampalis2021language}, among others.
 This approach is no longer of purely academic interest---diverse and complex programming languages have been specified in \K{}
-including [@c-semantics], Java [@java-semantics], JavaScript [@javascript-semantics],
-EVM [@evm-semantics] and x86 assembly [@x86-semantics].
+including \cite{c-semantics}, Java \cite{java-semantics}, JavaScript \cite{javascript-semantics},
+EVM \cite{evm-semantics} and x86 assembly \cite{x86-semantics}.
 The commercial success of verification tools built using this approach (e.g. \url{https://runtimeverifcation.com}) show that these tools are practical, valuable
 and in-demand.
 
 In order to provide sound and powerful formal verification tools \K{} needs a firm logical foundation.
 Without such a logical foundation the very meaning of what it means for a program to be "verified" or "correct" are in question.
 
-Matching logic [@matchinglogiclmcs; @matching-mu-logic; @matching-logic-explained] provides this foundation.
-As shown in [@fig:ml-as-basis-for-k], every \K{} semantic definition of a language $L$ yields a corresponding matching logic theory $\Gamma_L$,
+Matching logic \cite{matchinglogiclmcs,matching-mu-logic,matching-logic-explained} provides this foundation.
+As shown in Figure \ref{fig:ml-as-basis-for-k}, every \K{} semantic definition of a language $L$ yields a corresponding matching logic theory $\Gamma_L$,
 and every language task, such as executing a program or verifying a property, conducted by \K{}
 is characterized by checking the validity of a matching logic entailment,
 $\Gamma_L \vdash \phi_\mathit{task}$, where $\phi_\mathit{task}$ is the formal specification of the task in matching logic.
 These language tasks range from running a program in an interpreter
 (i.e. checking if there is a terminating execution trace for a program),
 to proving reachability claims.
-If these tools emit proof certificates, they may be checked with the matching logic proof checker [@chen-lin-trinh-rosu-2021-cav].
+If these tools emit proof certificates, they may be checked with the matching logic proof checker \cite{chen-lin-trinh-rosu-2021-cav}.
 
 \begin{figure}
 \def\svgwidth{\columnwidth}
@@ -83,8 +83,8 @@ If these tools emit proof certificates, they may be checked with the matching lo
 Matching logic provides this foundation by creating a unifying logic, or *lingua franca*, for formal verification.
 Constructs for building terms, first-order quantification, and fixedpoints,
 allow capturing the many formalisms important to verification,
-including linear temporal logic (LTL) [@ltl], computation tree logic (CTL) [@ctl], separation logic (SL) [@separation-logic], and
-reachability logic [@matchinglogiclmcs; @matching-mu-logic],
+including linear temporal logic (LTL) \cite{ltl}, computation tree logic (CTL) \cite{ctl}, separation logic (SL) \cite{separation-logic}, and
+reachability logic \cite{matchinglogiclmcs,matching-mu-logic},
 as well as the language-semantics-as-a-theory produced by \K{}.
 Together, these may be used to define the various language tasks described above.
 It does all this while maintaining minimal *representational distance*---because
@@ -96,7 +96,7 @@ that introduce quantifiers and other clutter.
 
 \K{}'s tools are best-effort checking for the validity of these entailments.
 Currently, this is done through ad-hoc reasoning developed on an as-needed basis
-and translation to SMT-LIB2 [@smtlib] for dispatch to the Z3 solver [@z3].
+and translation to SMT-LIB2 \cite{smtlib} for dispatch to the Z3 solver \cite{z3}.
 This leads to quite a few deficiencies---limited support for induction,
 users need to spell out many lemmas and simplifications,
 caching and optimization are at the mercy of what Z3's incremental interface will accept.
@@ -104,7 +104,7 @@ caching and optimization are at the mercy of what Z3's incremental interface wil
 
 *Our grand vision is to develop a matching logic solver, systematically and methodically,
 that unifies reasoning across embedded logics, and alleviates these problems.*
-In [@towards-a-unified-framework], the authors took the first steps in this
+In \cite{towards-a-unified-framework}, the authors took the first steps in this
 effort---they build the foundations for a unified proof framework that allows
 fixedpoint reasoning across logics.
 The authors developed a set of
@@ -114,7 +114,7 @@ This approach was effective---the framework was evaluated against four logical
 systems---first-order logic with fixedpoints, separation logic, reachability
 logic, and linear temporal logic (LTL).
 
-However, as admitted in [@towards-a-unified-framework] itself, it would be unreasonable
+However, as admitted in \cite{towards-a-unified-framework} itself, it would be unreasonable
 to hope that at such a nascent stage this framework would be able to compete with
 state-of-the-art domain-specific provers and decision procedures.
 We, however, believe that such a goal is possible and within reach in the near-term, but will
@@ -133,8 +133,8 @@ Often the simplification procedures weren't powerful enough to re-normalize betw
 \todo{make sure we answer precisely how these are solved later in the paper.}
 
 We propose that this heuristic be replaced with a decision procedure for a fragment of matching logic,
-analogously to how  DPLL [@dpll;@dpllt], a decision procedure for propositional fragment of first-order logic,
-forms the core of many first-order SMT solvers [@z3;@mathsat4;@cvc4].
+analogously to how  DPLL \cite{dpll,dpllt}, a decision procedure for propositional fragment of first-order logic,
+forms the core of many first-order SMT solvers \cite{z3,mathsat4,cvc4}.
 Solvers for first-order logic are typically constructed around DPLL,
 an algorithm for checking the satisfiability of propositional logic formulae.
 A first-order formula is transformed into a propositional "skeleton" by replacing atoms with propositional variables.
@@ -173,7 +173,7 @@ property---the size models for satisfiable are bound by a computable function of
 The second fragment, the *quantifier-free fragment*, extends this to allow
 least- and greatest-fixedpoints, the modal $\mu$-calculus extension of modal logic.
 This is proved decidable through an extension to the approach
-first show in [@games-for-mu-calculus].
+first show in \cite{games-for-mu-calculus}.
 
 The final fragment, called the *guarded fragment*,
 allows both fixedpoints and a restricted form of quantification.
@@ -185,5 +185,5 @@ It also removes the need to iterate over all possible interpretations
 and gives us a tangible object, called a refutation, in case the pattern is unsatisfiable.
 We may later work on a way of converting this to a formal proof.
 We propose using the presented decision procedure for this fragment as a new
-core for the proof framework in [@towards-a-unified-framework].
+core for the proof framework in \cite{towards-a-unified-framework}.
 
