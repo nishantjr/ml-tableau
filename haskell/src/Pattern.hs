@@ -283,8 +283,20 @@ genericStatement s cons = do
 pattern ∷ Parser Pat
 pattern = do
     optspaces
-    some $ matches anyChar (';' /=)
-    return $ EVar "XXX"
+    x ← disjunction <|> plain
+    return x
+    where
+        disjunction = do
+            x ← disjunct
+            keyword '∨'
+            y ← pattern
+            return $ x :∨ y
+        plain = do
+            x ← disjunct
+            return $ x
+
+            -- μ X . (s X) ∧ y
+            -- ∃ x . y ∧ (s x)
 
 evar ∷ Parser Pat
 evar = do

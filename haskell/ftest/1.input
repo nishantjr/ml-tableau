@@ -1,6 +1,9 @@
 symbols C:0 S:1 Z:123;
 
-  sat  S C;
-unsat  S C  ∧ ¬(S C);
-valid [S C] ↔ ¬(S ¬C);
-valid ⟨S C⟩ ∨ [S ¬C];
+--- Sample w/parens explicit; we should parse this and the no-parens
+    version the same. ;
+--- sat  (μ X . ( (z ∨ (<s X> ∧ y)) ∨ ([f z] ∧ (∃ x. [g ∀ q. <f <g z>>])) ));
+
+--- Add comments at level of symbols/sat/etc, must end with semicolon. ;
+--- μ X. ∃ y. … ;
+--- ∃ y. μ X. … ;
